@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173/)",
+      "PowerShell($paths = @\\(\"$env:ProgramFiles\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\",\"${env:ProgramFiles\\(x86\\)}\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\",\"$env:ProgramFiles\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\"${env:ProgramFiles\\(x86\\)}\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"\\); $paths | Where-Object { Test-Path $_ })",
+      "Read(//c/Users/aliss/AppData/Local/Temp/360shots/**)",
+      "Bash(npx prisma *)",
+      "Bash(DATABASE_URL=\"postgresql://u:p@localhost:5432/db\" npx prisma validate)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(docker --version)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:dev@localhost:55432/hospitalar360?schema=public\" PORT=3333 CORS_ORIGIN=\"\" npm start)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:dev@localhost:55432/hospitalar360?schema=public\" PORT=3333 npm start)",
+      "Bash(curl -s http://localhost:3333/health)",
+      "Bash(break)",
+      "Bash(curl -s -X POST http://localhost:3333/api/companies -H \"Content-Type: application/json\" -d '{\"name\":\"São José Diagnósticos\",\"segment\":\"lab\"}')",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\('id gerado:',d.id\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(VITE_API_BASE_URL=\"http://localhost:3333\" npm run dev)",
+      "Read(//c/Users/aliss/AppData/Local/Temp/360shots2/**)",
+      "Bash(curl -s http://localhost:3333/api/companies)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\('API retorna:',d.length,'empresas'\\);console.log\\('ids extras:',d.filter\\(c=>!['medlab','tecvida','higitec','bioresiduos','sterilpro','clinsys','telesaude','oxivida','manutmed','vestmed','nutricare','farmadistribui'].includes\\(c.id\\)\\).map\\(c=>c.id\\)\\)\")",
+      "Bash(echo \"===== PORTAL-LICITACOES \\(raiz\\) =====\"; ls -la \"C:/Projetos/Portal-Licitacoes\" 2>&1 | head -50)",
+      "Read(//c/Projetos/Portal-Licitacoes/**)",
+      "Bash(rm -rf sautek_old)",
+      "Bash(cp -rf __TRACKED_VAR__/sautek ./sautek)",
+      "Bash(cp -rf __TRACKED_VAR__/admin ./admin)",
+      "Bash(cp -f '__TRACKED_VAR__/360 Hospitalar - Painel de Gestão.html' './360 Hospitalar - Painel de Gestão.html')",
+      "Bash(cp -f '__TRACKED_VAR__/360 Hospitalar - Logomarca.html' './360 Hospitalar - Logomarca.html')",
+      "Bash(cp -f sautek/sautek/* sautek/)",
+      "Bash(rm -rf sautek/sautek)",
+      "Bash(rm -rf src server public node_modules dist .vite)",
+      "Bash(rm -f index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json tsconfig.app.tsbuildinfo package.json package-lock.json vercel.json .nvmrc .env.example README.md)",
+      "PowerShell(Start-Process $dd)",
+      "PowerShell($dd = \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe\")",
+      "PowerShell(\"Docker Desktop iniciando...\")",
+      "Bash(DATABASE_URL=\"postgresql://postgres:dev@localhost:55432/hospitalar360\" NODE_ENV=development PORT=3001 node dist/index.js)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s http://localhost:3001/api/companies)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\('empresas:',d.length,'| top:',d[0].name\\)\")",
+      "Bash(curl -s http://localhost:3001/api/profile)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\(d.name,'|',d.email,'| ufs:',d.atendeUfs.join\\(','\\)\\)\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Projetos\\360-hospitalar\\360 Hospitalar-handoff\\360-hospitalar\\project"
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+'use client';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { getCompanies } from '../lib/services';
+import { useAsync } from '../lib/useAsync';
+import { useAppStore } from '../lib/store';
+import { Icon } from '../lib/icons';
+import { SearchBar } from '../components/SearchBar';
+import { SegmentChips } from '../components/SegmentChips';
+import { CompanyCard } from '../components/CompanyCard';
+import { Loading, LoadError } from '../components/AsyncState';
+
+export default function HomePage() {
+  const router = useRouter();
+  const { query, uf, setQuery, setUf, applySearchUf, pickSegment } = useAppStore();
+  const { data: companies, loading, error } = useAsync(() => getCompanies(), []);
+
+  const featured = useMemo(
+    () => (companies ? [...companies].sort((a, b) => b.rating - a.rating).slice(0, 6) : []),
+    [companies]
+  );
+
+  const runSearch = () => {
+    applySearchUf();
+    router.push('/buscar');
+  };
+  const onSegment = (segId: string) => {
+    pickSegment(segId);
+    router.push('/buscar');
+  };
+
+  return (
+    <div className="screen home">
+      <section className="hero">
+        <div className="hero-inner">
+          <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
+          <h1 className="hero-title">
+            Encontre fornecedores e parceiros
+            <br />
+            <em>confiáveis</em> para sua operação de saúde.
+          </h1>
+          <p className="hero-sub">
+            Clínicas, hospitais e prestadores privados conectam-se a fornecedores verificados — de
+            laboratórios e equipamentos a esterilização e gestão de resíduos.
+          </p>
+          <div className="hero-search">
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onSubmit={runSearch}
+              segment={uf}
+              onSegment={setUf}
+              big
+              placeholder="Ex: esterilização, equipamentos, software…"
+            />
+          </div>
+          <div className="hero-stats">
+            <div>
+              <strong>2.400+</strong>
+              <span>fornecedores cadastrados</span>
+            </div>
+            <div className="div" />
+            <div>
+              <strong>12</strong>
+              <span>segmentos de saúde</span>
+            </div>
+            <div className="div" />
+            <div>
+              <strong>98%</strong>
+              <span>verificados e auditados</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="band">
+        <div className="band-head">
+          <h2>Explore por segmento</h2>
+          <p className="muted">Categorias mais buscadas por gestores de saúde</p>
+        </div>
+        <SegmentChips onPick={onSegment} />
+      </section>
+
+      <section className="band">
+        <div className="band-head row">
+          <div>
+            <h2>Fornecedores em destaque</h2>
+            <p className="muted">Empresas com melhor avaliação dos compradores</p>
+          </div>
+          <button className="btn-ghost" onClick={() => router.push('/buscar')}>
+            Ver todos <Icon name="arrow" size={15} />
+          </button>
+        </div>
+        {loading ? (
+          <Loading label="Carregando fornecedores…" />
+        ) : error ? (
+          <LoadError message={error} />
+        ) : (
+          <div className="card-grid">
+            {featured.map((c) => (
+              <CompanyCard key={c.id} c={c} layout="grid" />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="trust-band">
+        <div className="trust-item">
+          <Icon name="shield2" size={26} />
+          <div>
+            <strong>Verificação documental</strong>
+            <span>CNPJ, licenças e certificações auditadas.</span>
+          </div>
+        </div>
+        <div className="trust-item">
+          <Icon name="star" size={26} />
+          <div>
+            <strong>Avaliações reais</strong>
+            <span>Notas de compradores do setor de saúde.</span>
+          </div>
+        </div>
+        <div className="trust-item">
+          <Icon name="users" size={26} />
+          <div>
+            <strong>Contato direto</strong>
+            <span>Fale com o fornecedor sem intermediários.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

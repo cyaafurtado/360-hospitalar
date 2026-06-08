@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>360 Hospitalar — Logomarca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400..900&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: oklch(0.96 0.008 260); }
+  #root { min-height: 100vh; }
+
+  .rs-wordmark { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
+  .rs-tagline { font-family: "Nunito Sans", sans-serif; font-weight: 700; letter-spacing: 0.16em; line-height: 1; display: block; white-space: nowrap; }
+
+  .rs-lockup { display: flex; align-items: center; }
+  .rs-lockup.vert { flex-direction: column; gap: 22px; }
+  .rs-lockup.vert .rs-names { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .rs-lockup.horiz { flex-direction: row; gap: 16px; }
+  .rs-lockup.horiz .rs-names.left { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  .rs-appicon { display: grid; place-items: center; box-shadow: 0 10px 30px -12px oklch(0.56 0.16 248 / 0.5); }
+
+  .frame { display: grid; place-items: center; width: 100%; height: 100%; }
+  .frame.light { background: oklch(0.98 0.006 260); }
+  .frame.dark { background: oklch(0.22 0.05 270); }
+  .frame.paper { background: #fff; }
+
+  /* mini header demo for horizontal */
+  .hdr-demo { display: flex; align-items: center; width: 100%; height: 100%; padding: 0 28px; background: #fff; border-bottom: 1px solid oklch(0.92 0.01 260); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#2f5fd0" />
+    <ellipse cx="50" cy="50" rx="30" ry="13" fill="none" stroke="#fff" stroke-width="4" transform="rotate(-30 50 50)" />
+    <rect x="45.5" y="38" width="9" height="24" rx="4.5" fill="#34d399" />
+    <rect x="38" y="45.5" width="24" height="9" rx="4.5" fill="#34d399" />
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="logo/design-canvas.jsx"></script>
+<script type="text/babel" src="logo/logo.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="lockups" title="360 Hospitalar — Logomarca" subtitle="Conceito Orbit Plus · “+” de saúde com anel orbitando (cuidado 360°)">
+        <DCArtboard id="vert-light" label="1 · Lockup vertical (claro)" width={360} height={320}>
+          <div className="frame light"><LockupVertical /></div>
+        </DCArtboard>
+        <DCArtboard id="vert-dark" label="2 · Lockup vertical (dark)" width={360} height={320}>
+          <div className="frame dark"><LockupVertical dark /></div>
+        </DCArtboard>
+        <DCArtboard id="appicon" label="4 · App icon (squircle)" width={300} height={320}>
+          <div className="frame light"><AppIcon size={140} /></div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="horizontal" title="Lockup horizontal" subtitle="Para cabeçalhos e barras de navegação">
+        <DCArtboard id="horiz-light" label="3 · Horizontal (claro)" width={420} height={180}>
+          <div className="frame paper"><LockupHorizontal /></div>
+        </DCArtboard>
+        <DCArtboard id="horiz-dark" label="3 · Horizontal (dark)" width={420} height={180}>
+          <div className="frame dark"><LockupHorizontal dark /></div>
+        </DCArtboard>
+        <DCArtboard id="header-demo" label="No cabeçalho" width={720} height={180}>
+          <div className="hdr-demo"><LockupHorizontal /></div>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
