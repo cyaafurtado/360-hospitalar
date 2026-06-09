@@ -35,7 +35,7 @@ export default function HomePage() {
         <div className="hero-inner">
           <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
           <h1 className="hero-title">
-            Encontre fornecedores e parceiros
+            Encontre <em>fornecedores</em> e parceiros
             <br />
             <em>confiáveis</em> para sua operação de saúde.
           </h1>
