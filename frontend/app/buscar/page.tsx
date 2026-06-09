@@ -54,7 +54,7 @@ export default function BuscarPage() {
           segment={uf}
           onSegment={setUf}
           big
-          placeholder="Buscar fornecedor ou serviço…"
+          placeholder="Buscar prestador ou serviço…"
         />
       </div>
       <div className="results-body">

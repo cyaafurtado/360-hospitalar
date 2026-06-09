@@ -25,7 +25,7 @@ export function SearchBar({ value, onChange, onSubmit, segment, onSegment, big, 
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder || 'Buscar fornecedor, serviço ou segmento…'}
+          placeholder={placeholder || 'Buscar prestador, serviço ou segmento…'}
         />
       </div>
       {big && onSegment && (

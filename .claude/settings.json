@@ -42,10 +42,32 @@
       "Bash(curl -s http://localhost:3001/api/companies)",
       "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\('empresas:',d.length,'| top:',d[0].name\\)\")",
       "Bash(curl -s http://localhost:3001/api/profile)",
-      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\(d.name,'|',d.email,'| ufs:',d.atendeUfs.join\\(','\\)\\)\")"
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0\\)\\);console.log\\(d.name,'|',d.email,'| ufs:',d.atendeUfs.join\\(','\\)\\)\")",
+      "Bash(git push*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git status*)",
+      "Bash(git log*)"
     ],
     "additionalDirectories": [
       "C:\\Projetos\\360-hospitalar\\360 Hospitalar-handoff\\360-hospitalar\\project"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git push",
+            "if": "Bash(git commit*)",
+            "shell": "powershell",
+            "statusMessage": "Enviando para o repositório…",
+            "timeout": 60
+          }
+        ]
+      }
     ]
   }
 }
