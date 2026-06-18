@@ -32,12 +32,13 @@ export default function HomePage() {
   return (
     <div className="screen home">
       <section className="hero">
+        <div className="hero-bg" aria-hidden="true" />
         <div className="hero-inner">
           <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
           <h1 className="hero-title">
             Encontre <em>fornecedores</em> e parceiros
             <br />
-            <em>confiáveis</em> para sua operação de saúde.
+            confiáveis para sua operação de saúde.
           </h1>
           <p className="hero-sub">
             Clínicas, hospitais e prestadores privados conectam-se a fornecedores verificados — de
@@ -106,21 +107,21 @@ export default function HomePage() {
 
       <section className="trust-band">
         <div className="trust-item">
-          <Icon name="shield2" size={26} />
+          <div className="trust-ico"><Icon name="shield2" size={22} /></div>
           <div>
             <strong>Verificação documental</strong>
             <span>CNPJ, licenças e certificações auditadas.</span>
           </div>
         </div>
         <div className="trust-item">
-          <Icon name="star" size={26} />
+          <div className="trust-ico"><Icon name="star" size={22} /></div>
           <div>
             <strong>Avaliações reais</strong>
             <span>Notas de compradores do setor de saúde.</span>
           </div>
         </div>
         <div className="trust-item">
-          <Icon name="users" size={26} />
+          <div className="trust-ico"><Icon name="users" size={22} /></div>
           <div>
             <strong>Contato direto</strong>
             <span>Fale com o fornecedor sem intermediários.</span>
