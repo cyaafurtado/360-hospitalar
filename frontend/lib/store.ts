@@ -52,7 +52,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   logout: () => set({ authEmail: null }),
 
   query: '',
-  uf: '',
+  uf: 'PA',
   filters: { ...EMPTY_FILTERS },
   sort: 'rating',
   layout: 'grid',
