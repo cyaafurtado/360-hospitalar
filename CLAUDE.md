@@ -143,3 +143,8 @@ authMiddleware + tenantScope + rbacGuard).
 - Não usar emoji; ícones são SVG line (Lucide / set inline). Visual sóbrio, sem gradientes pesados.
 - Máscaras: `maskCNPJ`, `maskCard`, `maskExp`, `maskPhone`.
 - Mantenha os 3 temas e a densidade como CSS vars trocáveis por atributo no container raiz.
+
+## Fluxo de commits (obrigatório)
+- **Toda alteração de código deve ser commitada e enviada automaticamente** ao repositório remoto.
+- Após cada tarefa concluída: `git add` nos arquivos alterados → `git commit` com mensagem descritiva → `git push`.
+- Não deixar alterações sem commit. O deploy automático (Vercel/Railway) depende do push.
