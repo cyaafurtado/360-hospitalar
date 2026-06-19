@@ -22,9 +22,9 @@ const CERT_OPTS = ['ANVISA', 'ISO 9001', 'ISO 13485', 'ISO 27001', 'LGPD', 'RDC 
 const CONSELHOS = ['CRM', 'COREN', 'CRF', 'CRO', 'CRBM', 'CRN', 'CRP', 'CREFITO', 'CRMV', 'CREA', 'Outro'];
 
 const REG_STEPS: { key: string; label: string; fields: (keyof RegisterForm)[] }[] = [
-  { key: 'dados', label: 'Dados da empresa', fields: ['name', 'cnpj', 'site', 'about'] },
-  { key: 'atuacao', label: 'Área de atuação', fields: ['segment', 'uf', 'city', 'tagline'] },
-  { key: 'contato', label: 'Contato & selos', fields: ['email', 'phone'] },
+  { key: 'precadastro', label: 'Pré-cadastro', fields: ['name', 'cnpj', 'segment', 'uf', 'city', 'about'] },
+  { key: 'atuacao', label: 'Área de atuação', fields: ['tagline'] },
+  { key: 'contato', label: 'Contato & selos', fields: ['email', 'phone', 'site'] },
   { key: 'plano', label: 'Plano & verificação', fields: [] },
 ];
 
@@ -179,17 +179,6 @@ export default function CadastrarPage() {
                 <Field label="CNPJ" required hint="Usado para verificação cadastral.">
                   <input value={form.cnpj} onChange={(e) => set('cnpj', maskCNPJ(e.target.value))} placeholder="00.000.000/0000-00" inputMode="numeric" />
                 </Field>
-                <Field label="Site" required>
-                  <input value={form.site} onChange={(e) => set('site', e.target.value)} placeholder="suaempresa.com.br" />
-                </Field>
-                <Field label="Sobre a empresa" required>
-                  <textarea rows={4} value={form.about} onChange={(e) => set('about', e.target.value)} placeholder="Descreva o que sua empresa faz, diferenciais e quem atende." />
-                </Field>
-              </div>
-            )}
-
-            {step === 1 && (
-              <div className="reg-grid">
                 <Field label="Segmento principal" required>
                   <div className="reg-select">
                     <Icon name="filter" size={16} />
@@ -214,9 +203,17 @@ export default function CadastrarPage() {
                     </div>
                   </Field>
                   <Field label="Cidade" required>
-                    <input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="Ex: Campinas" />
+                    <input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="Ex: Belém" />
                   </Field>
                 </div>
+                <Field label="Sobre a empresa" required>
+                  <textarea rows={4} value={form.about} onChange={(e) => set('about', e.target.value)} placeholder="Descreva o que sua empresa faz, diferenciais e quem atende." />
+                </Field>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="reg-grid">
                 <Field label="Estados onde atua e atende" required hint="Selecione todas as UFs que sua empresa cobre.">
                   <div className="uf-grid-head">
                     <span className="uf-count">
@@ -265,6 +262,9 @@ export default function CadastrarPage() {
                     <input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(00) 0000-0000" />
                   </Field>
                 </div>
+                <Field label="Site" required>
+                  <input value={form.site} onChange={(e) => set('site', e.target.value)} placeholder="suaempresa.com.br" />
+                </Field>
                 <Field label="Certificações e selos" hint="Marque os que sua empresa possui — entram na verificação.">
                   <div className="reg-chips-row wrap">
                     {CERT_OPTS.map((cert) => (
