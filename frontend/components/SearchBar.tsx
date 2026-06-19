@@ -42,7 +42,7 @@ export function SearchBar({ value, onChange, onSubmit, segment, onSegment, big, 
         </div>
       )}
       <button type="submit" className="btn-primary sb-btn">
-        Buscar
+        Pesquisar
       </button>
     </form>
   );

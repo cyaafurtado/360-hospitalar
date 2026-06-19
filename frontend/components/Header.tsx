@@ -19,7 +19,7 @@ export function Header() {
         </Link>
         <nav className="nav">
           <a onClick={() => router.push('/')}>Segmentos</a>
-          <a onClick={() => router.push('/buscar')}>Buscar</a>
+          <a onClick={() => router.push('/buscar')}>Pesquisar</a>
           <a onClick={() => router.push('/cadastrar')}>Para fornecedores</a>
           <a className="header-login" onClick={() => router.push('/entrar')}>
             Entrar
