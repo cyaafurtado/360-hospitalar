@@ -116,6 +116,27 @@ export default function PerfilPage() {
     );
   };
 
+  // fotos da empresa
+  type Photo = { name: string; url: string };
+  const [photos, setPhotos] = useState<Photo[]>([]);
+
+  useEffect(() => {
+    if (initial?.fotos?.length) {
+      setPhotos(initial.fotos.map((name) => ({ name, url: '' })));
+    }
+  }, [initial]);
+
+  const addPhotos = (files: FileList | null) => {
+    if (!files) return;
+    const entries = Array.from(files).map((f) => ({ name: f.name, url: URL.createObjectURL(f) }));
+    setPhotos((p) => [...p, ...entries]);
+    setForm((f) => f ? { ...f, fotos: [...(f.fotos ?? []), ...entries.map((e) => e.name)] } : f);
+  };
+  const removePhoto = (idx: number) => {
+    setPhotos((p) => p.filter((_, i) => i !== idx));
+    setForm((f) => f ? { ...f, fotos: (f.fotos ?? []).filter((_, i) => i !== idx) } : f);
+  };
+
   const save = async () => {
     if (!form) return;
     try {
@@ -229,6 +250,69 @@ export default function PerfilPage() {
                 <span className="prof-value">{form.city} · {form.uf}</span>
               )}
             </div>
+          </section>
+
+          {/* ── Fotos da empresa ── */}
+          <section className="prof-card span-2">
+            <div className="prof-doc-head">
+              <h3>Fotos da empresa</h3>
+              {edit && (
+                <label className="prof-doc-add">
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+                  />
+                  <Icon name="check" size={13} stroke={3} /> Adicionar fotos
+                </label>
+              )}
+            </div>
+
+            {photos.length === 0 && !edit && (
+              <p className="doc-empty-hint">Nenhuma foto cadastrada. Edite o perfil para adicionar fotos da fachada.</p>
+            )}
+
+            {(photos.length > 0 || edit) && (
+              <div className="photo-grid">
+                {photos.map((p, i) => (
+                  <div key={i} className="photo-cell">
+                    {p.url ? (
+                      <img src={p.url} alt={p.name} className="photo-img" />
+                    ) : (
+                      <div className="photo-placeholder">
+                        <Icon name="file" size={22} />
+                        <span>{p.name}</span>
+                      </div>
+                    )}
+                    {edit && (
+                      <button
+                        type="button"
+                        className="photo-remove"
+                        onClick={() => removePhoto(i)}
+                        title="Remover foto"
+                      >
+                        <Icon name="close" size={13} stroke={2.5} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {edit && (
+                  <label className="photo-add-cell">
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+                    />
+                    <span className="photo-add-ico">+</span>
+                    <span>Adicionar foto</span>
+                  </label>
+                )}
+              </div>
+            )}
           </section>
 
           <section className="prof-card span-2">

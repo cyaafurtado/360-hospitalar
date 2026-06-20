@@ -80,4 +80,5 @@ export type SupplierProfileData = {
   reviews: number;
   verified: boolean;
   documentos?: DocumentoVerificacao[];
+  fotos?: string[]; // nomes/URLs das fotos da fachada
 };
