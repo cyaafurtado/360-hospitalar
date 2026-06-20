@@ -8,7 +8,7 @@ export function Footer() {
         <div className="muted">© 2026 360 Hospitalar · Diretório B2B do setor de saúde</div>
         <div className="footer-links">
           <a>Sobre</a>
-          <a>Como verificamos</a>
+          <Link href="/como-verificamos">Como verificamos</Link>
           <Link href="/cadastrar">Para fornecedores</Link>
           <a>Contato</a>
         </div>

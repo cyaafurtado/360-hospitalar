@@ -929,6 +929,74 @@ em { font-style: italic; }
 .qr-row span { color: var(--muted); }
 .qr-row strong { color: var(--text-strong); font-weight: 650; text-align: right; }
 
+/* ============ COMO VERIFICAMOS ============ */
+.cv-screen { max-width: 860px; margin: 0 auto; padding-bottom: 80px; }
+.cv-hero { padding: 56px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 56px; }
+.cv-hero-eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; font-size: 13.5px; font-weight: 650; color: var(--muted); }
+.cv-hero h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; letter-spacing: -0.025em; color: var(--text-strong); line-height: 1.15; margin-bottom: 20px; }
+.cv-hero p { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 680px; text-wrap: pretty; }
+.cv-section { margin-bottom: 64px; }
+.cv-section-label { font-size: 11.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
+.cv-section h2 { font-size: 26px; font-weight: 780; letter-spacing: -0.02em; color: var(--text-strong); margin-bottom: 24px; }
+.cv-section-desc { font-size: 15px; color: var(--muted); line-height: 1.65; margin-bottom: 24px; margin-top: -12px; }
+
+/* Por que verificar */
+.cv-why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.cv-why-card { background: var(--surface); border: var(--card-border); border-radius: var(--radius); padding: 24px 22px; display: flex; flex-direction: column; gap: 12px; }
+.cv-why-card svg { color: var(--primary); }
+.cv-why-card h3 { font-size: 15px; font-weight: 720; color: var(--text-strong); line-height: 1.3; }
+.cv-why-card p { font-size: 13.5px; color: var(--muted); line-height: 1.6; text-wrap: pretty; }
+
+/* Passos */
+.cv-steps { display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.cv-step { display: grid; grid-template-columns: 64px 1fr; gap: 0; border-bottom: 1px solid var(--border); }
+.cv-step:last-child { border-bottom: none; }
+.cv-step-num { font-size: 13px; font-weight: 800; color: var(--primary); background: var(--primary-tint); display: grid; place-items: center; letter-spacing: 0.04em; border-right: 1px solid var(--border); }
+.cv-step-body { padding: 22px 24px; }
+.cv-step-body h3 { font-size: 15px; font-weight: 720; color: var(--text-strong); margin-bottom: 6px; }
+.cv-step-body p { font-size: 14px; color: var(--muted); line-height: 1.65; text-wrap: pretty; }
+
+/* Documentos */
+.cv-docs-grid { display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.cv-doc-card { display: flex; align-items: flex-start; gap: 16px; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+.cv-doc-card:last-child { border-bottom: none; }
+.cv-doc-ico { flex: none; color: var(--primary); margin-top: 2px; background: var(--primary-tint); border-radius: var(--radius-sm); padding: 8px; display: grid; place-items: center; }
+.cv-doc-card strong { font-size: 14px; font-weight: 700; color: var(--text-strong); display: block; margin-bottom: 4px; }
+.cv-doc-card p { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin: 0; text-wrap: pretty; }
+
+/* Fontes */
+.cv-sources { display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.cv-source-row { display: grid; grid-template-columns: 260px 1fr; gap: 0; border-bottom: 1px solid var(--border); }
+.cv-source-row:last-child { border-bottom: none; }
+.cv-source-label { font-size: 13.5px; font-weight: 700; color: var(--text-strong); padding: 13px 18px; border-right: 1px solid var(--border); background: var(--surface-2); }
+.cv-source-url { font-size: 13px; color: var(--muted); padding: 13px 18px; font-family: monospace; }
+
+/* Prazo e validade */
+.cv-section-split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.cv-section-split h2 { font-size: 20px; margin-bottom: 14px; }
+.cv-section-split p { font-size: 14.5px; color: var(--muted); line-height: 1.7; text-wrap: pretty; }
+.cv-section-split strong { color: var(--text-strong); font-weight: 650; }
+
+/* Aviso de limitações */
+.cv-disclaimer { display: flex; gap: 18px; align-items: flex-start; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 24px 22px; }
+.cv-disclaimer svg { color: var(--muted); flex: none; margin-top: 2px; }
+.cv-disclaimer h3 { font-size: 14.5px; font-weight: 720; color: var(--text-strong); margin-bottom: 8px; }
+.cv-disclaimer p { font-size: 13.5px; color: var(--muted); line-height: 1.65; text-wrap: pretty; }
+.cv-disclaimer strong { color: var(--text-strong); font-weight: 650; }
+
+/* CTA final */
+.cv-cta { margin-top: 72px; }
+.cv-cta-inner { background: var(--primary); border-radius: var(--radius-lg); padding: 52px 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.cv-cta-inner .verified { border-color: rgba(255,255,255,.3); color: #fff; }
+.cv-cta-inner .verified svg { color: #fff; }
+.cv-cta-inner h2 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+.cv-cta-inner p { font-size: 15.5px; color: rgba(255,255,255,.75); }
+.cv-cta-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.cv-cta-inner .btn-primary { background: #fff; color: var(--primary); }
+.cv-cta-inner .btn-primary:hover { background: rgba(255,255,255,.9); }
+.cv-cta-inner .btn-ghost { border-color: rgba(255,255,255,.4); color: #fff; }
+.cv-cta-inner .btn-ghost:hover { background: rgba(255,255,255,.1); }
+
 /* ============ responsivo ============ */
 @media (max-width: 980px) {
   .results-body { grid-template-columns: 1fr; }
@@ -981,4 +1049,10 @@ em { font-style: italic; }
   .prof-rate .stars { margin: 0; }
   .portal-head.row { flex-direction: column; align-items: flex-start; }
   .req-panel { grid-template-columns: 1fr; }
+  .cv-why-grid { grid-template-columns: 1fr; }
+  .cv-section-split { grid-template-columns: 1fr; gap: 32px; }
+  .cv-source-row { grid-template-columns: 1fr; }
+  .cv-source-label { border-right: none; border-bottom: 1px solid var(--border); }
+  .cv-cta-inner { padding: 36px 24px; }
+  .cv-step { grid-template-columns: 48px 1fr; }
 }
