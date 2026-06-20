@@ -9,6 +9,7 @@ import { SearchBar } from '../components/SearchBar';
 import { SegmentChips } from '../components/SegmentChips';
 import { CompanyCard } from '../components/CompanyCard';
 import { Loading, LoadError } from '../components/AsyncState';
+import { HeroIllustration } from '../components/HeroIllustration';
 
 export default function HomePage() {
   const router = useRouter();
@@ -32,44 +33,48 @@ export default function HomePage() {
   return (
     <div className="screen home">
       <section className="hero">
-        <div className="hero-bg" aria-hidden="true" />
         <div className="hero-inner">
-          <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
-          <h1 className="hero-title">
-            Encontre <em>fornecedores</em> e parceiros
-            <br />
-            confiáveis para sua operação de saúde.
-          </h1>
-          <p className="hero-sub">
-            Clínicas, hospitais e prestadores privados conectam-se a fornecedores verificados — de
-            laboratórios e equipamentos a esterilização e gestão de resíduos.
-          </p>
-          <div className="hero-search">
-            <SearchBar
-              value={query}
-              onChange={setQuery}
-              onSubmit={runSearch}
-              segment={uf}
-              onSegment={setUf}
-              big
-              placeholder="Ex: esterilização, equipamentos, software…"
-            />
+          <div className="hero-content">
+            <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
+            <h1 className="hero-title">
+              Encontre <em>fornecedores</em> e parceiros
+              <br />
+              confiáveis para sua operação de saúde.
+            </h1>
+            <p className="hero-sub">
+              Clínicas, hospitais e prestadores privados conectam-se a fornecedores verificados — de
+              laboratórios e equipamentos a esterilização e gestão de resíduos.
+            </p>
+            <div className="hero-search">
+              <SearchBar
+                value={query}
+                onChange={setQuery}
+                onSubmit={runSearch}
+                segment={uf}
+                onSegment={setUf}
+                big
+                placeholder="Ex: esterilização, equipamentos, software…"
+              />
+            </div>
+            <div className="hero-stats">
+              <div>
+                <strong>2.400+</strong>
+                <span>fornecedores cadastrados</span>
+              </div>
+              <div className="div" />
+              <div>
+                <strong>12</strong>
+                <span>segmentos de saúde</span>
+              </div>
+              <div className="div" />
+              <div>
+                <strong>98%</strong>
+                <span>verificados e auditados</span>
+              </div>
+            </div>
           </div>
-          <div className="hero-stats">
-            <div>
-              <strong>2.400+</strong>
-              <span>fornecedores cadastrados</span>
-            </div>
-            <div className="div" />
-            <div>
-              <strong>12</strong>
-              <span>segmentos de saúde</span>
-            </div>
-            <div className="div" />
-            <div>
-              <strong>98%</strong>
-              <span>verificados e auditados</span>
-            </div>
+          <div className="hero-visual" aria-hidden="true">
+            <HeroIllustration />
           </div>
         </div>
       </section>
