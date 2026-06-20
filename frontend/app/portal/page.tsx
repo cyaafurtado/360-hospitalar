@@ -182,8 +182,7 @@ export default function PortalPage() {
                               </a>
                               <button
                                 className="btn-ghost sm"
-                                onClick={() => marcarStatus(r.id, 'andamento')}
-                                disabled={r.status === 'andamento' || r.status === 'respondida'}
+                                onClick={() => router.push(`/portal/solicitacao/${r.id}`)}
                               >
                                 <Icon name="signal" size={14} /> Acompanhar
                               </button>

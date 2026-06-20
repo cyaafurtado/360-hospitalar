@@ -4,6 +4,7 @@ import type {
   Company,
   SolicitacaoRequest,
   RequestStatus,
+  ContratoInfo,
   SupplierProfileData,
 } from '../data/types';
 
@@ -23,6 +24,16 @@ export async function getCompany(id: string): Promise<Company | null> {
 
 export async function getRequests(): Promise<SolicitacaoRequest[]> {
   const { data } = await api.get<SolicitacaoRequest[]>('/requests');
+  return data;
+}
+
+export async function getRequest(id: string): Promise<SolicitacaoRequest> {
+  const { data } = await api.get<SolicitacaoRequest>(`/requests/${id}`);
+  return data;
+}
+
+export async function updateRequestContract(id: string, contrato: ContratoInfo): Promise<SolicitacaoRequest> {
+  const { data } = await api.patch<SolicitacaoRequest>(`/requests/${id}/contract`, { contrato });
   return data;
 }
 

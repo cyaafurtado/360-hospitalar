@@ -25,6 +25,14 @@ export type Company = {
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
 export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada';
 
+export type ContratoInfo = {
+  assinado: boolean;
+  numero?: string;
+  valor?: string;
+  inicio?: string;
+  validade?: string;
+};
+
 export type SolicitacaoRequest = {
   id: string;
   solicitante: string;
@@ -39,6 +47,9 @@ export type SolicitacaoRequest = {
   phone: string;
   quando: string;
   resumo: string;
+  servico?: string;
+  prazo?: string;
+  contrato?: ContratoInfo;
 };
 
 export type Plan = 'free' | 'verified' | 'premium';

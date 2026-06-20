@@ -752,6 +752,62 @@ em { font-style: italic; }
 .prof-2col { display: grid; grid-template-columns: 1fr 90px; gap: 8px; }
 .prof-uf-list { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* ============ ACOMPANHAR SOLICITAÇÃO ============ */
+.sol-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+.sol-id-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sol-id { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--primary); background: var(--primary-tint); padding: 3px 10px; border-radius: var(--pill); }
+
+.sol-stepper { display: flex; align-items: center; background: var(--surface); border: var(--card-border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-card); margin-bottom: 28px; gap: 0; }
+.sol-step { display: flex; align-items: center; gap: 0; flex: 1; background: none; border: none; cursor: default; padding: 0; font-family: var(--font); }
+.sol-step-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: var(--surface-2); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--muted); flex: none; transition: all .2s; }
+.sol-step-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-left: 10px; white-space: nowrap; transition: color .2s; }
+.sol-step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; }
+.sol-step.done .sol-step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sol-step.done .sol-step-label { color: var(--accent); }
+.sol-step.done .sol-step-line { background: var(--accent); }
+.sol-step.active .sol-step-dot { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 0 0 4px var(--primary-tint); }
+.sol-step.active .sol-step-label { color: var(--primary); font-weight: 700; }
+
+.sol-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+.sol-main { display: flex; flex-direction: column; gap: 16px; }
+.sol-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 132px; }
+
+.sol-card { background: var(--surface); border: var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-card); }
+.sol-card-title { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 18px; }
+.sol-card-title svg { color: var(--primary); }
+
+.sol-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.sol-info-item { display: flex; flex-direction: column; gap: 3px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sol-info-item:nth-last-child(-n+2) { border-bottom: none; }
+.sol-info-label { font-size: 11.5px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.sol-info-val { font-size: 14.5px; color: var(--text-strong); font-weight: 500; }
+.sol-info-val.link { color: var(--primary); text-decoration: none; }
+.sol-info-val.link:hover { text-decoration: underline; }
+.sol-resumo { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.sol-resumo p { font-size: 14.5px; color: var(--text); line-height: 1.6; }
+
+.sol-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 16px; }
+.sol-toggle input { display: none; }
+.sol-toggle-track { width: 42px; height: 24px; border-radius: 12px; background: var(--border); flex: none; position: relative; transition: background .2s; }
+.sol-toggle-thumb { position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .2s; }
+.sol-toggle.on .sol-toggle-track { background: var(--accent); }
+.sol-toggle.on .sol-toggle-thumb { left: 21px; }
+.sol-toggle-label { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+
+.sol-contrato-fields { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 14px; }
+.sol-contrato-fields input { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; outline: none; width: 100%; }
+.sol-contrato-fields input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+
+.sol-status-btns { display: flex; flex-direction: column; gap: 8px; }
+.sol-status-btn { font-family: var(--font); font-size: 13.5px; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; cursor: pointer; transition: all .14s; display: flex; align-items: center; gap: 8px; }
+.sol-status-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-tint); }
+.sol-status-btn.active { border-color: var(--primary); background: var(--primary-tint); color: var(--primary); font-weight: 700; cursor: default; }
+.sol-status-btn.active svg { color: var(--primary); }
+.sol-status-btn:disabled:not(.active) { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary.block.mt { margin-top: 6px; }
+.btn-primary.saved { background: var(--accent); border-color: var(--accent); }
+
 /* ============ SOLICITAR ORÇAMENTO ============ */
 .reg-section-title { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 720; color: var(--text-strong); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
 .reg-section-title svg { color: var(--primary); }
