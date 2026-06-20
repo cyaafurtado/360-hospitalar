@@ -908,7 +908,7 @@ em { font-style: italic; }
   .screen { padding: 0 18px 70px; }
   .header-inner { padding: 0 18px; gap: 14px; }
   .nav { gap: 0; }
-  .nav a:not(.btn-primary) { display: none; }
+  .nav a:not(.btn-primary):not(.header-login) { display: none; }
   .hero { padding: 44px 0 8px; }
   .searchbar.big { flex-wrap: wrap; }
   .sb-seg { border-left: none; border-top: 1px solid var(--border); width: 100%; }
