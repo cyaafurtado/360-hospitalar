@@ -50,6 +50,8 @@ export default function SolicitacaoPage() {
   const [contrato, setContrato] = useState<ContratoInfo>({ ...EMPTY_CONTRATO });
   const [savingContrato, setSavingContrato] = useState(false);
   const [contratoSaved, setContratoSaved] = useState(false);
+  const [declinaModal, setDeclinaModal] = useState(false);
+  const [declinaObs, setDeclinaObs] = useState('');
 
   const setC = (k: keyof ContratoInfo, v: string | boolean) =>
     setContrato((prev) => ({ ...prev, [k]: v }));
@@ -65,6 +67,12 @@ export default function SolicitacaoPage() {
     } finally {
       setChangingStatus(false);
     }
+  };
+
+  const confirmarDeclinar = async () => {
+    setDeclinaModal(false);
+    await changeStatus('declinada');
+    setDeclinaObs('');
   };
 
   const saveContrato = async () => {
@@ -320,7 +328,7 @@ export default function SolicitacaoPage() {
                 <div className="sol-status-sep" />
                 <button
                   className={'sol-status-btn warn' + (req.status === 'declinada' ? ' active' : '')}
-                  onClick={() => changeStatus('declinada')}
+                  onClick={() => req.status !== 'declinada' && setDeclinaModal(true)}
                   disabled={changingStatus || req.status === 'declinada'}
                 >
                   {req.status === 'declinada' && <Icon name="check" size={13} stroke={3} />}
@@ -339,6 +347,40 @@ export default function SolicitacaoPage() {
           </aside>
         </div>
       </div>
+
+      {/* Modal de confirmação de declínio */}
+      {declinaModal && (
+        <div className="sol-modal-overlay" onClick={() => setDeclinaModal(false)}>
+          <div className="sol-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sol-modal-icon warn">
+              <Icon name="close" size={24} stroke={2.4} />
+            </div>
+            <h2 className="sol-modal-title">Declinar solicitação?</h2>
+            <p className="sol-modal-desc">
+              Tem certeza que deseja declinar a solicitação de{' '}
+              <strong>{req.organizacao}</strong>? O solicitante será notificado sobre o declínio.
+            </p>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">Observação <span className="sol-modal-opt">(opcional)</span></label>
+              <textarea
+                className="sol-modal-textarea"
+                rows={3}
+                value={declinaObs}
+                onChange={(e) => setDeclinaObs(e.target.value)}
+                placeholder="Informe o motivo do declínio ou orientações ao solicitante…"
+              />
+            </div>
+            <div className="sol-modal-actions">
+              <button className="btn-ghost" onClick={() => setDeclinaModal(false)}>
+                Voltar
+              </button>
+              <button className="btn-danger" onClick={confirmarDeclinar} disabled={changingStatus}>
+                {changingStatus ? 'Declinando…' : 'Confirmar declínio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
