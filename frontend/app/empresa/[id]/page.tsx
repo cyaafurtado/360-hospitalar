@@ -17,6 +17,7 @@ export default function EmpresaPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
   const router = useRouter();
+  const authEmail = useAppStore((s) => s.authEmail);
   const { data: companies, loading, error } = useAsync(() => getCompanies(), []);
 
   if (loading || error) {
@@ -49,7 +50,6 @@ export default function EmpresaPage() {
     );
   }
 
-  const authEmail = useAppStore((s) => s.authEmail);
   const similar = (companies ?? []).filter((x) => x.segment === c.segment && x.id !== c.id).slice(0, 3);
   const orcamento = () => router.push(`/empresa/${c.id}/orcamento`);
   const loginFrom = `/entrar?from=${encodeURIComponent(`/empresa/${c.id}`)}`;
