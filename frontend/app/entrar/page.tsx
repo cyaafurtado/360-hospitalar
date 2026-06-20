@@ -1,12 +1,14 @@
 'use client';
-import { useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '../../lib/icons';
 import { OrbitMark } from '../../components/OrbitMark';
 import { useAppStore } from '../../lib/store';
 
-export default function EntrarPage() {
+function EntrarForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from');
   const login = useAppStore((s) => s.login);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -28,7 +30,7 @@ export default function EntrarPage() {
     setTimeout(() => {
       setLoading(false);
       login(email);
-      router.push('/portal');
+      router.push(from || '/portal');
     }, 700);
   };
 
@@ -146,5 +148,13 @@ export default function EntrarPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function EntrarPage() {
+  return (
+    <Suspense>
+      <EntrarForm />
+    </Suspense>
   );
 }

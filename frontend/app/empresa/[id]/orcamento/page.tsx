@@ -11,6 +11,7 @@ import { RatingLine } from '../../../../components/Stars';
 import { VerifiedTag } from '../../../../components/VerifiedTag';
 import { Field } from '../../../../components/Field';
 import { Loading, LoadError } from '../../../../components/AsyncState';
+import { useAppStore } from '../../../../lib/store';
 
 const Q_TYPES = [
   { id: 'cotacao', label: 'Cotação de preço', icon: 'file' },
@@ -23,6 +24,7 @@ export default function OrcamentoPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
   const router = useRouter();
+  const authEmail = useAppStore((s) => s.authEmail);
   const { data: companies, loading, error } = useAsync(() => getCompanies(), []);
   const c = companies?.find((x) => x.id === id);
 
@@ -60,6 +62,48 @@ export default function OrcamentoPage() {
           <button className="btn-primary" onClick={() => router.push('/buscar')}>
             Ver fornecedores
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authEmail) {
+    const from = encodeURIComponent(`/empresa/${id}/orcamento`);
+    return (
+      <div className="screen register">
+        <button className="back-link" onClick={() => router.push(`/empresa/${c.id}`)}>
+          <Icon name="back" size={16} /> Voltar ao fornecedor
+        </button>
+        <div className="reg-success">
+          <div className="success-mark" style={{ background: 'var(--primary)' }}>
+            <Icon name="shield2" size={34} stroke={2} />
+          </div>
+          <h1>Entre para continuar</h1>
+          <p>
+            Para solicitar um orçamento a <strong>{c.name}</strong> você precisa estar conectado à
+            sua conta na 360 Hospitalar. Seu cadastro é gratuito e leva menos de 2 minutos.
+          </p>
+          <div className="quote-supplier" style={{ maxWidth: 320, margin: '0 auto' }}>
+            <Logo name={c.name} size={48} />
+            <div>
+              <div className="qs-name">
+                {c.name}
+                {c.verified && <VerifiedTag small />}
+              </div>
+              <div className="qs-seg">{segmentLabel(c.segment)}</div>
+              <div className="qs-meta">
+                <Icon name="pin" size={13} /> {c.city} · {c.uf}
+              </div>
+            </div>
+          </div>
+          <div className="success-actions">
+            <button className="btn-primary" onClick={() => router.push(`/entrar?from=${from}`)}>
+              Entrar na minha conta
+            </button>
+            <button className="btn-ghost" onClick={() => router.push(`/cadastrar`)}>
+              Criar conta grátis
+            </button>
+          </div>
         </div>
       </div>
     );
