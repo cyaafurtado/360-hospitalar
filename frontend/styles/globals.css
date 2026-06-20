@@ -564,6 +564,27 @@ em { font-style: italic; }
 .pay-secure { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); }
 .pay-secure svg { color: var(--accent); flex: none; }
 
+/* ── Seleção de tipo de conta (cadastro) ── */
+.reg-type-hint { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.type-card { position: relative; text-align: left; display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 24px 20px; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .12s; font-family: var(--font); }
+.type-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.type-card.on { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-tint); }
+.type-card-ico { color: var(--primary); opacity: .8; }
+.type-card.on .type-card-ico { opacity: 1; }
+.type-card-title { font-size: 17px; font-weight: 740; color: var(--text-strong); letter-spacing: -.01em; }
+.type-card-desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; text-wrap: pretty; }
+.type-card-check { position: absolute; top: 14px; right: 14px; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; }
+.inst-subtypes { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius); }
+.inst-subtypes-label { font-size: 13px; font-weight: 700; color: var(--text-strong); letter-spacing: .01em; }
+.inst-subtype-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.inst-subtype { text-align: left; display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer; font-family: var(--font); transition: border-color .13s, box-shadow .13s; }
+.inst-subtype:hover { border-color: var(--primary); }
+.inst-subtype.on { border-color: var(--primary); background: var(--primary-tint); box-shadow: 0 0 0 2px var(--primary-tint); }
+.inst-subtype-label { font-size: 14px; font-weight: 700; color: var(--text-strong); display: flex; align-items: center; gap: 7px; }
+.inst-subtype-label svg { color: var(--primary); flex: none; }
+.inst-subtype-desc { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
 /* ============ LOGIN / PORTAL ============ */
 .login-screen { display: grid; grid-template-columns: 460px 1fr; min-height: calc(100vh - 68px); }
 .login-brand { position: relative; background: var(--primary); color: #fff; padding: 40px 44px; display: flex; flex-direction: column; overflow: hidden; }
