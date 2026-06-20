@@ -56,11 +56,11 @@ export default function SolicitacaoPage() {
   const setC = (k: keyof ContratoInfo, v: string | boolean) =>
     setContrato((prev) => ({ ...prev, [k]: v }));
 
-  const changeStatus = async (s: RequestStatus) => {
+  const changeStatus = async (s: RequestStatus, obs?: string) => {
     if (!req || changingStatus) return;
     setChangingStatus(true);
     try {
-      const updated = await updateRequestStatus(req.id, s);
+      const updated = await updateRequestStatus(req.id, s, obs);
       setReq(updated);
     } catch (e) {
       console.error(e);
@@ -70,9 +70,19 @@ export default function SolicitacaoPage() {
   };
 
   const confirmarDeclinar = async () => {
+    const obs = declinaObs.trim() || undefined;
     setDeclinaModal(false);
-    await changeStatus('declinada');
-    setDeclinaObs('');
+    setChangingStatus(true);
+    try {
+      const updated = await updateRequestStatus(req!.id, 'declinada', obs);
+      setReq({ ...updated, declinaObs: obs, declinadoEm: new Date().toLocaleDateString('pt-BR') });
+    } catch (e) {
+      console.error(e);
+      setReq((prev) => prev ? { ...prev, status: 'declinada', declinaObs: obs, declinadoEm: new Date().toLocaleDateString('pt-BR') } : prev);
+    } finally {
+      setChangingStatus(false);
+      setDeclinaObs('');
+    }
   };
 
   const saveContrato = async () => {
@@ -137,15 +147,30 @@ export default function SolicitacaoPage() {
 
         {/* Banner para status terminais negativos */}
         {req.status === 'cancelada' && (
-          <div className="sol-terminal-banner">
-            <Icon name="close" size={16} stroke={2.4} />
-            Esta solicitação foi <strong>cancelada</strong>. Você ainda pode reabri-la alterando o status.
+          <div className="sol-terminal-banner canceled">
+            <div className="sol-banner-row">
+              <Icon name="close" size={16} stroke={2.4} />
+              <span>Esta solicitação foi <strong>cancelada</strong>. Você ainda pode reabri-la alterando o status.</span>
+            </div>
           </div>
         )}
         {req.status === 'declinada' && (
-          <div className="sol-terminal-banner warn">
-            <Icon name="close" size={16} stroke={2.4} />
-            Esta solicitação foi <strong>declinada</strong>. Você ainda pode reabri-la alterando o status.
+          <div className="sol-terminal-banner pending">
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="signal" size={16} stroke={2} />
+                <span>
+                  Declínio enviado — aguardando confirmação de{' '}
+                  <strong>{req.organizacao}</strong> para aceitar.
+                  {req.declinadoEm && <span className="sol-banner-when"> · {req.declinadoEm}</span>}
+                </span>
+              </div>
+              {req.declinaObs && (
+                <div className="sol-banner-obs">
+                  <span className="sol-banner-obs-label">Motivo informado:</span> {req.declinaObs}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

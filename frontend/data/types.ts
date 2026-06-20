@@ -50,6 +50,8 @@ export type SolicitacaoRequest = {
   servico?: string;
   prazo?: string;
   contrato?: ContratoInfo;
+  declinaObs?: string;
+  declinadoEm?: string;
 };
 
 export type Plan = 'free' | 'verified' | 'premium';

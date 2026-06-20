@@ -88,8 +88,9 @@ export async function createQuote(input: NewQuoteInput): Promise<{ id: string }>
 
 export async function updateRequestStatus(
   id: string,
-  status: RequestStatus
+  status: RequestStatus,
+  obs?: string
 ): Promise<SolicitacaoRequest> {
-  const { data } = await api.patch<SolicitacaoRequest>(`/requests/${id}/status`, { status });
+  const { data } = await api.patch<SolicitacaoRequest>(`/requests/${id}/status`, { status, obs });
   return data;
 }
