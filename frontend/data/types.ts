@@ -23,7 +23,7 @@ export type Company = {
 };
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
-export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada';
+export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada' | 'cancelada' | 'declinada';
 
 export type ContratoInfo = {
   assinado: boolean;

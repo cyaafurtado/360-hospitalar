@@ -18,8 +18,10 @@ const STATUS_STEPS: { id: RequestStatus; label: string }[] = [
   { id: 'fechada', label: 'Fechada' },
 ];
 
+const TERMINAL_NEGATIVE: RequestStatus[] = ['cancelada', 'declinada'];
+
 const STATUS_ORDER: Record<RequestStatus, number> = {
-  nova: 0, andamento: 1, respondida: 2, fechada: 3,
+  nova: 0, andamento: 1, respondida: 2, fechada: 3, cancelada: -1, declinada: -1,
 };
 
 const EMPTY_CONTRATO: ContratoInfo = { assinado: false, numero: '', valor: '', inicio: '', validade: '' };
@@ -125,8 +127,22 @@ export default function SolicitacaoPage() {
           </a>
         </header>
 
+        {/* Banner para status terminais negativos */}
+        {req.status === 'cancelada' && (
+          <div className="sol-terminal-banner">
+            <Icon name="close" size={16} stroke={2.4} />
+            Esta solicitação foi <strong>cancelada</strong>. Você ainda pode reabri-la alterando o status.
+          </div>
+        )}
+        {req.status === 'declinada' && (
+          <div className="sol-terminal-banner warn">
+            <Icon name="close" size={16} stroke={2.4} />
+            Esta solicitação foi <strong>declinada</strong>. Você ainda pode reabri-la alterando o status.
+          </div>
+        )}
+
         {/* Status stepper */}
-        <div className="sol-stepper">
+        <div className={'sol-stepper' + (TERMINAL_NEGATIVE.includes(req.status) ? ' dimmed' : '')}>
           {STATUS_STEPS.map((step, i) => {
             const done = STATUS_ORDER[req.status] > i;
             const active = req.status === step.id;
@@ -301,6 +317,23 @@ export default function SolicitacaoPage() {
                     {step.label}
                   </button>
                 ))}
+                <div className="sol-status-sep" />
+                <button
+                  className={'sol-status-btn warn' + (req.status === 'declinada' ? ' active' : '')}
+                  onClick={() => changeStatus('declinada')}
+                  disabled={changingStatus || req.status === 'declinada'}
+                >
+                  {req.status === 'declinada' && <Icon name="check" size={13} stroke={3} />}
+                  Declinar
+                </button>
+                <button
+                  className={'sol-status-btn danger' + (req.status === 'cancelada' ? ' active' : '')}
+                  onClick={() => changeStatus('cancelada')}
+                  disabled={changingStatus || req.status === 'cancelada'}
+                >
+                  {req.status === 'cancelada' && <Icon name="check" size={13} stroke={3} />}
+                  Cancelar
+                </button>
               </div>
             </div>
           </aside>

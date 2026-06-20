@@ -6,6 +6,8 @@ const STATUS_TONE: Record<RequestStatus, string> = {
   andamento: 'wip',
   respondida: 'ok',
   fechada: 'done',
+  cancelada: 'canceled',
+  declinada: 'declined',
 };
 
 export function StatusPill({ status }: { status: RequestStatus }) {

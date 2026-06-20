@@ -58,6 +58,8 @@ export const REQUEST_STATUS = [
   { id: 'andamento', label: 'Em andamento' },
   { id: 'respondida', label: 'Respondida' },
   { id: 'fechada', label: 'Fechada' },
+  { id: 'cancelada', label: 'Cancelada' },
+  { id: 'declinada', label: 'Declinada' },
 ] as const;
 
 const LOGO_TINTS = [
