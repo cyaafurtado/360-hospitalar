@@ -9,6 +9,7 @@ import { Stars } from '../../../components/Stars';
 import { VerifiedTag } from '../../../components/VerifiedTag';
 import { CompanyCard } from '../../../components/CompanyCard';
 import { Loading, LoadError } from '../../../components/AsyncState';
+import { useAppStore } from '../../../lib/store';
 
 const DIST: Record<number, number> = { 5: 0.62, 4: 0.26, 3: 0.08, 2: 0.03, 1: 0.01 };
 
@@ -48,8 +49,10 @@ export default function EmpresaPage() {
     );
   }
 
+  const authEmail = useAppStore((s) => s.authEmail);
   const similar = (companies ?? []).filter((x) => x.segment === c.segment && x.id !== c.id).slice(0, 3);
   const orcamento = () => router.push(`/empresa/${c.id}/orcamento`);
+  const loginFrom = `/entrar?from=${encodeURIComponent(`/empresa/${c.id}`)}`;
 
   return (
     <div className="screen detail">
@@ -85,9 +88,15 @@ export default function EmpresaPage() {
           <button className="btn-primary dh-cta" onClick={orcamento}>
             <Icon name="phone" size={15} /> Solicitar contato
           </button>
-          <a className="btn-ghost dh-cta2" href={`https://${c.site}`} target="_blank" rel="noreferrer">
-            <Icon name="globe" size={15} /> {c.site}
-          </a>
+          {authEmail ? (
+            <a className="btn-ghost dh-cta2" href={`https://${c.site}`} target="_blank" rel="noreferrer">
+              <Icon name="globe" size={15} /> {c.site}
+            </a>
+          ) : (
+            <button className="btn-ghost dh-cta2 dh-cta2-locked" onClick={() => router.push(loginFrom)}>
+              <Icon name="shield2" size={15} /> Ver site (faça login)
+            </button>
+          )}
         </div>
       </header>
 
@@ -168,12 +177,36 @@ export default function EmpresaPage() {
           </div>
           <div className="side-card">
             <h3>Contato</h3>
-            <div className="contact-row">
-              <Icon name="phone" size={15} /> {c.phone}
-            </div>
-            <div className="contact-row">
-              <Icon name="globe" size={15} /> {c.site}
-            </div>
+            {authEmail ? (
+              <>
+                <div className="contact-row">
+                  <Icon name="phone" size={15} /> {c.phone}
+                </div>
+                <div className="contact-row">
+                  <Icon name="globe" size={15} /> {c.site}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="contact-row">
+                  <Icon name="phone" size={15} />
+                  <span className="contact-mask">{c.phone}</span>
+                </div>
+                <div className="contact-row">
+                  <Icon name="globe" size={15} />
+                  <span className="contact-mask">{c.site}</span>
+                </div>
+                <div className="contact-gate">
+                  <div className="contact-gate-row">
+                    <Icon name="shield2" size={14} />
+                    <span>Faça login para ver os dados de contato</span>
+                  </div>
+                  <button className="btn-link" onClick={() => router.push(loginFrom)}>
+                    Entrar na minha conta
+                  </button>
+                </div>
+              </>
+            )}
             <div className="contact-row">
               <Icon name="pin" size={15} /> {c.city} · {c.uf}
             </div>
