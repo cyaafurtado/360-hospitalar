@@ -17,7 +17,7 @@ export function FilterRail({ filters, setFilters, counts }: Props) {
     else next.add(id);
     setFilters({ ...filters, segments: [...next] });
   };
-  const hasActive = filters.segments.length > 0 || !!filters.uf || filters.minRating > 0;
+  const hasActive = filters.segments.length > 0 || !!filters.uf || filters.minRating > 0 || filters.onlyVerified;
 
   return (
     <aside className="filter-rail">
@@ -60,6 +60,21 @@ export function FilterRail({ filters, setFilters, counts }: Props) {
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="fr-block">
+        <h4>Verificação</h4>
+        <label className={'fr-check' + (filters.onlyVerified ? ' on' : '')}>
+          <input
+            type="checkbox"
+            checked={filters.onlyVerified}
+            onChange={() => setFilters({ ...filters, onlyVerified: !filters.onlyVerified })}
+          />
+          <span className="fr-box">
+            <Icon name="check" size={12} stroke={3} />
+          </span>
+          <span className="fr-label">Apenas verificados</span>
+        </label>
       </div>
 
       <div className="fr-block">

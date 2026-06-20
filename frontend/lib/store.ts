@@ -5,8 +5,8 @@ export type Density = 'compact' | 'regular' | 'comfy';
 export type Sort = 'rating' | 'reviews' | 'az';
 export type Layout = 'grid' | 'list';
 
-export type Filters = { segments: string[]; uf: string; minRating: number };
-export const EMPTY_FILTERS: Filters = { segments: [], uf: '', minRating: 0 };
+export type Filters = { segments: string[]; uf: string; minRating: number; onlyVerified: boolean };
+export const EMPTY_FILTERS: Filters = { segments: [], uf: '', minRating: 0, onlyVerified: false };
 
 export const DEFAULT_ACCENT = 'oklch(0.56 0.16 248)';
 
@@ -61,6 +61,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setFilters: (filters) => set({ filters }),
   setSort: (sort) => set({ sort }),
   setLayout: (layout) => set({ layout }),
-  pickSegment: (segId) => set({ filters: { segments: [segId], uf: get().uf || '', minRating: 0 } }),
+  pickSegment: (segId) => set({ filters: { segments: [segId], uf: get().uf || '', minRating: 0, onlyVerified: false } }),
   applySearchUf: () => set((s) => ({ filters: { ...s.filters, uf: s.uf || s.filters.uf } })),
 }));

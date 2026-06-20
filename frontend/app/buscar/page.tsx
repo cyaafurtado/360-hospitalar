@@ -29,6 +29,7 @@ export default function BuscarPage() {
       if (filters.segments.length && !filters.segments.includes(c.segment)) return false;
       if (filters.uf && c.uf !== filters.uf) return false;
       if (filters.minRating && c.rating < filters.minRating) return false;
+      if (filters.onlyVerified && !c.verified) return false;
       if (query.trim()) {
         const q = query.toLowerCase();
         const hay = (c.name + ' ' + c.tagline + ' ' + segmentLabel(c.segment) + ' ' + c.services.join(' ')).toLowerCase();
@@ -42,7 +43,7 @@ export default function BuscarPage() {
     return list;
   }, [all, filters, query, sort]);
 
-  const hasActive = filters.segments.length > 0 || !!filters.uf || filters.minRating > 0;
+  const hasActive = filters.segments.length > 0 || !!filters.uf || filters.minRating > 0 || filters.onlyVerified;
 
   return (
     <div className="screen results">
@@ -109,6 +110,11 @@ export default function BuscarPage() {
               {filters.minRating > 0 && (
                 <span className="active-chip" onClick={() => setFilters({ ...filters, minRating: 0 })}>
                   {filters.minRating}+ <Icon name="close" size={12} />
+                </span>
+              )}
+              {filters.onlyVerified && (
+                <span className="active-chip" onClick={() => setFilters({ ...filters, onlyVerified: false })}>
+                  Verificados <Icon name="close" size={12} />
                 </span>
               )}
             </div>
