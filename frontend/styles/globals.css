@@ -782,11 +782,11 @@ em { font-style: italic; }
 .prof-doc-add:hover { background: color-mix(in oklch, var(--primary), white 80%); }
 .prof-doc-add svg { flex: none; }
 .doc-table { display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-/* visualização: tipo | numero | validade | situação | anexo */
-.doc-row { display: grid; grid-template-columns: 2fr 1.2fr 115px 105px 1.4fr; align-items: center; gap: 0; }
-/* edição: tipo | numero | date | file-btn | remover */
+/* visualização: tipo | numero | validade | situação | anexos */
+.doc-row { display: grid; grid-template-columns: 2fr 1.2fr 115px 105px 1.4fr; align-items: start; gap: 0; }
+/* edição: tipo | numero | date | anexos | remover */
 .doc-row.editing { grid-template-columns: 2fr 1.2fr 130px 1.4fr 44px; }
-.doc-row.header { background: var(--surface-2); border-bottom: 1.5px solid var(--border); }
+.doc-row.header { background: var(--surface-2); border-bottom: 1.5px solid var(--border); align-items: center; }
 .doc-row.header span { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; padding: 9px 13px; }
 .doc-row:not(.header) { border-bottom: 1px solid var(--border); }
 .doc-row:not(.header):last-child { border-bottom: none; }
@@ -802,19 +802,19 @@ em { font-style: italic; }
 .doc-input[type="date"] { color-scheme: light; }
 .doc-remove { display: grid; place-items: center; background: none; border: none; border-left: 1px solid var(--border); color: var(--muted); cursor: pointer; padding: 0; height: 100%; min-width: 44px; transition: color .12s, background .12s; }
 .doc-remove:hover { color: oklch(0.52 0.18 25); background: oklch(0.97 0.02 25); }
-/* botão de upload de arquivo */
-.doc-file-btn { display: flex; align-items: center; gap: 7px; font-family: var(--font); font-size: 12.5px; font-weight: 650; color: var(--primary); border: 1.5px dashed color-mix(in oklch, var(--primary), white 50%); border-radius: var(--radius-sm); padding: 6px 11px; margin: 8px 10px; cursor: pointer; transition: background .12s, border-color .12s; overflow: hidden; }
-.doc-file-btn:hover { background: var(--primary-tint); border-color: var(--primary); }
-.doc-file-btn.has-file { color: var(--text-strong); border-style: solid; border-color: var(--border-strong); }
-.doc-file-btn svg { flex: none; color: var(--primary); }
-.doc-file-btn.has-file svg { color: var(--accent); }
-.doc-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
-/* visualização do anexo */
-.doc-attachment { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--primary); text-decoration: none; padding: 12px 13px; overflow: hidden; }
-.doc-attachment:hover:not(.no-link) { text-decoration: underline; }
-.doc-attachment.no-link { color: var(--muted); cursor: default; }
-.doc-attachment svg { flex: none; }
-.doc-attach-empty { font-size: 13.5px; color: var(--muted); padding: 12px 13px; }
+/* múltiplos anexos por documento */
+.doc-file-list { display: flex; flex-direction: column; gap: 5px; padding: 8px 10px; align-items: flex-start; }
+.doc-file-list.view { padding: 10px 12px; }
+.doc-file-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-strong); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--pill); padding: 4px 8px 4px 10px; max-width: 100%; text-decoration: none; }
+.doc-file-chip svg { color: var(--primary); flex: none; }
+.doc-file-chip.link { color: var(--primary); cursor: pointer; }
+.doc-file-chip.link:hover { background: var(--primary-tint); border-color: color-mix(in oklch, var(--primary), white 60%); text-decoration: underline; }
+.doc-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+.doc-file-remove { display: grid; place-items: center; background: none; border: none; color: var(--muted); cursor: pointer; padding: 2px; margin-left: 2px; border-radius: 50%; flex: none; transition: color .12s, background .12s; }
+.doc-file-remove:hover { color: oklch(0.52 0.18 25); background: oklch(0.96 0.02 25); }
+.doc-file-add { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 4px 10px; border: 1.5px dashed color-mix(in oklch, var(--primary), white 50%); border-radius: var(--pill); transition: background .12s, border-color .12s; white-space: nowrap; }
+.doc-file-add:hover { background: var(--primary-tint); border-color: var(--primary); }
+.doc-attach-empty { font-size: 13.5px; color: var(--muted); }
 .doc-empty-hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 
 /* ============ ACOMPANHAR SOLICITAÇÃO ============ */

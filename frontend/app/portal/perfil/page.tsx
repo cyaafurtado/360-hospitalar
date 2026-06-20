@@ -62,28 +62,57 @@ export default function PerfilPage() {
         : f
     );
 
-  const [fileMap, setFileMap] = useState<Record<string, File>>({});
-  const [urlMap,  setUrlMap]  = useState<Record<string, string>>({});
+  // attachMap: docId → lista de {name, url?} (url = blob URL para arquivos desta sessão)
+  type Att = { name: string; url?: string };
+  const [attachMap, setAttachMap] = useState<Record<string, Att[]>>({});
+
+  useEffect(() => {
+    if (initial?.documentos) {
+      const init: Record<string, Att[]> = {};
+      for (const doc of initial.documentos) {
+        if (doc.arquivos?.length) init[doc.id] = doc.arquivos.map((name) => ({ name }));
+      }
+      setAttachMap(init);
+    }
+  }, [initial]);
+
+  const getAtts = (docId: string): Att[] => attachMap[docId] ?? [];
 
   const docs = form?.documentos ?? [];
   const addDoc = () =>
     setForm((f) =>
-      f ? { ...f, documentos: [...(f.documentos ?? []), { id: crypto.randomUUID(), tipo: '', numero: '', validade: '', arquivo: '' }] } : f
+      f ? { ...f, documentos: [...(f.documentos ?? []), { id: crypto.randomUUID(), tipo: '', numero: '', validade: '', arquivos: [] }] } : f
     );
   const removeDoc = (id: string) => {
-    setFileMap((p) => { const n = { ...p }; delete n[id]; return n; });
-    setUrlMap((p)  => { const n = { ...p }; delete n[id]; return n; });
+    setAttachMap((p) => { const n = { ...p }; delete n[id]; return n; });
     setForm((f) => f ? { ...f, documentos: (f.documentos ?? []).filter((d) => d.id !== id) } : f);
   };
   const setDoc = (id: string, k: keyof DocumentoVerificacao, v: string) =>
     setForm((f) =>
       f ? { ...f, documentos: (f.documentos ?? []).map((d) => d.id === id ? { ...d, [k]: v } : d) } : f
     );
-  const setDocFile = (id: string, file: File | null) => {
-    setFileMap((p) => { const n = { ...p }; if (file) n[id] = file; else delete n[id]; return n; });
-    setUrlMap((p)  => { const n = { ...p }; if (file) n[id] = URL.createObjectURL(file); else delete n[id]; return n; });
+  const addDocFile = (docId: string, file: File) => {
+    const url = URL.createObjectURL(file);
+    setAttachMap((p) => ({ ...p, [docId]: [...(p[docId] ?? []), { name: file.name, url }] }));
     setForm((f) =>
-      f ? { ...f, documentos: (f.documentos ?? []).map((d) => d.id === id ? { ...d, arquivo: file?.name ?? '' } : d) } : f
+      f ? { ...f, documentos: (f.documentos ?? []).map((d) =>
+        d.id === docId ? { ...d, arquivos: [...(d.arquivos ?? []), file.name] } : d
+      )} : f
+    );
+  };
+  const removeDocFile = (docId: string, idx: number) => {
+    setAttachMap((p) => {
+      const arr = [...(p[docId] ?? [])];
+      arr.splice(idx, 1);
+      return { ...p, [docId]: arr };
+    });
+    setForm((f) =>
+      f ? { ...f, documentos: (f.documentos ?? []).map((d) => {
+        if (d.id !== docId) return d;
+        const arqs = [...(d.arquivos ?? [])];
+        arqs.splice(idx, 1);
+        return { ...d, arquivos: arqs };
+      })} : f
     );
   };
 
@@ -224,13 +253,13 @@ export default function PerfilPage() {
                   <span>Número / Registro</span>
                   <span>Validade</span>
                   {!edit && <span>Situação</span>}
-                  <span>Anexo</span>
+                  <span>Anexos</span>
                   {edit && <span />}
                 </div>
 
                 {docs.map((doc) => {
                   const st = docStatus(doc.validade);
-                  const hasFile = !!urlMap[doc.id] || !!doc.arquivo;
+                  const atts = getAtts(doc.id);
                   return (
                     <div key={doc.id} className={'doc-row' + (edit ? ' editing' : '')}>
                       {edit ? (
@@ -249,19 +278,37 @@ export default function PerfilPage() {
                             value={doc.numero} onChange={(e) => setDoc(doc.id, 'numero', e.target.value)} />
                           <input className="doc-input" type="date"
                             value={doc.validade} onChange={(e) => setDoc(doc.id, 'validade', e.target.value)} />
-                          {/* coluna Anexo em modo edição */}
-                          <label className={'doc-file-btn' + (hasFile ? ' has-file' : '')}>
-                            <input
-                              type="file"
-                              hidden
-                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                              onChange={(e) => setDocFile(doc.id, e.target.files?.[0] ?? null)}
-                            />
-                            <Icon name="file" size={13} />
-                            <span className="doc-file-name">
-                              {fileMap[doc.id]?.name ?? doc.arquivo ?? 'Anexar arquivo'}
-                            </span>
-                          </label>
+
+                          {/* coluna Anexos — chips + botão + */}
+                          <div className="doc-file-list">
+                            {atts.map((att, i) => (
+                              <span key={i} className="doc-file-chip">
+                                <Icon name="file" size={12} />
+                                <span className="doc-file-name">{att.name}</span>
+                                <button
+                                  type="button"
+                                  className="doc-file-remove"
+                                  onClick={() => removeDocFile(doc.id, i)}
+                                  title="Remover arquivo"
+                                >
+                                  <Icon name="close" size={11} stroke={2.5} />
+                                </button>
+                              </span>
+                            ))}
+                            <label className="doc-file-add">
+                              <input
+                                type="file"
+                                hidden
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) { addDocFile(doc.id, f); e.target.value = ''; }
+                                }}
+                              />
+                              + Anexar
+                            </label>
+                          </div>
+
                           <button type="button" className="doc-remove" onClick={() => removeDoc(doc.id)} title="Remover documento">
                             <Icon name="close" size={14} stroke={2.4} />
                           </button>
@@ -277,26 +324,25 @@ export default function PerfilPage() {
                             {st === 'err'  && <><Icon name="close"  size={12} stroke={2.4} /> Vencido</>}
                             {st === 'none' && '—'}
                           </span>
-                          {/* coluna Anexo em modo visualização */}
-                          {urlMap[doc.id] ? (
-                            <a
-                              className="doc-attachment"
-                              href={urlMap[doc.id]}
-                              target="_blank"
-                              rel="noreferrer"
-                              title="Visualizar documento"
-                            >
-                              <Icon name="file" size={13} />
-                              <span className="doc-file-name">{fileMap[doc.id]?.name ?? doc.arquivo}</span>
-                            </a>
-                          ) : doc.arquivo ? (
-                            <span className="doc-attachment no-link">
-                              <Icon name="file" size={13} />
-                              <span className="doc-file-name">{doc.arquivo}</span>
-                            </span>
-                          ) : (
-                            <span className="doc-attach-empty">—</span>
-                          )}
+
+                          {/* coluna Anexos em modo visualização */}
+                          <div className="doc-file-list view">
+                            {atts.length === 0 ? (
+                              <span className="doc-attach-empty">—</span>
+                            ) : atts.map((att, i) =>
+                              att.url ? (
+                                <a key={i} className="doc-file-chip link" href={att.url} target="_blank" rel="noreferrer" title="Abrir arquivo">
+                                  <Icon name="file" size={12} />
+                                  <span className="doc-file-name">{att.name}</span>
+                                </a>
+                              ) : (
+                                <span key={i} className="doc-file-chip">
+                                  <Icon name="file" size={12} />
+                                  <span className="doc-file-name">{att.name}</span>
+                                </span>
+                              )
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
