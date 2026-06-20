@@ -338,36 +338,46 @@ export default function SolicitacaoPage() {
               <h3 className="sol-card-title">
                 <Icon name="signal" size={16} /> Alterar status
               </h3>
-              <div className="sol-status-btns">
-                {STATUS_STEPS.map((step) => (
+              {req.status === 'fechada' ? (
+                <div className="sol-finalizado">
+                  <Icon name="check" size={18} stroke={2.6} />
+                  <div>
+                    <strong>Finalizado</strong>
+                    <span>Esta solicitação foi encerrada.</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="sol-status-btns">
+                  {STATUS_STEPS.map((step) => (
+                    <button
+                      key={step.id}
+                      className={'sol-status-btn' + (req.status === step.id ? ' active' : '')}
+                      onClick={() => changeStatus(step.id)}
+                      disabled={changingStatus || req.status === step.id}
+                    >
+                      {req.status === step.id && <Icon name="check" size={13} stroke={3} />}
+                      {step.label}
+                    </button>
+                  ))}
+                  <div className="sol-status-sep" />
                   <button
-                    key={step.id}
-                    className={'sol-status-btn' + (req.status === step.id ? ' active' : '')}
-                    onClick={() => changeStatus(step.id)}
-                    disabled={changingStatus || req.status === step.id}
+                    className={'sol-status-btn warn' + (req.status === 'declinada' ? ' active' : '')}
+                    onClick={() => req.status !== 'declinada' && setDeclinaModal(true)}
+                    disabled={changingStatus || req.status === 'declinada'}
                   >
-                    {req.status === step.id && <Icon name="check" size={13} stroke={3} />}
-                    {step.label}
+                    {req.status === 'declinada' && <Icon name="check" size={13} stroke={3} />}
+                    Declinar
                   </button>
-                ))}
-                <div className="sol-status-sep" />
-                <button
-                  className={'sol-status-btn warn' + (req.status === 'declinada' ? ' active' : '')}
-                  onClick={() => req.status !== 'declinada' && setDeclinaModal(true)}
-                  disabled={changingStatus || req.status === 'declinada'}
-                >
-                  {req.status === 'declinada' && <Icon name="check" size={13} stroke={3} />}
-                  Declinar
-                </button>
-                <button
-                  className={'sol-status-btn danger' + (req.status === 'cancelada' ? ' active' : '')}
-                  onClick={() => changeStatus('cancelada')}
-                  disabled={changingStatus || req.status === 'cancelada'}
-                >
-                  {req.status === 'cancelada' && <Icon name="check" size={13} stroke={3} />}
-                  Cancelar
-                </button>
-              </div>
+                  <button
+                    className={'sol-status-btn danger' + (req.status === 'cancelada' ? ' active' : '')}
+                    onClick={() => changeStatus('cancelada')}
+                    disabled={changingStatus || req.status === 'cancelada'}
+                  >
+                    {req.status === 'cancelada' && <Icon name="check" size={13} stroke={3} />}
+                    Cancelar
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
         </div>
