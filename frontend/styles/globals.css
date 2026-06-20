@@ -782,27 +782,40 @@ em { font-style: italic; }
 .prof-doc-add:hover { background: color-mix(in oklch, var(--primary), white 80%); }
 .prof-doc-add svg { flex: none; }
 .doc-table { display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.doc-row { display: grid; grid-template-columns: 2fr 1.5fr 130px 120px; align-items: center; gap: 0; }
+/* visualização: tipo | numero | validade | situação | anexo */
+.doc-row { display: grid; grid-template-columns: 2fr 1.2fr 115px 105px 1.4fr; align-items: center; gap: 0; }
+/* edição: tipo | numero | date | file-btn | remover */
+.doc-row.editing { grid-template-columns: 2fr 1.2fr 130px 1.4fr 44px; }
 .doc-row.header { background: var(--surface-2); border-bottom: 1.5px solid var(--border); }
-.doc-row.header span { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; padding: 10px 14px; }
+.doc-row.header span { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; padding: 9px 13px; }
 .doc-row:not(.header) { border-bottom: 1px solid var(--border); }
 .doc-row:not(.header):last-child { border-bottom: none; }
-.doc-tipo, .doc-num, .doc-val { font-size: 14px; color: var(--text-strong); padding: 13px 14px; line-height: 1.3; }
-.doc-num, .doc-val { color: var(--muted); font-size: 13.5px; }
-.doc-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 650; padding: 13px 14px; }
-.doc-status.ok  { color: oklch(0.52 0.15 155); }
+.doc-tipo, .doc-num, .doc-val { font-size: 13.5px; color: var(--text-strong); padding: 12px 13px; line-height: 1.3; }
+.doc-num, .doc-val { color: var(--muted); }
+.doc-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 650; padding: 12px 13px; }
+.doc-status.ok   { color: oklch(0.52 0.15 155); }
 .doc-status.warn { color: oklch(0.60 0.14 60); }
 .doc-status.err  { color: oklch(0.52 0.18 25); }
 .doc-status.none { color: var(--muted); }
-.doc-input { font-family: var(--font); font-size: 13.5px; color: var(--text-strong); background: var(--surface); border: none; border-right: 1px solid var(--border); padding: 10px 12px; width: 100%; outline: none; height: 100%; }
+.doc-input { font-family: var(--font); font-size: 13.5px; color: var(--text-strong); background: var(--surface); border: none; border-right: 1px solid var(--border); padding: 9px 11px; width: 100%; outline: none; height: 100%; min-width: 0; }
 .doc-input:focus { background: color-mix(in oklch, var(--primary), white 94%); }
 .doc-input[type="date"] { color-scheme: light; }
-.doc-remove { display: grid; place-items: center; background: none; border: none; border-left: 1px solid var(--border); color: var(--muted); cursor: pointer; padding: 0 14px; height: 100%; transition: color .12s, background .12s; }
+.doc-remove { display: grid; place-items: center; background: none; border: none; border-left: 1px solid var(--border); color: var(--muted); cursor: pointer; padding: 0; height: 100%; min-width: 44px; transition: color .12s, background .12s; }
 .doc-remove:hover { color: oklch(0.52 0.18 25); background: oklch(0.97 0.02 25); }
+/* botão de upload de arquivo */
+.doc-file-btn { display: flex; align-items: center; gap: 7px; font-family: var(--font); font-size: 12.5px; font-weight: 650; color: var(--primary); border: 1.5px dashed color-mix(in oklch, var(--primary), white 50%); border-radius: var(--radius-sm); padding: 6px 11px; margin: 8px 10px; cursor: pointer; transition: background .12s, border-color .12s; overflow: hidden; }
+.doc-file-btn:hover { background: var(--primary-tint); border-color: var(--primary); }
+.doc-file-btn.has-file { color: var(--text-strong); border-style: solid; border-color: var(--border-strong); }
+.doc-file-btn svg { flex: none; color: var(--primary); }
+.doc-file-btn.has-file svg { color: var(--accent); }
+.doc-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+/* visualização do anexo */
+.doc-attachment { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--primary); text-decoration: none; padding: 12px 13px; overflow: hidden; }
+.doc-attachment:hover:not(.no-link) { text-decoration: underline; }
+.doc-attachment.no-link { color: var(--muted); cursor: default; }
+.doc-attachment svg { flex: none; }
+.doc-attach-empty { font-size: 13.5px; color: var(--muted); padding: 12px 13px; }
 .doc-empty-hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
-/* modo edição: tipo (input+datalist) | numero | date | botão remover */
-.doc-row.editing { grid-template-columns: 2fr 1.5fr 140px 44px; }
-.doc-row.editing.header span { padding: 8px 12px; }
 
 /* ============ ACOMPANHAR SOLICITAÇÃO ============ */
 .sol-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }

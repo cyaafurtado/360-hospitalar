@@ -62,17 +62,30 @@ export default function PerfilPage() {
         : f
     );
 
+  const [fileMap, setFileMap] = useState<Record<string, File>>({});
+  const [urlMap,  setUrlMap]  = useState<Record<string, string>>({});
+
   const docs = form?.documentos ?? [];
   const addDoc = () =>
     setForm((f) =>
-      f ? { ...f, documentos: [...(f.documentos ?? []), { id: crypto.randomUUID(), tipo: '', numero: '', validade: '' }] } : f
+      f ? { ...f, documentos: [...(f.documentos ?? []), { id: crypto.randomUUID(), tipo: '', numero: '', validade: '', arquivo: '' }] } : f
     );
-  const removeDoc = (id: string) =>
+  const removeDoc = (id: string) => {
+    setFileMap((p) => { const n = { ...p }; delete n[id]; return n; });
+    setUrlMap((p)  => { const n = { ...p }; delete n[id]; return n; });
     setForm((f) => f ? { ...f, documentos: (f.documentos ?? []).filter((d) => d.id !== id) } : f);
+  };
   const setDoc = (id: string, k: keyof DocumentoVerificacao, v: string) =>
     setForm((f) =>
       f ? { ...f, documentos: (f.documentos ?? []).map((d) => d.id === id ? { ...d, [k]: v } : d) } : f
     );
+  const setDocFile = (id: string, file: File | null) => {
+    setFileMap((p) => { const n = { ...p }; if (file) n[id] = file; else delete n[id]; return n; });
+    setUrlMap((p)  => { const n = { ...p }; if (file) n[id] = URL.createObjectURL(file); else delete n[id]; return n; });
+    setForm((f) =>
+      f ? { ...f, documentos: (f.documentos ?? []).map((d) => d.id === id ? { ...d, arquivo: file?.name ?? '' } : d) } : f
+    );
+  };
 
   const save = async () => {
     if (!form) return;
@@ -210,17 +223,19 @@ export default function PerfilPage() {
                   <span>Tipo / Certificação</span>
                   <span>Número / Registro</span>
                   <span>Validade</span>
-                  {edit ? <span /> : <span>Situação</span>}
+                  {!edit && <span>Situação</span>}
+                  <span>Anexo</span>
+                  {edit && <span />}
                 </div>
 
                 {docs.map((doc) => {
                   const st = docStatus(doc.validade);
+                  const hasFile = !!urlMap[doc.id] || !!doc.arquivo;
                   return (
                     <div key={doc.id} className={'doc-row' + (edit ? ' editing' : '')}>
                       {edit ? (
                         <>
                           <input
-                            id={'doc-tipo-list-' + doc.id}
                             className="doc-input"
                             list={'doc-presets-' + doc.id}
                             placeholder="Ex: ANVISA, ISO 9001…"
@@ -234,7 +249,20 @@ export default function PerfilPage() {
                             value={doc.numero} onChange={(e) => setDoc(doc.id, 'numero', e.target.value)} />
                           <input className="doc-input" type="date"
                             value={doc.validade} onChange={(e) => setDoc(doc.id, 'validade', e.target.value)} />
-                          <button type="button" className="doc-remove" onClick={() => removeDoc(doc.id)} title="Remover">
+                          {/* coluna Anexo em modo edição */}
+                          <label className={'doc-file-btn' + (hasFile ? ' has-file' : '')}>
+                            <input
+                              type="file"
+                              hidden
+                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              onChange={(e) => setDocFile(doc.id, e.target.files?.[0] ?? null)}
+                            />
+                            <Icon name="file" size={13} />
+                            <span className="doc-file-name">
+                              {fileMap[doc.id]?.name ?? doc.arquivo ?? 'Anexar arquivo'}
+                            </span>
+                          </label>
+                          <button type="button" className="doc-remove" onClick={() => removeDoc(doc.id)} title="Remover documento">
                             <Icon name="close" size={14} stroke={2.4} />
                           </button>
                         </>
@@ -249,6 +277,26 @@ export default function PerfilPage() {
                             {st === 'err'  && <><Icon name="close"  size={12} stroke={2.4} /> Vencido</>}
                             {st === 'none' && '—'}
                           </span>
+                          {/* coluna Anexo em modo visualização */}
+                          {urlMap[doc.id] ? (
+                            <a
+                              className="doc-attachment"
+                              href={urlMap[doc.id]}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Visualizar documento"
+                            >
+                              <Icon name="file" size={13} />
+                              <span className="doc-file-name">{fileMap[doc.id]?.name ?? doc.arquivo}</span>
+                            </a>
+                          ) : doc.arquivo ? (
+                            <span className="doc-attachment no-link">
+                              <Icon name="file" size={13} />
+                              <span className="doc-file-name">{doc.arquivo}</span>
+                            </span>
+                          ) : (
+                            <span className="doc-attach-empty">—</span>
+                          )}
                         </>
                       )}
                     </div>

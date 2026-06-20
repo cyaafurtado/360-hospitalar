@@ -61,6 +61,7 @@ export type DocumentoVerificacao = {
   tipo: string;
   numero: string;
   validade: string; // YYYY-MM-DD
+  arquivo?: string; // nome do arquivo anexado
 };
 
 export type SupplierProfileData = {
