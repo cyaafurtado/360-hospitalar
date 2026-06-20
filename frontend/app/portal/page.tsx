@@ -55,9 +55,9 @@ export default function PortalPage() {
     [requests, tipo, status, q]
   );
 
-  const marcarRespondida = async (id: string) => {
+  const marcarStatus = async (id: string, s: RequestStatus) => {
     try {
-      const updated = await updateRequestStatus(id, 'respondida');
+      const updated = await updateRequestStatus(id, s);
       setRowsState((prev) => (prev ? prev.map((r) => (r.id === id ? updated : r)) : prev));
     } catch (e) {
       console.error(e);
@@ -182,7 +182,14 @@ export default function PortalPage() {
                               </a>
                               <button
                                 className="btn-ghost sm"
-                                onClick={() => marcarRespondida(r.id)}
+                                onClick={() => marcarStatus(r.id, 'andamento')}
+                                disabled={r.status === 'andamento' || r.status === 'respondida'}
+                              >
+                                <Icon name="signal" size={14} /> Acompanhar
+                              </button>
+                              <button
+                                className="btn-ghost sm"
+                                onClick={() => marcarStatus(r.id, 'respondida')}
                                 disabled={r.status === 'respondida'}
                               >
                                 Marcar como respondida
