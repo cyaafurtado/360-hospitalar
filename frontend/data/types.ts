@@ -56,6 +56,13 @@ export type SolicitacaoRequest = {
 
 export type Plan = 'free' | 'verified' | 'premium';
 
+export type DocumentoVerificacao = {
+  id: string;
+  tipo: string;
+  numero: string;
+  validade: string; // YYYY-MM-DD
+};
+
 export type SupplierProfileData = {
   name: string;
   tagline: string;
@@ -71,4 +78,5 @@ export type SupplierProfileData = {
   rating: number;
   reviews: number;
   verified: boolean;
+  documentos?: DocumentoVerificacao[];
 };
