@@ -2,10 +2,11 @@
 import { Icon } from '../lib/icons';
 import { SEGMENTS } from '../data/reference';
 
-export function SegmentChips({ onPick, active }: { onPick: (id: string) => void; active?: string }) {
+export function SegmentChips({ onPick, active, limit }: { onPick: (id: string) => void; active?: string; limit?: number }) {
+  const list = limit ? SEGMENTS.slice(0, limit) : SEGMENTS;
   return (
     <div className="seg-chips">
-      {SEGMENTS.map((s) => (
+      {list.map((s) => (
         <button
           key={s.id}
           type="button"

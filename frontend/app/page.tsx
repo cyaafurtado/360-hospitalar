@@ -79,7 +79,7 @@ export default function HomePage() {
           <h2>Explore por segmento</h2>
           <p className="muted">Categorias mais buscadas por gestores de saúde</p>
         </div>
-        <SegmentChips onPick={onSegment} />
+        <SegmentChips onPick={onSegment} limit={8} />
       </section>
 
       <section className="band">
