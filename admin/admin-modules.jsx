@@ -425,10 +425,274 @@ function ModConfiguracoes({ ctx }) {
   );
 }
 
+/* ====================== MEU PERFIL ====================== */
+function ModPerfil({ ctx }) {
+  const { org, user, areas } = ctx;
+
+  const [edit, setEdit] = useStateM(false);
+  const [form, setForm] = useStateM({
+    nome: user.nome,
+    email: user.email,
+    telefone: "(11) 9 8765-4321",
+    cargo: "Administradora de Plataforma",
+  });
+  const [formSnap, setFormSnap] = useStateM(null);
+  const [pw, setPw] = useStateM({ atual: "", nova: "", conf: "" });
+  const [showPw, setShowPw] = useStateM({ atual: false, nova: false, conf: false });
+  const [mfa, setMfa] = useStateM(true);
+  const [saved, setSaved] = useStateM(false);
+  const [pwSaved, setPwSaved] = useStateM(false);
+
+  const userLogs = [
+    { id: 1, acao: "Login bem-sucedido",                     ip: "187.45.12.9",  agent: "Chrome · macOS", quando: "Hoje, 09:42" },
+    { id: 2, acao: "Criou usuário: João Vieira (Usuário)",   ip: "187.45.12.9",  agent: "Chrome · macOS", quando: "Hoje, 09:50" },
+    { id: 3, acao: "Alterou dados pessoais",                 ip: "187.45.12.9",  agent: "Chrome · macOS", quando: "Ontem, 16:15" },
+    { id: 4, acao: "Encerrou sessão em outro dispositivo",   ip: "177.91.20.4",  agent: "Safari · iPhone", quando: "Ontem, 10:08" },
+    { id: 5, acao: "Login bem-sucedido",                     ip: "187.45.12.9",  agent: "Chrome · macOS", quando: "20/06/2026, 08:30" },
+  ];
+
+  const initials = user.nome.split(" ").map((p) => p[0]).slice(0, 2).join("");
+
+  const handleEdit = () => { setFormSnap({ ...form }); setEdit(true); };
+  const handleCancel = () => { if (formSnap) setForm({ ...formSnap }); setEdit(false); };
+  const handleSave = () => { setSaved(true); setEdit(false); setTimeout(() => setSaved(false), 3500); };
+  const handlePwSave = () => {
+    if (!pw.nova || pw.nova !== pw.conf) return;
+    setPwSaved(true);
+    setPw({ atual: "", nova: "", conf: "" });
+    setTimeout(() => setPwSaved(false), 3500);
+  };
+
+  const PwField = ({ k, label }) => (
+    <div className="pfx-field">
+      <label className="pfx-label">{label}</label>
+      <div className="pfx-pw-wrap">
+        <input
+          type={showPw[k] ? "text" : "password"}
+          value={pw[k]}
+          onChange={(e) => setPw((s) => ({ ...s, [k]: e.target.value }))}
+          placeholder="••••••••"
+        />
+        <button className="pfx-pw-eye" type="button" onClick={() => setShowPw((s) => ({ ...s, [k]: !s[k] }))}>
+          {showPw[k] ? "Ocultar" : "Mostrar"}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <PageHead title="Meu perfil" sub="Seus dados, acessos e permissões na plataforma.">
+        {!edit ? (
+          <button className="btn-primary sm" onClick={handleEdit}>
+            <Icon name="edit" size={14} /> Editar perfil
+          </button>
+        ) : (
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn-ghost sm" onClick={handleCancel}>Cancelar</button>
+            <button className="btn-primary sm" onClick={handleSave}>
+              <Icon name="check" size={14} stroke={2.5} /> Salvar alterações
+            </button>
+          </div>
+        )}
+      </PageHead>
+
+      {saved && (
+        <div className="pfx-saved">
+          <Icon name="check" size={15} stroke={2.5} /> Alterações salvas com sucesso.
+        </div>
+      )}
+
+      {/* ── Hero ── */}
+      <section className="adm-card prof-hero">
+        <span className="avatar lg prof-hero-av">{initials}</span>
+        <div className="prof-hero-body">
+          <div className="prof-hero-top">
+            <div>
+              <div className="prof-hero-name">{form.nome}</div>
+              <div className="prof-hero-email">{form.email}</div>
+            </div>
+            <div className="prof-hero-badges">
+              <RoleBadge role="super" />
+              {areas.map((a) => (
+                <span key={a} className={"area-chip on" + (a === "fornecer" ? " forn" : "")}>
+                  <Icon name={a === "fornecer" ? "building" : "home"} size={12} />
+                  {areaLabel(a)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="prof-hero-meta">
+            <span className="prof-meta-item">
+              <Icon name="clock" size={13} /> Último acesso: Hoje, 09:42
+            </span>
+            <span className="prof-meta-sep">·</span>
+            <span className="st-pill st-ok">ativo</span>
+            <span className="prof-meta-sep">·</span>
+            <span className="prof-meta-item pfx-verified">
+              <Icon name="check" size={13} stroke={2.8} /> E-mail verificado
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Dados pessoais + Segurança ── */}
+      <div className="adm-cols pfx-top-cols">
+
+        {/* Dados pessoais */}
+        <section className="adm-card">
+          <div className="adm-card-head"><h3>Dados pessoais</h3></div>
+          {edit ? (
+            <div className="pfx-form">
+              {[
+                { k: "nome",     label: "Nome completo",  type: "text" },
+                { k: "email",    label: "E-mail",          type: "email" },
+                { k: "telefone", label: "Telefone",        type: "tel" },
+                { k: "cargo",    label: "Cargo / Função",  type: "text" },
+              ].map(({ k, label, type }) => (
+                <div key={k} className="pfx-field">
+                  <label className="pfx-label">{label}</label>
+                  <input
+                    type={type}
+                    value={form[k]}
+                    onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="prof-grid-2">
+              {[
+                { label: "Nome completo", val: form.nome },
+                { label: "E-mail",        val: form.email },
+                { label: "Telefone",      val: form.telefone },
+                { label: "Cargo / Função",val: form.cargo },
+              ].map(({ label, val }) => (
+                <div key={label} className="prof-row">
+                  <span className="prof-label">{label}</span>
+                  <span className="prof-value">{val}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Segurança */}
+        <section className="adm-card">
+          <div className="adm-card-head"><h3>Segurança</h3></div>
+
+          <div className="pfx-sec-group">
+            <div className="pfx-sec-title">Trocar senha</div>
+            <div className="pfx-form">
+              <PwField k="atual" label="Senha atual" />
+              <PwField k="nova"  label="Nova senha" />
+              <PwField k="conf"  label="Confirmar nova senha" />
+            </div>
+            {pwSaved && (
+              <div className="pfx-saved sm">
+                <Icon name="check" size={14} stroke={2.5} /> Senha alterada com sucesso.
+              </div>
+            )}
+            <button className="btn-primary sm" style={{ marginTop: 14 }} onClick={handlePwSave}>
+              <Icon name="lock" size={14} /> Alterar senha
+            </button>
+          </div>
+
+          <div className="cfg-row">
+            <div>
+              <div className="cfg-label">Autenticação em dois fatores</div>
+              <div className="cfg-hint">Exige código de verificação adicional no login.</div>
+            </div>
+            <button className={"switch" + (mfa ? " on" : "")} onClick={() => setMfa((v) => !v)} aria-pressed={mfa}>
+              <span />
+            </button>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <button className="btn-ghost sm"><Icon name="logout" size={14} /> Encerrar outras sessões</button>
+            <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6, lineHeight: 1.4 }}>
+              Desconecta todos os outros dispositivos onde sua conta está ativa.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      {/* ── Organizações e perfis ── */}
+      <section className="adm-card pfx-wide-card">
+        <div className="adm-card-head"><h3>Minhas organizações e perfis</h3></div>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 18, lineHeight: 1.5 }}>
+          O perfil de acesso é atribuído por vínculo — você pode ter papéis diferentes em cada organização da qual faz parte.
+        </p>
+        <div className="pfx-org-list">
+          {user.vinculos.map((v) => {
+            const o = orgById(v.orgId);
+            const active = v.orgId === org.id;
+            return (
+              <div key={v.orgId} className={"pfx-org-row" + (active ? " active" : "")}>
+                <Logo name={o.fantasia} size={38} radius="9px" />
+                <div className="pfx-org-info">
+                  <span className="pfx-org-name">{o.fantasia}</span>
+                  <span className="pfx-org-type">{orgTypeLabel(o.tipo)}</span>
+                </div>
+                <RoleBadge role={v.perfil} />
+                {active && <span className="pfx-org-active">Em uso</span>}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Permissões do perfil ── */}
+      <section className="adm-card pfx-wide-card">
+        <div className="adm-card-head"><h3>Permissões do perfil Super Administrador</h3></div>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 20, lineHeight: 1.6, maxWidth: "70ch" }}>
+          {M.ROLES.find((r) => r.id === "super").desc}{" "}
+          As permissões são derivadas pelo back-end com base no perfil do vínculo ativo — somente leitura nesta tela.
+        </p>
+        <div className="pfx-cap-grid">
+          {M.CAPABILITIES.map((c) => (
+            <div key={c.id} className={"pfx-cap-item" + (c.roles.super ? " on" : "")}>
+              <span className="pfx-cap-ico">
+                {c.roles.super
+                  ? <Icon name="check" size={14} stroke={3} />
+                  : <Icon name="close" size={12} stroke={2.4} />}
+              </span>
+              <span className="pfx-cap-label">{c.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Atividade recente ── */}
+      <section className="adm-card pfx-wide-card">
+        <div className="adm-card-head"><h3>Atividade recente da minha conta</h3></div>
+        <div className="table-wrap">
+          <table className="req-table">
+            <thead>
+              <tr><th>Ação</th><th>IP</th><th>Dispositivo</th><th>Quando</th></tr>
+            </thead>
+            <tbody>
+              {userLogs.map((l) => (
+                <tr key={l.id}>
+                  <td className="cell-strong">{l.acao}</td>
+                  <td className="cell-muted mono">{l.ip}</td>
+                  <td className="cell-muted">{l.agent}</td>
+                  <td className="cell-sub">{l.quando}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 const MOD_COMPONENTS = {
   dashboard: ModDashboard, organizacoes: ModOrganizacoes, usuarios: ModUsuarios,
   perfis: ModPerfis, aprovacoes: ModAprovacoes, relatorios: ModRelatorios,
-  atividades: ModAtividades, logs: ModLogs, auditoria: ModAuditoria, configuracoes: ModConfiguracoes,
+  atividades: ModAtividades, logs: ModLogs, auditoria: ModAuditoria,
+  configuracoes: ModConfiguracoes, perfil: ModPerfil,
 };
 
 Object.assign(window, { MOD_COMPONENTS, RoleBadge, PageHead, KpiCard });

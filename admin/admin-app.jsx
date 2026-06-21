@@ -82,7 +82,7 @@ function OrgSwitcher({ user, activeOrgId, onSwitch }) {
   );
 }
 
-function Topbar({ user, activeOrgId, onSwitch, onLogout, onMenu }) {
+function Topbar({ user, activeOrgId, onSwitch, onLogout, onMenu, onProfile }) {
   const [umenu, setUmenu] = useStateApp(false);
   return (
     <header className="adm-topbar">
@@ -101,7 +101,7 @@ function Topbar({ user, activeOrgId, onSwitch, onLogout, onMenu }) {
               <div className="org-switch-scrim" onClick={() => setUmenu(false)} />
               <div className="adm-user-menu">
                 <div className="adm-user-head"><span className="avatar lg">{user.nome.split(" ").map((p) => p[0]).slice(0, 2).join("")}</span><div><div className="cell-strong">{user.nome}</div><div className="cell-sub">{user.email}</div></div></div>
-                <button className="adm-user-item"><Icon name="users" size={16} /> Meu perfil</button>
+                <button className="adm-user-item" onClick={() => { onProfile(); setUmenu(false); }}><Icon name="users" size={16} /> Meu perfil</button>
                 <button className="adm-user-item"><Icon name="gear" size={16} /> Preferências</button>
                 <button className="adm-user-item danger" onClick={onLogout}><Icon name="logout" size={16} /> Sair</button>
               </div>
@@ -147,7 +147,7 @@ function AdminApp() {
       <Sidebar role={role} areas={areas} active={module} onPick={(m) => { setModule(m); setSideOpen(false); }} />
       {sideOpen && <div className="adm-side-scrim" onClick={() => setSideOpen(false)} />}
       <div className="adm-main">
-        <Topbar user={user} activeOrgId={activeOrgId} onSwitch={setActiveOrgId} onLogout={() => go("login")} onMenu={() => setSideOpen(true)} />
+        <Topbar user={user} activeOrgId={activeOrgId} onSwitch={setActiveOrgId} onLogout={() => go("login")} onMenu={() => setSideOpen(true)} onProfile={() => setModule("perfil")} />
         <main className="adm-content" key={module + activeOrgId} data-screen-label={"Painel — " + module}>
           <ModComp ctx={{ role, org, user, areas, isForn, setFornecedor }} />
         </main>
