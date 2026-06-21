@@ -15,6 +15,14 @@ export const SEGMENTS: Segment[] = [
   { id: 'epi', label: 'Uniformes & EPI', icon: 'vest' },
   { id: 'nutri', label: 'Nutrição Hospitalar', icon: 'bowl' },
   { id: 'farma', label: 'Distribuição Farmacêutica', icon: 'pill' },
+  { id: 'transporte', label: 'Transporte de Pacientes & Ambulâncias', icon: 'truck' },
+  { id: 'construcao', label: 'Construção & Arquitetura Hospitalar', icon: 'hardhat' },
+  { id: 'infra', label: 'Infraestrutura Predial', icon: 'bolt' },
+  { id: 'lavanderia', label: 'Lavanderia Hospitalar', icon: 'tshirt' },
+  { id: 'engclinica', label: 'Engenharia Clínica & Calibração', icon: 'gauge' },
+  { id: 'mobiliario', label: 'Mobiliário Hospitalar', icon: 'armchair' },
+  { id: 'consultoria', label: 'Consultoria & Compliance', icon: 'clipboard' },
+  { id: 'treinamento', label: 'Treinamento & Capacitação', icon: 'mortarboard' },
 ];
 
 export const STATES: State[] = [
