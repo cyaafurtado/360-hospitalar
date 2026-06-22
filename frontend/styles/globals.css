@@ -439,6 +439,16 @@ em { font-style: italic; }
 .footer-links a { font-size: 13.5px; color: var(--muted); text-decoration: none; cursor: pointer; }
 .footer-links a:hover { color: var(--primary); }
 
+/* ============ POLÍTICA DE PRIVACIDADE ============ */
+.policy-toc { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 56px; }
+.policy-toc-item { font-size: 13.5px; color: var(--muted); text-decoration: none; padding: 5px 0; line-height: 1.4; }
+.policy-toc-item:hover { color: var(--primary); }
+.policy-body { display: flex; flex-direction: column; gap: 48px; }
+.policy-section h2 { font-size: 18px; font-weight: 750; color: var(--text-strong); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.policy-section p { font-size: 15px; color: var(--text); line-height: 1.75; margin-bottom: 10px; white-space: pre-line; }
+.policy-section p:last-child { margin-bottom: 0; }
+.policy-footer-cta { margin-top: 72px; padding-top: 32px; border-top: 1px solid var(--border); }
+
 /* ============ CADASTRO DE EMPRESA ============ */
 .register { padding-top: 24px; max-width: 1180px; }
 .reg-hero { max-width: 680px; margin: 8px 0 36px; }

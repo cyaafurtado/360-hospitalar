@@ -11,6 +11,7 @@ export function Footer() {
           <Link href="/como-verificamos">Como verificamos</Link>
           <Link href="/cadastrar">Para fornecedores</Link>
           <a>Contato</a>
+          <Link href="/politica-de-privacidade">Política de Privacidade</Link>
         </div>
       </div>
     </footer>
