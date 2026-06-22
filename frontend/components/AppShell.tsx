@@ -5,6 +5,7 @@ import { useAppStore } from '../lib/store';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { TweaksPanel } from './TweaksPanel';
+import { WhatsAppFloat } from './WhatsAppFloat';
 
 // Rotas com layout próprio (sem rodapé do site)
 const NO_FOOTER = ['/entrar', '/portal'];
@@ -19,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Header />
       {children}
       {!hideFooter && <Footer />}
+      <WhatsAppFloat />
       <TweaksPanel />
     </div>
   );
