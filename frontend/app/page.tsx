@@ -5,10 +5,35 @@ import { getCompanies } from '../lib/services';
 import { useAsync } from '../lib/useAsync';
 import { useAppStore } from '../lib/store';
 import { Icon } from '../lib/icons';
+import { Logo } from '../components/Logo';
 import { SearchBar } from '../components/SearchBar';
 import { SegmentChips } from '../components/SegmentChips';
 import { CompanyCard } from '../components/CompanyCard';
 import { Loading, LoadError } from '../components/AsyncState';
+
+const FEATURED_CLIENTS = [
+  'Hospital Israelita Albert Einstein',
+  'Hospital Sírio-Libanês',
+  'Hospital das Clínicas FMUSP',
+  'Hospital Mater Dei',
+  'Rede D\'Or São Luiz',
+  'Hospital Copa Star',
+  'Hospital Oswaldo Cruz',
+  'Prevent Senior',
+  'Hospital Leforte',
+  'Oncoclínicas',
+];
+
+const REGISTERED_CLIENTS = [
+  'Clínica SIM Saúde',
+  'Clínica Integrada',
+  'Hospital Santa Catarina',
+  'Hospital Anchieta',
+  'UPA Central',
+  'Centro Médico Campinas',
+  'Clínica Mais Saúde',
+  'Hospital São Marcos',
+];
 
 export default function HomePage() {
   const router = useRouter();
@@ -69,6 +94,33 @@ export default function HomePage() {
             <div>
               <strong>98%</strong>
               <span>verificados e auditados</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="clients-band">
+        <div className="clients-band-inner">
+          <div className="clients-group">
+            <span className="clients-group-label">Principais hospitais e clínicas</span>
+            <div className="clients-strip">
+              {FEATURED_CLIENTS.map((name) => (
+                <div key={name} className="client-tile">
+                  <Logo name={name} size={48} radius="12px" />
+                  <span>{name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="clients-group">
+            <span className="clients-group-label">Cadastrados na plataforma</span>
+            <div className="clients-strip">
+              {REGISTERED_CLIENTS.map((name) => (
+                <div key={name} className="client-tile">
+                  <Logo name={name} size={48} radius="12px" />
+                  <span>{name}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

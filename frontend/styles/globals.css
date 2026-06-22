@@ -449,6 +449,17 @@ em { font-style: italic; }
   .footer-main { grid-template-columns: 1fr; gap: 36px; padding-top: 40px; }
 }
 
+/* ============ HOSPITAIS & CLÍNICAS ============ */
+.clients-band { margin-top: var(--section-gap); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+.clients-band-inner { max-width: 1240px; margin: 0 auto; padding: 40px 28px; display: flex; flex-direction: column; gap: 36px; }
+.clients-group { display: flex; flex-direction: column; gap: 16px; }
+.clients-group-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.clients-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.clients-strip::-webkit-scrollbar { display: none; }
+.client-tile { display: flex; flex-direction: column; align-items: center; gap: 9px; flex: none; width: 112px; padding: 14px 10px; border-radius: var(--radius); border: 1px solid transparent; transition: border-color .15s, background .15s; cursor: default; }
+.client-tile:hover { border-color: var(--border); background: var(--bg); }
+.client-tile span { font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
 /* ============ POLÍTICA DE PRIVACIDADE ============ */
 .policy-toc { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 56px; }
 .policy-toc-item { font-size: 13.5px; color: var(--muted); text-decoration: none; padding: 5px 0; line-height: 1.4; }
