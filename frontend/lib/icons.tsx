@@ -30,6 +30,8 @@ export const ICON_PATHS: Record<string, string> = {
   grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   list: 'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01',
   file: 'M14 3v5h5M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z',
+  mail: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6',
+  clock: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2',
   truck: 'M1 3h13v11H1zM14 7h4l3 3v4h-7V7zM5.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM18.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
   hardhat: 'M2 20h20M12 4a8 8 0 0 1 8 8H4a8 8 0 0 1 8-8zM12 4v3M4 15h16',
   bolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
