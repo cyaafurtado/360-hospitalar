@@ -33,6 +33,7 @@ export default function HomePage() {
     <div className="screen home">
       <section className="hero">
         <div className="hero-bg" aria-hidden="true" />
+        <div className="hero-split">
         <div className="hero-inner">
           <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
           <h1 className="hero-title">
@@ -71,6 +72,10 @@ export default function HomePage() {
               <span>verificados e auditados</span>
             </div>
           </div>
+        </div>
+        <div className="hero-photo" aria-hidden="true">
+          <img src="/hero-cirurgia.jpg" alt="Profissional de saúde em centro cirúrgico" />
+        </div>
         </div>
       </section>
 

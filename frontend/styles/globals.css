@@ -220,6 +220,10 @@ em { font-style: italic; }
 .hero-stats strong { font-size: 27px; font-weight: 800; color: var(--text-strong); letter-spacing: -0.03em; line-height: 1; }
 .hero-stats span { font-size: 13px; color: var(--muted); margin-top: 4px; }
 .hero-stats .div { width: 1px; height: 32px; background: var(--border); }
+.hero-split { display: flex; align-items: center; gap: 56px; position: relative; z-index: 1; }
+.hero-split .hero-inner { flex: 1 1 0; position: static; z-index: auto; }
+.hero-photo { flex: 0 0 420px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 20px 60px -10px rgba(0,0,0,.18); }
+.hero-photo img { width: 100%; height: 480px; object-fit: cover; display: block; }
 
 /* ============ SEARCHBAR ============ */
 .searchbar { display: flex; gap: 10px; align-items: stretch; }
@@ -1088,6 +1092,8 @@ em { font-style: italic; }
   .company-card.list { grid-template-columns: auto 1fr; }
   .company-card.list .cc-aside { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
   .hero-bg { display: none; }
+  .hero-photo { display: none; }
+  .hero-split { display: block; }
   .hero-stats { gap: 18px; }
   .hero-stats .div { display: none; }
   .seg-chips { grid-template-columns: repeat(2, 1fr); }
