@@ -30,7 +30,7 @@ function EntrarForm() {
     setTimeout(() => {
       setLoading(false);
       login(email);
-      router.push(from || '/portal');
+      router.push(from || '/escolher-perfil');
     }, 700);
   };
 

@@ -21,7 +21,9 @@ type AppState = {
 
   // auth (mock por enquanto)
   authEmail: string | null;
+  profileRole: 'fornecedor' | 'contratante' | null;
   login: (email: string) => void;
+  setProfileRole: (role: 'fornecedor' | 'contratante') => void;
   logout: () => void;
 
   // busca (compartilhada Home ↔ Resultados)
@@ -48,8 +50,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAccent: (accent) => set({ accent }),
 
   authEmail: null,
+  profileRole: null,
   login: (authEmail) => set({ authEmail }),
-  logout: () => set({ authEmail: null }),
+  setProfileRole: (profileRole) => set({ profileRole }),
+  logout: () => set({ authEmail: null, profileRole: null }),
 
   query: '',
   uf: 'PA',

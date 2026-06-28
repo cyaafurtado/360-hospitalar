@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Icon } from '../lib/icons';
 import { useAppStore } from '../lib/store';
 
-export function PortalNav() {
+export function PainelNav() {
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAppStore((s) => s.logout);
@@ -18,19 +18,16 @@ export function PortalNav() {
     <div className="portal-subnav">
       <div className="portal-subnav-inner">
         <div className="portal-tabs">
-          <Link href="/portal" className={'portal-tab' + (pathname === '/portal' ? ' on' : '')}>
-            <Icon name="list" size={16} /> Solicitações
+          <Link href="/painel" className={'portal-tab' + (pathname === '/painel' ? ' on' : '')}>
+            <Icon name="list" size={16} /> Minhas solicitações
           </Link>
-          <Link
-            href="/portal/perfil"
-            className={'portal-tab' + (pathname === '/portal/perfil' ? ' on' : '')}
-          >
-            <Icon name="shield2" size={16} /> Meu perfil
+          <Link href="/buscar" className="portal-tab">
+            <Icon name="search" size={16} /> Buscar fornecedores
           </Link>
         </div>
         <div className="portal-subnav-actions">
-          <span className="portal-role-badge">
-            <Icon name="clipboard" size={13} stroke={2} /> Fornecedor
+          <span className="portal-role-badge tone-green">
+            <Icon name="pulse" size={13} stroke={2} /> Unidade de Saúde
           </span>
           <button className="portal-switch" onClick={() => router.push('/escolher-perfil')}>
             <Icon name="sliders" size={14} /> Trocar perfil
