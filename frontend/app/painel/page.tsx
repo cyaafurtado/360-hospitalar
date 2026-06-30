@@ -5,15 +5,16 @@ import { useAppStore } from '../../lib/store';
 import { Icon } from '../../lib/icons';
 import { PainelNav } from '../../components/PainelNav';
 import { StatusPill, TypePill } from '../../components/Pills';
-import { segmentLabel } from '../../data/reference';
+import { segmentLabel, REQUEST_STATUS, REQUEST_TYPES } from '../../data/reference';
 import { EXEMPLOS_PAINEL } from '../../data/exemplos-painel';
-import type { RequestStatus } from '../../data/types';
+import type { RequestStatus, RequestType } from '../../data/types';
 
 export default function PainelPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
   const [openId, setOpenId] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<'' | RequestStatus>('');
+  const [filtroTipo, setFiltroTipo] = useState<'' | RequestType>('');
   const [q, setQ] = useState('');
 
   useEffect(() => {
@@ -24,13 +25,14 @@ export default function PainelPage() {
     () =>
       EXEMPLOS_PAINEL.filter((r) => {
         if (filtroStatus && r.status !== filtroStatus) return false;
+        if (filtroTipo && r.tipo !== filtroTipo) return false;
         if (q.trim()) {
           const h = (r.prestador + ' ' + r.servico + ' ' + r.id).toLowerCase();
           if (!h.includes(q.toLowerCase())) return false;
         }
         return true;
       }),
-    [filtroStatus, q]
+    [filtroStatus, filtroTipo, q]
   );
 
   const stats = useMemo(
@@ -86,17 +88,25 @@ export default function PainelPage() {
             />
           </div>
           <div className="pf-select">
+            <span>Tipo</span>
+            <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as '' | RequestType)}>
+              <option value="">Todos</option>
+              {REQUEST_TYPES.map((t) => (
+                <option key={t.id} value={t.id}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="pf-select">
             <span>Status</span>
             <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value as '' | RequestStatus)}>
               <option value="">Todos</option>
-              <option value="nova">Nova</option>
-              <option value="andamento">Em andamento</option>
-              <option value="respondida">Respondida</option>
-              <option value="fechada">Fechada</option>
+              {REQUEST_STATUS.map((s) => (
+                <option key={s.id} value={s.id}>{s.label}</option>
+              ))}
             </select>
           </div>
-          {(filtroStatus || q) && (
-            <button className="pf-clear" onClick={() => { setFiltroStatus(''); setQ(''); }}>
+          {(filtroTipo || filtroStatus || q) && (
+            <button className="pf-clear" onClick={() => { setFiltroTipo(''); setFiltroStatus(''); setQ(''); }}>
               Limpar
             </button>
           )}
