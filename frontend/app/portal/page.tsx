@@ -197,6 +197,7 @@ export default function PortalPage() {
                 <table className="req-table">
                   <thead>
                     <tr>
+                      <th>Nº Pedido</th>
                       <th>Solicitante</th>
                       <th>Organização</th>
                       <th>Tipo</th>
@@ -211,6 +212,7 @@ export default function PortalPage() {
                     {rowsRecebidas.map((r) => (
                       <Fragment key={r.id}>
                         <tr className={openId === r.id ? 'row-open' : ''} onClick={() => setOpenId(openId === r.id ? null : r.id)}>
+                          <td><span className="col-id">{r.id}</span></td>
                           <td>
                             <div className="cell-strong">{r.solicitante}</div>
                             <div className="cell-sub">{r.cargo} · {r.quando}</div>
@@ -234,7 +236,7 @@ export default function PortalPage() {
                         </tr>
                         {openId === r.id && (
                           <tr className="detail-row">
-                            <td colSpan={8}>
+                            <td colSpan={9}>
                               <div className="req-detail">
                                 <div className="req-detail-main">
                                   <span className="req-detail-id">{r.id}</span>
@@ -334,6 +336,7 @@ export default function PortalPage() {
               <table className="req-table">
                 <thead>
                   <tr>
+                    <th>Nº Pedido</th>
                     <th>Parceiro / Fornecedor</th>
                     <th>Segmento</th>
                     <th>Tipo</th>
@@ -350,9 +353,9 @@ export default function PortalPage() {
                         className={openEnvId === r.id ? 'row-open' : ''}
                         onClick={() => setOpenEnvId(openEnvId === r.id ? null : r.id)}
                       >
+                        <td><span className="col-id">{r.id}</span></td>
                         <td>
                           <div className="cell-strong">{r.destinatario}</div>
-                          <div className="cell-sub">{r.id}</div>
                         </td>
                         <td className="cell-muted">{segmentLabel(r.segmento)}</td>
                         <td><TypePill tipo={r.tipo} /></td>
@@ -367,7 +370,7 @@ export default function PortalPage() {
                       </tr>
                       {openEnvId === r.id && (
                         <tr className="detail-row">
-                          <td colSpan={7}>
+                          <td colSpan={8}>
                             <div className="req-detail">
                               <div className="req-detail-main">
                                 <span className="req-detail-id">{r.id}</span>

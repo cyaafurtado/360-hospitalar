@@ -828,6 +828,7 @@ em { font-style: italic; }
 .detail-row td { padding: 0 16px 16px; background: var(--primary-tint); }
 .req-detail { display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
 .req-detail-id { font-size: 12px; font-weight: 700; color: var(--primary); letter-spacing: 0.03em; }
+.col-id { display: inline-block; font-size: 12px; font-weight: 700; font-family: ui-monospace, 'Cascadia Code', monospace; letter-spacing: 0.04em; color: var(--primary); background: var(--primary-tint); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
 .req-detail-main p { font-size: 14px; color: var(--text); margin-top: 6px; line-height: 1.45; }
 .req-detail-actions { display: flex; gap: 10px; flex: none; }
 .btn-primary.sm, .btn-ghost.sm { font-size: 13px; padding: 9px 14px; text-decoration: none; }
