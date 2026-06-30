@@ -137,17 +137,68 @@ export async function gerarPdfSolicitacao(req: SolicitacaoRequest): Promise<void
   doc.text(lines, margin, y);
   y += lines.length * 5 + 10;
 
+  // ── Seção: Aprovação e Vigência (apenas fechadas) ────────────────
+  if (req.status === 'fechada' && req.contrato) {
+    const c = req.contrato;
+
+    // Faixa verde esmeralda
+    doc.setFillColor(...ACCENT);
+    doc.rect(margin, y, W - margin * 2, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text('APROVAÇÃO E VIGÊNCIA DO CONTRATO', margin + 3, y + 4.8);
+
+    // Selo "Contrato Fechado" à direita
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.text('CONTRATO FECHADO', W - margin - 3, y + 4.8, { align: 'right' });
+    y += 10;
+
+    // Linha 1: aprovação + número
+    field('Data de aprovação', c.aprovadoEm || req.quando, margin, 2);
+    field('Número do contrato', c.numero || '—', margin + col2, 2);
+    y += 12;
+
+    // Linha 2: início + validade
+    field('Início da vigência', c.inicio || '—', margin, 2);
+    field('Validade / Encerramento', c.validade || '—', margin + col2, 2);
+    y += 12;
+
+    // Linha 3: valor + assinatura
+    field('Valor contratado', c.valor || '—', margin, 2);
+    field('Contrato assinado', c.assinado ? 'Sim — documento arquivado' : 'Pendente de assinatura', margin + col2, 2);
+    y += 16;
+
+    // Linha separadora verde
+    doc.setDrawColor(...ACCENT);
+    doc.setLineWidth(0.6);
+    doc.line(margin, y - 6, W - margin, y - 6);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.3);
+  }
+
   // ── Tabela de contato ────────────────────────────────────────────
+  const tableBody: string[][] = [
+    ['Tipo de solicitação', typeLabel(req.tipo)],
+    ['Status atual', statusLabel(req.status)],
+    ['E-mail de contato', req.email],
+    ['Telefone', req.phone],
+    ['ID da solicitação', req.id],
+  ];
+
+  if (req.status === 'fechada' && req.contrato) {
+    if (req.contrato.numero) tableBody.push(['Nº do contrato', req.contrato.numero]);
+    if (req.contrato.valor) tableBody.push(['Valor contratado', req.contrato.valor]);
+    if (req.contrato.aprovadoEm || req.quando) tableBody.push(['Aprovado em', req.contrato.aprovadoEm || req.quando]);
+    if (req.contrato.inicio) tableBody.push(['Início da vigência', req.contrato.inicio]);
+    if (req.contrato.validade) tableBody.push(['Validade', req.contrato.validade]);
+  }
+
   autoTable(doc, {
     startY: y,
     head: [['Campo', 'Valor']],
-    body: [
-      ['Tipo de solicitação', typeLabel(req.tipo)],
-      ['Status atual', statusLabel(req.status)],
-      ['E-mail de contato', req.email],
-      ['Telefone', req.phone],
-      ['ID da solicitação', req.id],
-    ],
+    body: tableBody,
     margin: { left: margin, right: margin },
     styles: { fontSize: 9, cellPadding: 4, textColor: DARK },
     headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },

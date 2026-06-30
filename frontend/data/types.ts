@@ -29,8 +29,9 @@ export type ContratoInfo = {
   assinado: boolean;
   numero?: string;
   valor?: string;
-  inicio?: string;
-  validade?: string;
+  aprovadoEm?: string;  // data em que a solicitação foi fechada/aprovada
+  inicio?: string;      // início da vigência do contrato/serviço
+  validade?: string;    // fim da vigência (prazo de validade)
 };
 
 export type SolicitacaoRequest = {

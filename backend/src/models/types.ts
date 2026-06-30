@@ -22,6 +22,15 @@ export interface Company {
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
 export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada';
 
+export interface ContratoInfo {
+  assinado: boolean;
+  numero?: string;
+  valor?: string;
+  aprovadoEm?: string;
+  inicio?: string;
+  validade?: string;
+}
+
 export interface SolicitacaoRequest {
   id: string;
   solicitante: string;
@@ -36,6 +45,9 @@ export interface SolicitacaoRequest {
   phone: string;
   quando: string;
   resumo: string;
+  servico?: string;
+  prazo?: string;
+  contrato?: ContratoInfo;
 }
 
 // Perfil editável do fornecedor logado (deriva de Company)

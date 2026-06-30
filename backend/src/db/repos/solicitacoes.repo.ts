@@ -1,5 +1,5 @@
 import { query } from '../connection';
-import { SolicitacaoRequest, RequestStatus } from '../../models/types';
+import { SolicitacaoRequest, RequestStatus, ContratoInfo } from '../../models/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function rowToReq(r: any): SolicitacaoRequest {
@@ -17,6 +17,9 @@ function rowToReq(r: any): SolicitacaoRequest {
     phone: r.phone,
     quando: r.quando,
     resumo: r.resumo,
+    ...(r.servico ? { servico: r.servico } : {}),
+    ...(r.prazo ? { prazo: r.prazo } : {}),
+    ...(r.contrato ? { contrato: r.contrato as ContratoInfo } : {}),
   };
 }
 
@@ -66,6 +69,14 @@ export const SolicitacoesRepo = {
     const { rows } = await query(
       'UPDATE solicitacoes SET status = $2 WHERE id = $1 RETURNING *',
       [id, status]
+    );
+    return rows[0] ? rowToReq(rows[0]) : null;
+  },
+
+  async updateContract(id: string, contrato: ContratoInfo): Promise<SolicitacaoRequest | null> {
+    const { rows } = await query(
+      'UPDATE solicitacoes SET contrato = $2::jsonb WHERE id = $1 RETURNING *',
+      [id, JSON.stringify(contrato)]
     );
     return rows[0] ? rowToReq(rows[0]) : null;
   },

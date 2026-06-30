@@ -6,5 +6,6 @@ const router = Router();
 router.get('/', SolicitacoesController.list);
 router.post('/', SolicitacoesController.create);
 router.patch('/:id/status', SolicitacoesController.updateStatus);
+router.patch('/:id/contract', SolicitacoesController.updateContract);
 
 export default router;
