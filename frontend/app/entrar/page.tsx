@@ -41,7 +41,7 @@ function EntrarForm() {
           <Icon name="back" size={16} /> Voltar ao site
         </button>
         <div className="login-brand-inner">
-          <span className="login-logo-wrap"><BrandLogo height={80} /></span>
+          <span className="login-logo-wrap"><BrandLogo height={80} ring="#fff" plus="oklch(0.68 0.15 165)" node="#fff" /></span>
           <h2>
             Portal do parceiro
             <br />
