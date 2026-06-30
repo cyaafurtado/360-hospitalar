@@ -678,6 +678,11 @@ em { font-style: italic; }
 .portal-tab.on { color: var(--primary); border-bottom-color: var(--primary); }
 .portal-exit { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font); font-size: 13.5px; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; }
 .portal-exit:hover { color: var(--primary); }
+.portal-body-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.pbt-tab { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 14.5px; font-weight: 620; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 16px 12px; cursor: pointer; transition: color .14s, border-color .14s; margin-bottom: -1px; }
+.pbt-tab:hover { color: var(--text-strong); }
+.pbt-tab.on { color: var(--primary); border-bottom-color: var(--primary); font-weight: 680; }
+.pbt-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: var(--pill); }
 .portal-subnav-actions { display: flex; align-items: center; gap: 12px; }
 .portal-role-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 660; letter-spacing: 0.02em; padding: 4px 10px; border-radius: var(--pill); background: color-mix(in oklch, var(--primary), white 88%); color: var(--primary); }
 .portal-role-badge.tone-green { background: color-mix(in oklch, var(--accent), white 84%); color: var(--accent); }
