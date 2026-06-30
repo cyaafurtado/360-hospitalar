@@ -2,7 +2,7 @@
 import { Suspense, useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '../../lib/icons';
-import { OrbitMark } from '../../components/OrbitMark';
+import { BrandLogo } from '../../components/BrandLogo';
 import { useAppStore } from '../../lib/store';
 
 function EntrarForm() {
@@ -41,7 +41,7 @@ function EntrarForm() {
           <Icon name="back" size={16} /> Voltar ao site
         </button>
         <div className="login-brand-inner">
-          <OrbitMark size={52} ring="#fff" plus="oklch(0.68 0.15 165)" node="#fff" />
+          <span className="login-logo-wrap"><BrandLogo height={80} /></span>
           <h2>
             Portal do parceiro
             <br />

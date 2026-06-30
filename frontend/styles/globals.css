@@ -174,6 +174,9 @@ em { font-style: italic; }
 .brand-name span { color: var(--primary); }
 .app[data-theme="editorial"] .brand-name span { color: oklch(0.72 0.13 248); }
 .app[data-theme="editorial"] .brand-tagline { color: oklch(0.74 0.03 262); }
+.brand img { display: block; object-fit: contain; }
+.login-logo-wrap { display: inline-flex; background: #fff; border-radius: 14px; padding: 10px 14px; }
+.footer-brand-logo img { display: block; }
 .nav { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav a {
   color: var(--header-text); opacity: 0.82; text-decoration: none; font-weight: 550; font-size: 14.5px;

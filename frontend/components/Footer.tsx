@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { OrbitMark } from './OrbitMark';
+import { BrandLogo } from './BrandLogo';
 import { Icon } from '../lib/icons';
 
 const NAV_LINKS = [
@@ -23,8 +23,7 @@ export function Footer() {
 
         <div className="footer-brand">
           <div className="footer-brand-logo">
-            <OrbitMark size={32} />
-            <span className="footer-brand-name">360 Hospitalar</span>
+            <BrandLogo height={64} />
           </div>
           <p className="footer-brand-desc">
             Diretório B2B do setor de saúde. Conectamos compradores e

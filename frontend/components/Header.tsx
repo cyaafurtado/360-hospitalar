@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { OrbitMark } from './OrbitMark';
+import { BrandLogo } from './BrandLogo';
 import { useAppStore } from '../lib/store';
 
 export function Header() {
@@ -12,13 +12,7 @@ export function Header() {
     <header className="site-header">
       <div className="header-inner">
         <Link className="brand" href="/">
-          <OrbitMark size={38} />
-          <span className="brand-lockup">
-            <span className="brand-name">
-              360 <span>Hospitalar</span>
-            </span>
-            <span className="brand-tagline">REDE DE PRESTADORES</span>
-          </span>
+          <BrandLogo height={52} />
         </Link>
         <nav className="nav">
           <a onClick={() => router.push('/')}>Segmentos</a>

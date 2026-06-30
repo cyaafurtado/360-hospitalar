@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '../../lib/store';
-import { OrbitMark } from '../../components/OrbitMark';
+import { BrandLogo } from '../../components/BrandLogo';
 import { Icon } from '../../lib/icons';
 
 export default function EscolherPerfilPage() {
@@ -29,7 +29,7 @@ export default function EscolherPerfilPage() {
     <div className="role-pick-screen">
       <div className="role-pick-wrap">
         <div className="role-pick-head">
-          <OrbitMark size={48} />
+          <BrandLogo height={72} />
           <div>
             <h1>Como você quer entrar?</h1>
             <p>Escolha o perfil de acesso para esta sessão.</p>
