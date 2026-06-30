@@ -5,7 +5,7 @@ import { getMyProfile, updateMyProfile } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { useAppStore } from '../../../lib/store';
 import { STATES, segmentLabel, stateName } from '../../../data/reference';
-import type { SupplierProfileData, DocumentoVerificacao } from '../../../data/types';
+import type { SupplierProfileData, DocumentoVerificacao, CatalogoServico } from '../../../data/types';
 import { Icon } from '../../../lib/icons';
 import { Logo } from '../../../components/Logo';
 import { Stars } from '../../../components/Stars';
@@ -137,10 +137,65 @@ export default function PerfilPage() {
     setForm((f) => f ? { ...f, fotos: (f.fotos ?? []).filter((_, i) => i !== idx) } : f);
   };
 
+  // ── Catálogo de serviços ──────────────────────────────────────────
+  const MOCK_CATALOGO: Record<string, Omit<CatalogoServico, 'id'>[]> = {
+    esteril: [
+      { nome: 'Esterilização em autoclave a vapor', descricao: 'Processamento de artigos críticos e semicríticos conforme RDC 15/2012. Coleta e entrega incluídas.', preco: 'R$ 4,50 / artigo', prazo: '24h', destaque: true },
+      { nome: 'Esterilização por óxido de etileno', descricao: 'Para artigos sensíveis ao calor. Validação documentada e rastreabilidade por lote.', preco: 'R$ 12,00 / artigo', prazo: '72h', destaque: false },
+      { nome: 'Auditoria e consultoria de CME', descricao: 'Avaliação do processo de esterilização da central de materiais e elaboração de plano de adequação.', preco: 'Sob consulta', prazo: '5 dias úteis', destaque: false },
+    ],
+    equip: [
+      { nome: 'Fornecimento de equipamentos médicos', descricao: 'Venda e locação de equipamentos hospitalares com garantia estendida e suporte técnico.', preco: 'A partir de R$ 800/mês', prazo: 'Imediato', destaque: true },
+      { nome: 'Manutenção preventiva', descricao: 'Plano anual de manutenção preventiva com cronograma e relatórios mensais.', preco: 'A partir de R$ 350/mês', prazo: 'Agendado', destaque: true },
+      { nome: 'Calibração e qualificação', descricao: 'Calibração de equipamentos com emissão de certificado rastreável ao INMETRO.', preco: 'R$ 180 / equipamento', prazo: '3 dias úteis', destaque: false },
+    ],
+    ti: [
+      { nome: 'Prontuário eletrônico do paciente (PEP)', descricao: 'Sistema completo com agendamento, prescrição digital e integração TISS/TUSS.', preco: 'A partir de R$ 290/mês', prazo: 'Implantação em 30 dias', destaque: true },
+      { nome: 'Business intelligence hospitalar', descricao: 'Dashboards de desempenho clínico e operacional com integração a sistemas legados.', preco: 'Sob consulta', prazo: 'Projeto personalizado', destaque: false },
+      { nome: 'Suporte técnico e treinamento', descricao: 'Suporte 8×5 com SLA garantido e treinamento presencial ou remoto para equipes.', preco: 'Incluso no plano', prazo: 'Resposta em até 4h', destaque: false },
+    ],
+    lab: [
+      { nome: 'Exames laboratoriais de rotina', descricao: 'Hemograma, bioquímica, hormônios e coagulação com laudos em até 6 horas.', preco: 'Tabela CBHPM', prazo: '6h', destaque: true },
+      { nome: 'Análise microbiológica', descricao: 'Culturas, antibiograma e identificação de microrganismos com relatório detalhado.', preco: 'R$ 85,00 / análise', prazo: '48–72h', destaque: false },
+    ],
+    gases: [
+      { nome: 'Fornecimento de O₂ medicinal', descricao: 'Cilindros e concentradores de oxigênio para UTI e enfermaria com monitoramento remoto.', preco: 'R$ 3,20 / m³', prazo: 'Entrega em 24h', destaque: true },
+      { nome: 'Gases especiais para anestesia', descricao: 'N₂O, ar comprimido medicinal e mistura de gases para centro cirúrgico.', preco: 'Sob consulta', prazo: '48h', destaque: false },
+      { nome: 'Instalação de rede de gases', descricao: 'Projeto e instalação de centrais de gases com válvulas reguladoras e alarmes.', preco: 'Orçamento por m²', prazo: 'Projeto personalizado', destaque: false },
+    ],
+  };
+
+  const DEFAULT_MOCK: Omit<CatalogoServico, 'id'>[] = [
+    { nome: 'Serviço principal', descricao: 'Descreva aqui o seu serviço mais importante com todos os detalhes que o comprador precisa saber.', preco: 'Sob consulta', prazo: 'A combinar', destaque: true },
+    { nome: 'Pacote completo', descricao: 'Solução integrada que cobre todas as etapas do processo, da contratação ao suporte pós-venda.', preco: 'Sob consulta', prazo: 'A combinar', destaque: false },
+  ];
+
+  const seedCatalogo = (segment: string): CatalogoServico[] =>
+    (MOCK_CATALOGO[segment] ?? DEFAULT_MOCK).map((s) => ({ ...s, id: crypto.randomUUID() }));
+
+  const [catalogo, setCatalogo] = useState<CatalogoServico[]>([]);
+
+  useEffect(() => {
+    if (initial) {
+      setCatalogo(initial.catalogo?.length ? initial.catalogo : seedCatalogo(initial.segment));
+    }
+  }, [initial]);
+
+  const addServico = () =>
+    setCatalogo((c) => [...c, { id: crypto.randomUUID(), nome: '', descricao: '', preco: '', prazo: '', destaque: false }]);
+
+  const removeServico = (id: string) => setCatalogo((c) => c.filter((s) => s.id !== id));
+
+  const setServico = (id: string, k: keyof CatalogoServico, v: string | boolean) =>
+    setCatalogo((c) => c.map((s) => s.id === id ? { ...s, [k]: v } : s));
+
+  const toggleDestaque = (id: string) =>
+    setCatalogo((c) => c.map((s) => s.id === id ? { ...s, destaque: !s.destaque } : s));
+
   const save = async () => {
     if (!form) return;
     try {
-      const updated = await updateMyProfile(form);
+      const updated = await updateMyProfile({ ...form, catalogo });
       setForm(updated);
     } catch (e) {
       console.error(e);
@@ -438,6 +493,109 @@ export default function PerfilPage() {
             {edit && docs.length === 0 && (
               <p className="doc-empty-hint">Clique em &ldquo;Adicionar documento&rdquo; para registrar certificações e licenças com validade.</p>
             )}
+          </section>
+
+          {/* ── Catálogo de serviços ── */}
+          <section className="prof-card span-2">
+            <div className="prof-doc-head">
+              <div>
+                <h3>Meu catálogo de serviços</h3>
+                <p className="prof-card-sub">Serviços que aparecem na sua página pública para compradores.</p>
+              </div>
+              {edit && (
+                <button type="button" className="prof-doc-add" onClick={addServico}>
+                  <Icon name="check" size={13} stroke={3} /> Adicionar serviço
+                </button>
+              )}
+            </div>
+
+            {catalogo.length === 0 && !edit && (
+              <p className="doc-empty-hint">Nenhum serviço cadastrado. Edite o perfil para montar seu catálogo.</p>
+            )}
+
+            <div className="catalogo-grid">
+              {catalogo.map((s) => edit ? (
+                <div key={s.id} className="catalogo-card editing">
+                  <div className="catalogo-edit-head">
+                    <button
+                      type="button"
+                      className={'catalogo-star' + (s.destaque ? ' on' : '')}
+                      onClick={() => toggleDestaque(s.id)}
+                      title={s.destaque ? 'Remover destaque' : 'Marcar como destaque'}
+                    >
+                      <Icon name="star" size={15} stroke={s.destaque ? 0 : 1.6} />
+                    </button>
+                    <button type="button" className="doc-remove" onClick={() => removeServico(s.id)}>
+                      <Icon name="close" size={14} stroke={2.4} />
+                    </button>
+                  </div>
+                  <input
+                    className="prof-input catalogo-input-nome"
+                    placeholder="Nome do serviço"
+                    value={s.nome}
+                    onChange={(e) => setServico(s.id, 'nome', e.target.value)}
+                  />
+                  <textarea
+                    className="prof-input catalogo-input-desc"
+                    rows={3}
+                    placeholder="Descreva o serviço — o que inclui, diferenciais, público-alvo…"
+                    value={s.descricao}
+                    onChange={(e) => setServico(s.id, 'descricao', e.target.value)}
+                  />
+                  <div className="catalogo-edit-meta">
+                    <div className="reg-field">
+                      <span className="reg-label">Preço / referência</span>
+                      <input
+                        className="prof-input"
+                        placeholder="Ex: R$ 250/mês, Sob consulta"
+                        value={s.preco ?? ''}
+                        onChange={(e) => setServico(s.id, 'preco', e.target.value)}
+                      />
+                    </div>
+                    <div className="reg-field">
+                      <span className="reg-label">Prazo estimado</span>
+                      <input
+                        className="prof-input"
+                        placeholder="Ex: 24h, 5 dias úteis"
+                        value={s.prazo ?? ''}
+                        onChange={(e) => setServico(s.id, 'prazo', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div key={s.id} className={'catalogo-card' + (s.destaque ? ' destaque' : '')}>
+                  {s.destaque && (
+                    <span className="catalogo-badge">
+                      <Icon name="star" size={11} /> Destaque
+                    </span>
+                  )}
+                  <div className="catalogo-nome">{s.nome || '—'}</div>
+                  <p className="catalogo-desc">{s.descricao || '—'}</p>
+                  {(s.preco || s.prazo) && (
+                    <div className="catalogo-meta">
+                      {s.preco && (
+                        <span className="catalogo-meta-item">
+                          <Icon name="file" size={13} /> {s.preco}
+                        </span>
+                      )}
+                      {s.prazo && (
+                        <span className="catalogo-meta-item">
+                          <Icon name="clock" size={13} /> {s.prazo}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {edit && (
+                <button type="button" className="catalogo-add-card" onClick={addServico}>
+                  <Icon name="check" size={20} stroke={1.4} />
+                  <span>Novo serviço</span>
+                </button>
+              )}
+            </div>
           </section>
 
           <section className="prof-card span-2">

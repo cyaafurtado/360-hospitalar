@@ -909,6 +909,32 @@ em { font-style: italic; }
 .prof-uf-list { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ── Fotos da empresa ── */
+/* ── Catálogo de serviços ── */
+.prof-card-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.catalogo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+.catalogo-card { position: relative; background: var(--surface-2); border: var(--card-border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow .15s; }
+.catalogo-card.destaque { border-color: var(--primary); background: color-mix(in oklch, var(--primary), white 94%); box-shadow: 0 0 0 1px var(--primary); }
+.catalogo-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(0.55 0.14 78); background: color-mix(in oklch, var(--star), white 82%); padding: 3px 9px; border-radius: var(--pill); align-self: flex-start; }
+.catalogo-nome { font-size: 15px; font-weight: 720; color: var(--text-strong); letter-spacing: -0.01em; }
+.catalogo-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; flex: 1; margin: 0; }
+.catalogo-meta { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: auto; }
+.catalogo-meta-item { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--text); }
+.catalogo-meta-item svg { color: var(--primary); }
+
+.catalogo-card.editing { background: var(--surface); border: 1.5px solid var(--border); gap: 12px; }
+.catalogo-edit-head { display: flex; justify-content: space-between; align-items: center; }
+.catalogo-star { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; line-height: 1; transition: color .14s; }
+.catalogo-star.on { color: var(--star); }
+.catalogo-star:hover { color: var(--star); }
+.catalogo-input-nome { font-weight: 700 !important; font-size: 14px !important; }
+.catalogo-input-desc { resize: vertical; }
+.catalogo-edit-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.catalogo-add-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: none; border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 28px 20px; cursor: pointer; color: var(--muted); font-size: 13.5px; font-family: var(--font); font-weight: 600; transition: border-color .15s, color .15s; }
+.catalogo-add-card:hover { border-color: var(--primary); color: var(--primary); }
+@media (max-width: 900px) { .catalogo-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .catalogo-grid { grid-template-columns: 1fr; } }
+
 .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 4px; }
 .photo-cell { position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); border: 1.5px solid var(--border); }
 .photo-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .15s; }

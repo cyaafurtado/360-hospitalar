@@ -56,6 +56,15 @@ export type SolicitacaoRequest = {
 
 export type Plan = 'free' | 'verified' | 'premium';
 
+export type CatalogoServico = {
+  id: string;
+  nome: string;
+  descricao: string;
+  preco?: string;
+  prazo?: string;
+  destaque: boolean;
+};
+
 export type DocumentoVerificacao = {
   id: string;
   tipo: string;
@@ -80,5 +89,6 @@ export type SupplierProfileData = {
   reviews: number;
   verified: boolean;
   documentos?: DocumentoVerificacao[];
-  fotos?: string[]; // nomes/URLs das fotos da fachada
+  fotos?: string[];
+  catalogo?: CatalogoServico[];
 };
