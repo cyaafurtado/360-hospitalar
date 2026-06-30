@@ -11,6 +11,7 @@ import { Icon } from '../../lib/icons';
 import { PortalNav } from '../../components/PortalNav';
 import { StatusPill, TypePill } from '../../components/Pills';
 import { Loading, LoadError } from '../../components/AsyncState';
+import { gerarPdfSolicitacao } from '../../lib/pdf';
 
 type Tab = 'recebidas' | 'enviadas';
 
@@ -32,6 +33,12 @@ export default function PortalPage() {
   const [status, setStatus] = useState<'' | RequestStatus>('');
   const [q, setQ] = useState('');
   const [openId, setOpenId] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null);
+
+  const baixarPdf = async (r: SolicitacaoRequest) => {
+    setPdfLoading(r.id);
+    try { await gerarPdfSolicitacao(r); } finally { setPdfLoading(null); }
+  };
 
   const requests = rowsState ?? [];
 
@@ -242,6 +249,14 @@ export default function PortalPage() {
                                     onClick={() => router.push(`/portal/solicitacao/${r.id}`)}
                                   >
                                     <Icon name="signal" size={14} /> Acompanhar
+                                  </button>
+                                  <button
+                                    className="btn-ghost sm"
+                                    onClick={() => baixarPdf(r)}
+                                    disabled={pdfLoading === r.id}
+                                  >
+                                    <Icon name="file" size={14} />
+                                    {pdfLoading === r.id ? 'Gerando…' : 'Gerar PDF'}
                                   </button>
                                   <button
                                     className="btn-ghost sm"
