@@ -8,6 +8,7 @@ import { StatusPill, TypePill } from '../../components/Pills';
 import { segmentLabel, REQUEST_STATUS, REQUEST_TYPES } from '../../data/reference';
 import { EXEMPLOS_PAINEL } from '../../data/exemplos-painel';
 import type { RequestStatus, RequestType } from '../../data/types';
+import { gerarPdfSolicitacao } from '../../lib/pdf';
 
 export default function PainelPage() {
   const router = useRouter();
@@ -16,10 +17,36 @@ export default function PainelPage() {
   const [filtroStatus, setFiltroStatus] = useState<'' | RequestStatus>('');
   const [filtroTipo, setFiltroTipo] = useState<'' | RequestType>('');
   const [q, setQ] = useState('');
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authEmail) router.replace('/entrar');
   }, [authEmail, router]);
+
+  const baixarPdf = async (r: (typeof EXEMPLOS_PAINEL)[0]) => {
+    setPdfLoading(r.id);
+    try {
+      await gerarPdfSolicitacao({
+        id: r.id,
+        solicitante: 'Unidade de Saúde',
+        cargo: '',
+        organizacao: authEmail ?? '',
+        tipo: r.tipo,
+        status: r.status,
+        prestador: r.prestador,
+        uf: '',
+        cidade: '',
+        email: r.prestadorEmail,
+        phone: r.prestadorContato,
+        quando: r.quando,
+        resumo: r.resumo,
+        servico: r.servico,
+        prazo: r.prazo,
+      });
+    } finally {
+      setPdfLoading(null);
+    }
+  };
 
   const rows = useMemo(
     () =>
@@ -162,6 +189,14 @@ export default function PainelPage() {
                               onClick={() => router.push(`/painel/solicitacao/${r.id}`)}
                             >
                               <Icon name="signal" size={14} /> Acompanhar
+                            </button>
+                            <button
+                              className="btn-ghost sm"
+                              disabled={pdfLoading === r.id}
+                              onClick={(e) => { e.stopPropagation(); baixarPdf(r); }}
+                            >
+                              <Icon name="file" size={14} />
+                              {pdfLoading === r.id ? 'Gerando…' : 'Gerar PDF'}
                             </button>
                             <button
                               className="btn-ghost sm"
