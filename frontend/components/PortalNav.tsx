@@ -21,6 +21,9 @@ export function PortalNav() {
           <Link href="/portal" className={'portal-tab' + (pathname === '/portal' ? ' on' : '')}>
             <Icon name="list" size={16} /> Solicitações
           </Link>
+          <Link href="/portal/dashboard" className={'portal-tab' + (pathname === '/portal/dashboard' ? ' on' : '')}>
+            <Icon name="signal" size={16} /> Dashboard
+          </Link>
           <Link
             href="/portal/perfil"
             className={'portal-tab' + (pathname === '/portal/perfil' ? ' on' : '')}
