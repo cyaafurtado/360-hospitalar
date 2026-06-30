@@ -213,7 +213,7 @@ export default function PortalPage() {
                       <Fragment key={r.id}>
                         <tr className={openId === r.id ? 'row-open' : ''} onClick={() => setOpenId(openId === r.id ? null : r.id)}>
                           <td><span className="col-id">{r.id}</span></td>
-                          <td>
+                          <td className="td-name">
                             <div className="cell-strong">{r.solicitante}</div>
                             <div className="cell-sub">{r.cargo} · {r.quando}</div>
                           </td>
@@ -354,7 +354,7 @@ export default function PortalPage() {
                         onClick={() => setOpenEnvId(openEnvId === r.id ? null : r.id)}
                       >
                         <td><span className="col-id">{r.id}</span></td>
-                        <td>
+                        <td className="td-name">
                           <div className="cell-strong">{r.destinatario}</div>
                         </td>
                         <td className="cell-muted">{segmentLabel(r.segmento)}</td>

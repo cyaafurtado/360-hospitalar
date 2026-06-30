@@ -124,7 +124,7 @@ export default function PainelPage() {
                     onClick={() => setOpenId(openId === r.id ? null : r.id)}
                   >
                     <td><span className="col-id">{r.id}</span></td>
-                    <td>
+                    <td className="td-name">
                       <div className="cell-strong">{r.prestador}</div>
                     </td>
                     <td className="cell-muted">{segmentLabel(r.segmento)}</td>
