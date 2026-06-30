@@ -89,6 +89,7 @@ export type SupplierProfileData = {
   rating: number;
   reviews: number;
   verified: boolean;
+  plan?: Plan;
   documentos?: DocumentoVerificacao[];
   fotos?: string[];
   catalogo?: CatalogoServico[];

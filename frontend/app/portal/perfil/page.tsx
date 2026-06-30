@@ -5,7 +5,7 @@ import { getMyProfile, updateMyProfile } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { useAppStore } from '../../../lib/store';
 import { STATES, segmentLabel, stateName } from '../../../data/reference';
-import type { SupplierProfileData, DocumentoVerificacao, CatalogoServico } from '../../../data/types';
+import type { SupplierProfileData, DocumentoVerificacao, CatalogoServico, Plan } from '../../../data/types';
 import { Icon } from '../../../lib/icons';
 import { Logo } from '../../../components/Logo';
 import { Stars } from '../../../components/Stars';
@@ -137,7 +137,41 @@ export default function PerfilPage() {
     setForm((f) => f ? { ...f, fotos: (f.fotos ?? []).filter((_, i) => i !== idx) } : f);
   };
 
-  // ── Catálogo de serviços ──────────────────────────────────────────
+  // ── Plano de pagamento ───────────────────────────────────────────
+  const [plano, setPlano] = useState<Plan>('free');
+  const [showPay, setShowPay] = useState(false);
+  const [payCard, setPayCard] = useState({ nome: '', numero: '', validade: '', cvv: '' });
+  const [payLoading, setPayLoading] = useState(false);
+  const [payOk, setPayOk] = useState(false);
+
+  useEffect(() => {
+    if (initial) setPlano(initial.plan ?? (initial.verified ? 'verified' : 'free'));
+  }, [initial]);
+
+  const maskCard = (v: string) => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+  const maskExp  = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 4);
+    return d.length >= 3 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+  };
+
+  const confirmarPremium = () => {
+    if (!payCard.nome || payCard.numero.replace(/\s/g, '').length < 16 || !payCard.validade || payCard.cvv.length < 3) return;
+    setPayLoading(true);
+    setTimeout(() => {
+      setPayLoading(false);
+      setPayOk(true);
+      setPlano('premium');
+      setForm((f) => f ? { ...f, verified: true, plan: 'premium' } : f);
+      setTimeout(() => { setPayOk(false); setShowPay(false); }, 2200);
+    }, 1400);
+  };
+
+  const solicitarVerificado = () => {
+    setPlano('verified');
+    setForm((f) => f ? { ...f, plan: 'verified' } : f);
+  };
+
+  // ── Catálogo de serviços ─────────────────────────────────────────
   const MOCK_CATALOGO: Record<string, Omit<CatalogoServico, 'id'>[]> = {
     esteril: [
       { nome: 'Esterilização em autoclave a vapor', descricao: 'Processamento de artigos críticos e semicríticos conforme RDC 15/2012. Coleta e entrega incluídas.', preco: 'R$ 4,50 / artigo', prazo: '24h', destaque: true },
@@ -306,6 +340,184 @@ export default function PerfilPage() {
               )}
             </div>
           </section>
+
+          {/* ── Plano ── */}
+          <section className="prof-card span-2 plano-section">
+            <div className="prof-doc-head">
+              <div>
+                <h3>Plano e verificação</h3>
+                <p className="prof-card-sub">Escolha como sua empresa aparece na plataforma.</p>
+              </div>
+              {plano === 'premium' && (
+                <span className="plano-active-badge premium">
+                  <Icon name="star" size={13} /> Premium ativo
+                </span>
+              )}
+              {plano === 'verified' && (
+                <span className="plano-active-badge verified">
+                  <Icon name="check" size={13} stroke={2.6} /> Em análise / Verificado
+                </span>
+              )}
+            </div>
+
+            <div className="plano-grid">
+              {/* Básico */}
+              <div className={'plano-card' + (plano === 'free' ? ' current' : '')}>
+                <div className="plano-header">
+                  <span className="plano-name">Básico</span>
+                  {plano === 'free' && <span className="plano-badge current">Plano atual</span>}
+                </div>
+                <div className="plano-price">Grátis</div>
+                <ul className="plano-features">
+                  <li><Icon name="check" size={13} stroke={2.6} /> Perfil público no diretório</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Listado nos resultados de busca</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Catálogo de serviços</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Recebe pedidos de orçamento</li>
+                  <li className="plano-no"><Icon name="close" size={13} stroke={2.4} /> Sem selo Verificado</li>
+                  <li className="plano-no"><Icon name="close" size={13} stroke={2.4} /> Sem destaque na busca</li>
+                </ul>
+                {plano !== 'free' && (
+                  <button className="plano-btn ghost" onClick={() => { setPlano('free'); setForm((f) => f ? { ...f, plan: 'free', verified: false } : f); }}>
+                    Usar Básico
+                  </button>
+                )}
+                {plano === 'free' && <div className="plano-current-lbl">Plano atual</div>}
+              </div>
+
+              {/* Verificada */}
+              <div className={'plano-card featured' + (plano === 'verified' ? ' current' : '')}>
+                <div className="plano-header">
+                  <span className="plano-name">Verificada</span>
+                  {plano === 'verified' && <span className="plano-badge verified">Em análise</span>}
+                </div>
+                <div className="plano-price">Grátis <span className="plano-price-note">mediante análise</span></div>
+                <ul className="plano-features">
+                  <li><Icon name="check" size={13} stroke={2.6} /> Tudo do Básico</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Selo <strong>Verificado</strong> no perfil</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Destaque nos resultados de busca</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Análise documental pela equipe 360H</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Maior confiança para compradores</li>
+                  <li className="plano-no"><Icon name="close" size={13} stroke={2.4} /> Sem posição premium</li>
+                </ul>
+                {plano !== 'verified' && plano !== 'premium' && (
+                  <button className="plano-btn primary" onClick={solicitarVerificado}>
+                    Solicitar verificação
+                  </button>
+                )}
+                {plano === 'verified' && <div className="plano-current-lbl verified">Solicitação enviada — em análise</div>}
+                {plano === 'premium' && (
+                  <button className="plano-btn ghost" onClick={solicitarVerificado}>
+                    Usar Verificada
+                  </button>
+                )}
+              </div>
+
+              {/* Premium */}
+              <div className={'plano-card premium' + (plano === 'premium' ? ' current' : '')}>
+                <div className="plano-header">
+                  <span className="plano-name">Destaque Premium</span>
+                  {plano === 'premium' && <span className="plano-badge premium"><Icon name="star" size={11} /> Ativo</span>}
+                </div>
+                <div className="plano-price">
+                  R$&nbsp;19,90 <span className="plano-price-note">/mês</span>
+                </div>
+                <ul className="plano-features">
+                  <li><Icon name="check" size={13} stroke={2.6} /> Tudo do Verificada</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Posição de <strong>topo</strong> nos resultados</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Perfil em destaque na home</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Suporte prioritário</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Relatório mensal de leads</li>
+                  <li><Icon name="check" size={13} stroke={2.6} /> Cancelamento a qualquer momento</li>
+                </ul>
+                {plano !== 'premium' && (
+                  <button className="plano-btn premium" onClick={() => setShowPay(true)}>
+                    <Icon name="star" size={14} /> Assinar Premium
+                  </button>
+                )}
+                {plano === 'premium' && <div className="plano-current-lbl premium">Assinatura ativa</div>}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Modal pagamento Premium ── */}
+          {showPay && (
+            <div className="pay-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPay(false); }}>
+              <div className="pay-modal">
+                <div className="pay-modal-head">
+                  <div>
+                    <h3>Destaque Premium</h3>
+                    <p className="prof-card-sub">R$ 19,90/mês · Cancele quando quiser</p>
+                  </div>
+                  <button className="doc-remove" onClick={() => setShowPay(false)}>
+                    <Icon name="close" size={16} stroke={2.4} />
+                  </button>
+                </div>
+
+                {payOk ? (
+                  <div className="pay-ok">
+                    <Icon name="check" size={36} stroke={2} />
+                    <h4>Assinatura ativada!</h4>
+                    <p>Seu perfil agora aparece em destaque na plataforma.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="pay-fields">
+                      <div className="reg-field" style={{ gridColumn: '1 / -1' }}>
+                        <span className="reg-label">Nome no cartão</span>
+                        <input
+                          className="prof-input"
+                          placeholder="Ex: MARIA C FURTADO"
+                          value={payCard.nome}
+                          onChange={(e) => setPayCard((p) => ({ ...p, nome: e.target.value.toUpperCase() }))}
+                        />
+                      </div>
+                      <div className="reg-field" style={{ gridColumn: '1 / -1' }}>
+                        <span className="reg-label">Número do cartão</span>
+                        <input
+                          className="prof-input pay-card-input"
+                          placeholder="0000 0000 0000 0000"
+                          inputMode="numeric"
+                          value={payCard.numero}
+                          onChange={(e) => setPayCard((p) => ({ ...p, numero: maskCard(e.target.value) }))}
+                        />
+                      </div>
+                      <div className="reg-field">
+                        <span className="reg-label">Validade</span>
+                        <input
+                          className="prof-input"
+                          placeholder="MM/AA"
+                          inputMode="numeric"
+                          value={payCard.validade}
+                          onChange={(e) => setPayCard((p) => ({ ...p, validade: maskExp(e.target.value) }))}
+                        />
+                      </div>
+                      <div className="reg-field">
+                        <span className="reg-label">CVV</span>
+                        <input
+                          className="prof-input"
+                          placeholder="123"
+                          inputMode="numeric"
+                          maxLength={4}
+                          value={payCard.cvv}
+                          onChange={(e) => setPayCard((p) => ({ ...p, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      className="plano-btn premium full"
+                      disabled={payLoading}
+                      onClick={confirmarPremium}
+                    >
+                      {payLoading ? 'Processando…' : <><Icon name="star" size={15} /> Confirmar assinatura — R$ 19,90/mês</>}
+                    </button>
+                    <p className="pay-note">
+                      <Icon name="file" size={12} /> Ambiente seguro · Dados protegidos por criptografia
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ── Fotos da empresa ── */}
           <section className="prof-card span-2">
