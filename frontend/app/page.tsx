@@ -1,5 +1,5 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCompanies } from '../lib/services';
 import { useAsync } from '../lib/useAsync';
@@ -9,6 +9,38 @@ import { SearchBar } from '../components/SearchBar';
 import { SegmentChips } from '../components/SegmentChips';
 import { CompanyCard } from '../components/CompanyCard';
 import { Loading, LoadError } from '../components/AsyncState';
+
+// ── Camada de conteúdo/CMS ─────────────────────────────────────────
+// Trocar por variáveis de ambiente ou fetch de CMS em produção.
+const HERO_IMAGE  = '/images/hero-saude.jpg';
+const ABOUT_IMAGE = '/images/about-saude.jpg';
+
+function HeroImg() {
+  const [err, setErr] = useState(false);
+  if (err) return null;
+  return (
+    <img
+      src={HERO_IMAGE}
+      alt="Equipe clínica em ambiente hospitalar"
+      className="hero-photo-img"
+      onError={() => setErr(true)}
+      aria-hidden="true"
+    />
+  );
+}
+
+function AboutImg() {
+  const [err, setErr] = useState(false);
+  if (err) return <div className="feature-split-img" aria-hidden="true" />;
+  return (
+    <img
+      src={ABOUT_IMAGE}
+      alt="Profissionais de saúde em atendimento"
+      className="feature-split-img"
+      onError={() => setErr(true)}
+    />
+  );
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -20,30 +52,32 @@ export default function HomePage() {
     [companies]
   );
 
-  const runSearch = () => {
-    applySearchUf();
-    router.push('/buscar');
-  };
-  const onSegment = (segId: string) => {
-    pickSegment(segId);
-    router.push('/buscar');
-  };
+  const runSearch = () => { applySearchUf(); router.push('/buscar'); };
+  const onSegment = (segId: string) => { pickSegment(segId); router.push('/buscar'); };
 
   return (
     <div className="screen home">
-      <section className="hero">
-        <div className="hero-bg" aria-hidden="true" />
-        <div className="hero-inner">
+
+      {/* 2. HERO FOTOGRÁFICO full-bleed */}
+      <section className="hero-photo" aria-label="360 Hospitalar — busca de fornecedores">
+        <HeroImg />
+        <div className="hero-photo-scrim" aria-hidden="true" />
+
+        <div className="hero-photo-inner">
           <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
+
           <h1 className="hero-title">
-            Encontre <em>fornecedores</em> e parceiros
+            Encontre fornecedores e parceiros
             <br />
-            confiáveis para sua operação de saúde.
+            <em>confiáveis</em> para sua operação de saúde.
           </h1>
+
           <p className="hero-sub">
-            Clínicas, hospitais e prestadores privados conectam-se a fornecedores verificados — de
-            laboratórios e equipamentos a esterilização e gestão de resíduos.
+            Clínicas, hospitais e prestadores privados conectam-se a fornecedores
+            verificados — de laboratórios e equipamentos a esterilização e gestão
+            de resíduos.
           </p>
+
           <div className="hero-search">
             <SearchBar
               value={query}
@@ -55,6 +89,7 @@ export default function HomePage() {
               placeholder="Ex: esterilização, equipamentos, software…"
             />
           </div>
+
           <div className="hero-stats">
             <div>
               <strong>2.400+</strong>
@@ -74,6 +109,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Ticker de organizações */}
       <section className="ticker-band" aria-label="Organizações parceiras">
         <div className="ticker-track" aria-hidden="true">
           {[...Array(2)].flatMap(() => [
@@ -91,6 +127,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 4. Explore por segmento */}
       <section className="band">
         <div className="band-head">
           <h2>Explore por segmento</h2>
@@ -99,6 +136,7 @@ export default function HomePage() {
         <SegmentChips onPick={onSegment} limit={8} />
       </section>
 
+      {/* 5. Fornecedores em destaque */}
       <section className="band">
         <div className="band-head row">
           <div>
@@ -122,29 +160,61 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="trust-band">
-        <div className="trust-item">
-          <div className="trust-ico"><Icon name="shield2" size={22} /></div>
-          <div>
-            <strong>Verificação documental</strong>
-            <span>CNPJ, licenças e certificações auditadas.</span>
-          </div>
-        </div>
-        <div className="trust-item">
-          <div className="trust-ico"><Icon name="star" size={22} /></div>
-          <div>
-            <strong>Avaliações reais</strong>
-            <span>Notas de compradores do setor de saúde.</span>
-          </div>
-        </div>
-        <div className="trust-item">
-          <div className="trust-ico"><Icon name="users" size={22} /></div>
-          <div>
-            <strong>Contato direto</strong>
-            <span>Fale com o fornecedor sem intermediários.</span>
+      {/* 6. SEÇÃO FOTOGRÁFICA DIVIDIDA — Por que a 360 Hospitalar */}
+      <section className="band">
+        <div className="feature-split">
+          <AboutImg />
+
+          <div className="feature-split-body">
+            <div className="hero-eyebrow">Por que a 360 Hospitalar</div>
+            <h2>
+              Cada fornecedor passa por verificação antes de aparecer na busca.
+            </h2>
+            <p>
+              Garantimos que hospitais, clínicas e gestores de saúde encontrem
+              apenas parceiros com documentação em dia e histórico avaliado por
+              pares do setor.
+            </p>
+
+            <div className="feature-pillars">
+              <div className="feature-pillar">
+                <div className="feature-pillar-ico">
+                  <Icon name="shield2" size={22} />
+                </div>
+                <div>
+                  <strong>Verificação documental</strong>
+                  <span>CNPJ, licenças sanitárias e certificações auditadas antes da aprovação.</span>
+                </div>
+              </div>
+              <div className="feature-pillar">
+                <div className="feature-pillar-ico">
+                  <Icon name="star" size={22} />
+                </div>
+                <div>
+                  <strong>Avaliações reais</strong>
+                  <span>Notas e comentários de compradores verificados do setor de saúde.</span>
+                </div>
+              </div>
+              <div className="feature-pillar">
+                <div className="feature-pillar-ico">
+                  <Icon name="users" size={22} />
+                </div>
+                <div>
+                  <strong>Contato direto</strong>
+                  <span>Fale com o fornecedor sem intermediários — cotação em minutos.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="feature-split-cta">
+              <button className="btn-primary" onClick={() => router.push('/cadastrar')}>
+                <Icon name="check" size={16} stroke={2.4} /> Cadastrar minha empresa
+              </button>
+            </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
