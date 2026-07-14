@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { SEGMENTS, STATES } from '../../data/reference';
 import type { Plan } from '../../data/types';
 import { Icon } from '../../lib/icons';
-import { maskCNPJ, maskCard, maskExp } from '../../lib/masks';
+import { maskCNPJ, maskCNES, maskCard, maskExp } from '../../lib/masks';
 import { Field } from '../../components/Field';
 import { PreviewCard } from '../../components/PreviewCard';
 import { createCompany } from '../../lib/services';
@@ -13,7 +13,7 @@ type TipoConta = '' | 'empresa' | 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_
 
 type RegisterForm = {
   tipoConta: TipoConta;
-  name: string; cnpj: string; site: string; about: string;
+  name: string; cnpj: string; cnes: string; site: string; about: string;
   segment: string; uf: string; city: string; tagline: string; atendeUfs: string[];
   email: string; phone: string; employees: string; badges: string[]; terms: boolean;
   conselho: string; conselhoNum: string; plan: Plan;
@@ -27,12 +27,14 @@ const INST_TYPES: { id: TipoConta; label: string; desc: string }[] = [
   { id: 'orgao_pub', label: 'Órgão Público',     desc: 'Secretaria ou órgão estadual / federal' },
 ];
 
+const CNES_TYPES: TipoConta[] = ['clinica', 'hosp_priv', 'hosp_pub'];
+
 const PORTES = ['1–10', '10–50', '50–200', '200–500', '500–1.000', '1.000+'];
 const CERT_OPTS = ['ANVISA', 'ISO 9001', 'ISO 13485', 'ISO 27001', 'LGPD', 'RDC 222', 'Inmetro', 'NR-32', 'IBAMA', 'Boas Práticas'];
 const CONSELHOS = ['CRM', 'COREN', 'CRF', 'CRO', 'CRBM', 'CRN', 'CRP', 'CREFITO', 'CRMV', 'CREA', 'Outro'];
 
 const INITIAL: RegisterForm = {
-  tipoConta: '', name: '', cnpj: '', site: '', about: '', segment: '', uf: '', city: '',
+  tipoConta: '', name: '', cnpj: '', cnes: '', site: '', about: '', segment: '', uf: '', city: '',
   tagline: '', atendeUfs: [], email: '', phone: '', employees: '', badges: [], terms: false,
   conselho: '', conselhoNum: '', plan: 'free',
 };
@@ -70,7 +72,9 @@ export default function CadastrarPage() {
     }
     return [
       tipoStep,
-      { key: 'dados',   label: 'Dados da instituição', fields: ['name', 'cnpj', 'uf', 'city', 'about'] as (keyof RegisterForm)[] },
+      { key: 'dados',   label: 'Dados da instituição', fields: [
+        'name', 'cnpj', ...(CNES_TYPES.includes(form.tipoConta) ? ['cnes'] as const : []), 'uf', 'city', 'about',
+      ] as (keyof RegisterForm)[] },
       { key: 'contato', label: 'Contato',               fields: ['email', 'phone'] as (keyof RegisterForm)[] },
     ];
   }, [form.tipoConta]);
@@ -353,6 +357,11 @@ export default function CadastrarPage() {
                 <Field label="CNPJ" required hint="Usado para verificação cadastral.">
                   <input value={form.cnpj} onChange={(e) => set('cnpj', maskCNPJ(e.target.value))} placeholder="00.000.000/0000-00" inputMode="numeric" />
                 </Field>
+                {CNES_TYPES.includes(form.tipoConta) && (
+                  <Field label="CNES" required hint="Cadastro Nacional de Estabelecimentos de Saúde.">
+                    <input value={form.cnes} onChange={(e) => set('cnes', maskCNES(e.target.value))} placeholder="0000000" inputMode="numeric" />
+                  </Field>
+                )}
                 <div className="reg-row2">
                   <Field label="Estado (sede)" required>
                     <div className="reg-select">

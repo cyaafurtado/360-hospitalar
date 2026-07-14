@@ -7,6 +7,10 @@ export function maskCNPJ(v: string): string {
     .replace(/(\d{4})(\d)/, '$1-$2');
 }
 
+export function maskCNES(v: string): string {
+  return v.replace(/\D/g, '').slice(0, 7);
+}
+
 export function maskCard(v: string): string {
   return v.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
 }
