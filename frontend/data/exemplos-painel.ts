@@ -1,5 +1,11 @@
 import type { RequestStatus, RequestType } from './types';
 
+export type RespostaFornecedor = {
+  texto: string;
+  quando: string;
+  autor?: string;
+};
+
 export type SolEnviada = {
   id: string;
   prestador: string;
@@ -12,6 +18,7 @@ export type SolEnviada = {
   quando: string;
   resumo: string;
   prazo?: string;
+  resposta?: RespostaFornecedor;
 };
 
 export const EXEMPLOS_PAINEL: SolEnviada[] = [
@@ -27,6 +34,11 @@ export const EXEMPLOS_PAINEL: SolEnviada[] = [
     quando: 'há 2 dias',
     prazo: '10 dias úteis',
     resumo: 'Cotação para esterilização semanal de 800 instrumentais cirúrgicos. Interesse em contrato anual com coleta e entrega.',
+    resposta: {
+      texto: 'Conseguimos atender o volume semanal de 800 instrumentais com coleta e entrega inclusas. Proposta: R$ 6.400/mês no contrato anual, com SLA de devolução em até 24h e rastreabilidade por lote. Podemos agendar uma visita técnica para validar o fluxo antes de fechar.',
+      quando: 'há 1 dia',
+      autor: 'MedSafe Esterilização Ltda',
+    },
   },
   {
     id: 'SOL-0039',
@@ -65,6 +77,11 @@ export const EXEMPLOS_PAINEL: SolEnviada[] = [
     quando: 'há 8 dias',
     prazo: '15 dias úteis',
     resumo: 'Cotação de 2 ultrassônicos portáteis modelo institucional e contrato de manutenção preventiva anual.',
+    resposta: {
+      texto: 'Temos os 2 ultrassônicos portáteis em estoque, modelo institucional com garantia de 24 meses. Valor: R$ 78.500 (unidade) + contrato de manutenção preventiva anual de R$ 4.200. Prazo de entrega: 12 dias úteis após aprovação. Proposta comercial completa em anexo por e-mail.',
+      quando: 'há 6 dias',
+      autor: 'DiagPro Equipamentos Médicos',
+    },
   },
   {
     id: 'SOL-0031',
@@ -77,6 +94,11 @@ export const EXEMPLOS_PAINEL: SolEnviada[] = [
     servico: 'Lavanderia hospitalar terceirizada',
     quando: 'há 12 dias',
     resumo: 'Terceirização completa de lavanderia — enxoval (500 kg/dia), uniformes e roupas cirúrgicas. Contrato de 24 meses assinado.',
+    resposta: {
+      texto: 'Proposta aceita e contrato de 24 meses assinado: R$ 11.900/mês para 500 kg/dia (enxoval, uniformes e roupas cirúrgicas), com coleta e entrega diárias e reposição de peças danificadas sem custo adicional. Início da operação em 5 dias úteis.',
+      quando: 'há 9 dias',
+      autor: 'LavClean Hospitalar',
+    },
   },
   {
     id: 'SOL-0028',

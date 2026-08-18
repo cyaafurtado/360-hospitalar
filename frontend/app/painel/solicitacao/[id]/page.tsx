@@ -156,6 +156,22 @@ export default function AcompanharSolicitacaoPage() {
               </div>
             </div>
 
+            {/* Resposta do fornecedor */}
+            {sol.resposta && (
+              <div className="sol-card">
+                <h3 className="sol-card-title">
+                  <Icon name="mail" size={16} /> Resposta do fornecedor
+                </h3>
+                <div className="sol-resposta-box">
+                  <p>{sol.resposta.texto}</p>
+                  <div className="sol-resposta-meta">
+                    <Icon name="check" size={12} stroke={2.5} />
+                    <span>{sol.resposta.autor ?? sol.prestador} · {sol.resposta.quando}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Dados do fornecedor */}
             <div className="sol-card">
               <h3 className="sol-card-title">

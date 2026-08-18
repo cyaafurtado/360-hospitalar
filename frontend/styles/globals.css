@@ -1157,6 +1157,10 @@ em { font-style: italic; }
 .sol-resumo { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
 .sol-resumo p { font-size: 14.5px; color: var(--text); line-height: 1.6; }
 
+.sol-resposta-box { background: color-mix(in oklch, var(--accent), white 92%); border: 1px solid color-mix(in oklch, var(--accent), white 76%); border-radius: var(--radius-sm); padding: 16px 18px; }
+.sol-resposta-box p { font-size: 14.5px; color: var(--text-strong); line-height: 1.6; white-space: pre-wrap; margin: 0; }
+.sol-resposta-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 12px; }
+
 .sol-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 16px; }
 .sol-toggle input { display: none; }
 .sol-toggle-track { width: 42px; height: 24px; border-radius: 12px; background: var(--border); flex: none; position: relative; transition: background .2s; }
