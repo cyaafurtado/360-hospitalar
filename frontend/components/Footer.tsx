@@ -12,8 +12,6 @@ const NAV_LINKS = [
 
 const CONTACT = [
   { icon: 'mail', text: 'contato@360hospitalar.com.br' },
-  { icon: 'phone', text: '(11) 3000-0000' },
-  { icon: 'clock', text: 'Seg–Sex, 9h às 18h' },
 ];
 
 export function Footer() {
