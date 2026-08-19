@@ -21,6 +21,9 @@ export type SolEnviada = {
   resposta?: RespostaFornecedor;
   resultado?: 'aprovada' | 'nao-aprovada';
   encerradaEm?: string;
+  cancelResultado?: 'positivo' | 'negativo';
+  cancelMotivo?: string;
+  canceladoEm?: string;
 };
 
 export const EXEMPLOS_PAINEL: SolEnviada[] = [

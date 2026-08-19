@@ -36,6 +36,9 @@ export default function AcompanharSolicitacaoPage() {
   const [encerrarModal, setEncerrarModal] = useState(false);
   const [aprovada, setAprovada] = useState<boolean | null>(null);
   const [encerrando, setEncerrando] = useState(false);
+  const [cancelarModal, setCancelarModal] = useState(false);
+  const [cancelResultado, setCancelResultado] = useState<'positivo' | 'negativo' | null>(null);
+  const [cancelMotivo, setCancelMotivo] = useState('');
 
   if (!sol) return (
     <div className="portal-screen">
@@ -56,12 +59,27 @@ export default function AcompanharSolicitacaoPage() {
   const currentStep = STATUS_ORDER[sol.status];
   const isTerminal = sol.status === 'cancelada' || sol.status === 'declinada' || sol.status === 'fechada';
 
-  const cancelar = () => {
+  const fecharModalCancelar = () => {
+    if (cancelando) return;
+    setCancelarModal(false);
+    setCancelResultado(null);
+    setCancelMotivo('');
+  };
+
+  const confirmarCancelamento = () => {
+    if (cancelando || cancelResultado === null || !cancelMotivo.trim()) return;
     setCancelando(true);
     setTimeout(() => {
-      setSol((prev) => prev ? { ...prev, status: 'cancelada' } : prev);
+      setSol((prev) => prev ? {
+        ...prev,
+        status: 'cancelada',
+        cancelResultado,
+        cancelMotivo: cancelMotivo.trim(),
+        canceladoEm: new Date().toLocaleDateString('pt-BR'),
+      } : prev);
       setCancelando(false);
       setCancelado(true);
+      setCancelarModal(false);
     }, 600);
   };
 
@@ -115,9 +133,21 @@ export default function AcompanharSolicitacaoPage() {
 
         {sol.status === 'cancelada' && (
           <div className="sol-terminal-banner canceled">
-            <div className="sol-banner-row">
-              <Icon name="close" size={16} stroke={2.4} />
-              <span>Esta solicitação foi <strong>cancelada</strong>.</span>
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="close" size={16} stroke={2.4} />
+                <span>
+                  Esta solicitação foi <strong>cancelada</strong>
+                  {sol.cancelResultado === 'positivo' && ' — atendimento concluído de forma positiva'}
+                  {sol.cancelResultado === 'negativo' && ' — atendimento concluído de forma negativa'}
+                  {sol.canceladoEm ? ` em ${sol.canceladoEm}` : ''}.
+                </span>
+              </div>
+              {sol.cancelMotivo && (
+                <div className="sol-banner-obs">
+                  <span className="sol-banner-obs-label">Motivo informado:</span> {sol.cancelMotivo}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -276,7 +306,7 @@ export default function AcompanharSolicitacaoPage() {
                   </button>
                   <button
                     className="sol-status-btn danger"
-                    onClick={cancelar}
+                    onClick={() => setCancelarModal(true)}
                     disabled={cancelando}
                   >
                     {cancelando ? 'Cancelando…' : 'Cancelar solicitação'}
@@ -349,6 +379,65 @@ export default function AcompanharSolicitacaoPage() {
               </button>
               <button className="btn-primary" onClick={confirmarEncerramento} disabled={encerrando || aprovada === null}>
                 {encerrando ? 'Encerrando…' : 'Confirmar encerramento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de cancelamento da solicitação */}
+      {cancelarModal && (
+        <div className="sol-modal-overlay" onClick={fecharModalCancelar}>
+          <div className="sol-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sol-modal-icon warn">
+              <Icon name="close" size={24} stroke={2.4} />
+            </div>
+            <h2 className="sol-modal-title">Cancelar solicitação</h2>
+            <p className="sol-modal-desc">
+              Antes de cancelar, conte como ficou o atendimento com <strong>{sol.prestador}</strong> —
+              isso ajuda a manter o histórico da plataforma.
+            </p>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">O serviço foi concluído de forma positiva ou negativa?</label>
+              <div className="sol-status-btns">
+                <button
+                  type="button"
+                  className={'sol-status-btn' + (cancelResultado === 'positivo' ? ' active' : '')}
+                  onClick={() => setCancelResultado('positivo')}
+                >
+                  {cancelResultado === 'positivo' && <Icon name="check" size={13} stroke={3} />}
+                  Positivo — foi resolvido de outra forma
+                </button>
+                <button
+                  type="button"
+                  className={'sol-status-btn danger' + (cancelResultado === 'negativo' ? ' active' : '')}
+                  onClick={() => setCancelResultado('negativo')}
+                >
+                  {cancelResultado === 'negativo' && <Icon name="check" size={13} stroke={3} />}
+                  Negativo — não foi resolvido
+                </button>
+              </div>
+            </div>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">Motivo do encerramento</label>
+              <textarea
+                className="sol-modal-textarea"
+                rows={3}
+                value={cancelMotivo}
+                onChange={(e) => setCancelMotivo(e.target.value)}
+                placeholder="Explique por que está encerrando esta solicitação na plataforma…"
+              />
+            </div>
+            <div className="sol-modal-actions">
+              <button className="btn-ghost" onClick={fecharModalCancelar} disabled={cancelando}>
+                Voltar
+              </button>
+              <button
+                className="btn-danger"
+                onClick={confirmarCancelamento}
+                disabled={cancelando || cancelResultado === null || !cancelMotivo.trim()}
+              >
+                {cancelando ? 'Cancelando…' : 'Confirmar cancelamento'}
               </button>
             </div>
           </div>
