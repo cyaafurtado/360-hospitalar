@@ -6,8 +6,9 @@
 
 /* ===== Design 360 Hospitalar — portado de sautek/styles.css (fonte da verdade visual) ===== */
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; overflow-x: clip; }
 body { background: var(--bg); }
+img, video, table { max-width: 100%; height: auto; }
 
 .app {
   /* ---- type ---- */
@@ -1328,6 +1329,8 @@ em { font-style: italic; }
   .reg-body { grid-template-columns: 1fr; }
   .reg-aside { position: static; flex-direction: row; flex-wrap: wrap; }
   .reg-aside-block { flex: 1; min-width: 240px; }
+  .sol-grid { grid-template-columns: 1fr; }
+  .sol-side { position: static; }
   /* feature split tablet */
   .feature-split { grid-template-columns: 1fr; gap: 32px; }
   .feature-split-img { height: 340px; }
@@ -1385,4 +1388,9 @@ em { font-style: italic; }
   .cv-source-label { border-right: none; border-bottom: 1px solid var(--border); }
   .cv-cta-inner { padding: 36px 24px; }
   .cv-step { grid-template-columns: 48px 1fr; }
+  /* barra de navegação do Portal/Painel */
+  .portal-subnav-inner { height: auto; flex-wrap: wrap; padding: 10px 16px; gap: 8px; }
+  .portal-tabs { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .portal-tab { white-space: nowrap; padding: 10px 12px; }
+  .portal-subnav-actions { width: 100%; justify-content: space-between; flex-wrap: wrap; row-gap: 8px; }
 }
