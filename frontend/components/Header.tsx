@@ -7,6 +7,13 @@ import { useAppStore } from '../lib/store';
 export function Header() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const profileRole = useAppStore((s) => s.profileRole);
+
+  const irParaMeuPortal = () => {
+    if (profileRole === 'contratante') router.push('/painel');
+    else if (profileRole === 'fornecedor') router.push('/portal');
+    else router.push('/escolher-perfil');
+  };
 
   return (
     <header className="site-header">
@@ -21,7 +28,7 @@ export function Header() {
             <a onClick={() => router.push('/cadastrar')}>Para fornecedores</a>
           )}
           {authEmail ? (
-            <button className="btn-primary" onClick={() => router.push('/portal')}>
+            <button className="btn-primary" onClick={irParaMeuPortal}>
               Meu portal
             </button>
           ) : (
