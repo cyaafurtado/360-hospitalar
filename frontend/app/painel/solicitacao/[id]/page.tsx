@@ -33,6 +33,9 @@ export default function AcompanharSolicitacaoPage() {
   const [sol, setSol] = useState(original);
   const [cancelando, setCancelando] = useState(false);
   const [cancelado, setCancelado] = useState(false);
+  const [encerrarModal, setEncerrarModal] = useState(false);
+  const [aprovada, setAprovada] = useState<boolean | null>(null);
+  const [encerrando, setEncerrando] = useState(false);
 
   if (!sol) return (
     <div className="portal-screen">
@@ -59,6 +62,28 @@ export default function AcompanharSolicitacaoPage() {
       setSol((prev) => prev ? { ...prev, status: 'cancelada' } : prev);
       setCancelando(false);
       setCancelado(true);
+    }, 600);
+  };
+
+  const fecharModalEncerrar = () => {
+    if (encerrando) return;
+    setEncerrarModal(false);
+    setAprovada(null);
+  };
+
+  const confirmarEncerramento = () => {
+    if (aprovada === null || encerrando) return;
+    setEncerrando(true);
+    setTimeout(() => {
+      setSol((prev) => prev ? {
+        ...prev,
+        status: 'fechada',
+        resultado: aprovada ? 'aprovada' : 'nao-aprovada',
+        encerradaEm: new Date().toLocaleDateString('pt-BR'),
+      } : prev);
+      setEncerrando(false);
+      setEncerrarModal(false);
+      setAprovada(null);
     }, 600);
   };
 
@@ -101,6 +126,28 @@ export default function AcompanharSolicitacaoPage() {
             <div className="sol-banner-row">
               <Icon name="signal" size={16} stroke={2} />
               <span>O fornecedor <strong>declineu</strong> esta solicitação. Você pode buscar outros fornecedores.</span>
+            </div>
+          </div>
+        )}
+        {sol.status === 'fechada' && sol.resultado === 'aprovada' && (
+          <div className="sol-terminal-banner approved">
+            <div className="sol-banner-row">
+              <Icon name="check" size={16} stroke={2.4} />
+              <span>
+                Cotação encerrada — proposta <strong>aprovada</strong> e venda concluída
+                {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
+              </span>
+            </div>
+          </div>
+        )}
+        {sol.status === 'fechada' && sol.resultado === 'nao-aprovada' && (
+          <div className="sol-terminal-banner warn">
+            <div className="sol-banner-row">
+              <Icon name="close" size={16} stroke={2.4} />
+              <span>
+                Cotação encerrada — proposta <strong>não aprovada</strong>, sem venda concluída
+                {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
+              </span>
             </div>
           </div>
         )}
@@ -222,6 +269,12 @@ export default function AcompanharSolicitacaoPage() {
                 <>
                   <div className="sol-status-sep" />
                   <button
+                    className="sol-status-btn"
+                    onClick={() => setEncerrarModal(true)}
+                  >
+                    <Icon name="check" size={13} stroke={2.6} /> Encerrar cotação
+                  </button>
+                  <button
                     className="sol-status-btn danger"
                     onClick={cancelar}
                     disabled={cancelando}
@@ -257,6 +310,50 @@ export default function AcompanharSolicitacaoPage() {
         </div>
 
       </div>
+
+      {/* Modal de encerramento da cotação */}
+      {encerrarModal && (
+        <div className="sol-modal-overlay" onClick={fecharModalEncerrar}>
+          <div className="sol-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sol-modal-icon success">
+              <Icon name="check" size={24} stroke={2.4} />
+            </div>
+            <h2 className="sol-modal-title">Encerrar cotação</h2>
+            <p className="sol-modal-desc">
+              Confirme que a cotação com <strong>{sol.prestador}</strong> foi totalmente finalizada.
+            </p>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">A proposta foi aprovada e a venda foi concluída?</label>
+              <div className="sol-status-btns">
+                <button
+                  type="button"
+                  className={'sol-status-btn' + (aprovada === true ? ' active' : '')}
+                  onClick={() => setAprovada(true)}
+                >
+                  {aprovada === true && <Icon name="check" size={13} stroke={3} />}
+                  Sim, aprovada — venda concluída
+                </button>
+                <button
+                  type="button"
+                  className={'sol-status-btn warn' + (aprovada === false ? ' active' : '')}
+                  onClick={() => setAprovada(false)}
+                >
+                  {aprovada === false && <Icon name="check" size={13} stroke={3} />}
+                  Não foi aprovada / sem venda
+                </button>
+              </div>
+            </div>
+            <div className="sol-modal-actions">
+              <button className="btn-ghost" onClick={fecharModalEncerrar} disabled={encerrando}>
+                Voltar
+              </button>
+              <button className="btn-primary" onClick={confirmarEncerramento} disabled={encerrando || aprovada === null}>
+                {encerrando ? 'Encerrando…' : 'Confirmar encerramento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

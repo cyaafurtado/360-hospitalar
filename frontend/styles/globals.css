@@ -1195,6 +1195,7 @@ em { font-style: italic; }
 .sol-terminal-banner.canceled { background: oklch(0.96 0.04 15); border: 1px solid oklch(0.88 0.06 15); color: oklch(0.45 0.18 15); }
 .sol-terminal-banner.warn { background: oklch(0.97 0.04 45); border: 1px solid oklch(0.9 0.07 45); color: oklch(0.48 0.14 45); }
 .sol-terminal-banner.pending { background: color-mix(in oklch, var(--primary), white 90%); border: 1px solid color-mix(in oklch, var(--primary), white 72%); color: var(--primary); }
+.sol-terminal-banner.approved { background: color-mix(in oklch, var(--accent), white 90%); border: 1px solid color-mix(in oklch, var(--accent), white 70%); color: oklch(0.40 0.13 155); }
 .sol-banner-main { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .sol-banner-row { display: flex; align-items: center; gap: 9px; line-height: 1.45; }
 .sol-banner-when { font-size: 12.5px; font-weight: 400; opacity: 0.75; }
@@ -1205,6 +1206,7 @@ em { font-style: italic; }
 .sol-modal { background: var(--surface); border-radius: var(--radius-lg); padding: 32px; max-width: 460px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,.22); display: flex; flex-direction: column; gap: 16px; }
 .sol-modal-icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none; margin: 0 auto 4px; }
 .sol-modal-icon.warn { background: oklch(0.96 0.04 45); color: oklch(0.5 0.14 45); }
+.sol-modal-icon.success { background: color-mix(in oklch, var(--accent), white 88%); color: var(--accent); }
 .sol-modal-title { font-size: 20px; font-weight: 760; color: var(--text-strong); text-align: center; letter-spacing: -0.015em; }
 .sol-modal-desc { font-size: 14.5px; color: var(--text); line-height: 1.55; text-align: center; }
 .sol-modal-field { display: flex; flex-direction: column; gap: 6px; }

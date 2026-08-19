@@ -19,6 +19,8 @@ export type SolEnviada = {
   resumo: string;
   prazo?: string;
   resposta?: RespostaFornecedor;
+  resultado?: 'aprovada' | 'nao-aprovada';
+  encerradaEm?: string;
 };
 
 export const EXEMPLOS_PAINEL: SolEnviada[] = [
