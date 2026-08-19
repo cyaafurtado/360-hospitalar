@@ -23,7 +23,8 @@ app.use(
       if (!origin) return cb(null, true); // server-to-server / curl
       if (config.corsOrigins.includes(origin)) return cb(null, true);
       if (/\.vercel\.app$/.test(origin)) return cb(null, true);
-      if (/\.verificadoagora\.com\.br$/.test(origin)) return cb(null, true);
+      if (/^https:\/\/(www\.)?360hospitalar\.com\.br$/.test(origin)) return cb(null, true);
+      if (/\.360hospitalar\.com\.br$/.test(origin)) return cb(null, true);
       cb(new Error(`CORS bloqueado: ${origin}`));
     },
     credentials: true,

@@ -13,8 +13,8 @@
 - **Backend:** Express + TypeScript + `pg` (PostgreSQL com **SQL puro**, migrations versionadas —
   **sem ORM**). JWT + bcrypt para auth. Deploy no **Railway** (auto-deploy a cada `git push`),
   banco **Postgres no Railway**. Pasta `backend/`.
-- **Domínio:** Hostinger (DNS). Front em `360-hospitalar.verificadoagora.com.br`,
-  API em `api-360-hospitalar.verificadoagora.com.br` (CNAMEs apontando p/ Vercel/Railway).
+- **Domínio:** Hostinger (DNS). Front em `360hospitalar.com.br` (raiz, registro A p/ Vercel),
+  API em `api.360hospitalar.com.br` (CNAME p/ Railway).
 - Fluxo de trabalho: **editar → `git push` → Vercel e Railway atualizam sozinhos.** Sem upload manual.
 
 ### Estrutura do repositório
@@ -38,7 +38,7 @@
 - Migrations `.sql` numeradas em `backend/src/db/migrations/`; `db/migrate.ts` aplica as pendentes
   (tabela `migrations`). `railway.json`: build `npm install && npm run build`, start
   `node dist/db/migrate.js && node dist/index.js`.
-- CORS libera `*.verificadoagora.com.br` e `*.vercel.app`. Helmet + rate-limit em `/api`.
+- CORS libera `360hospitalar.com.br` (raiz + subdomínios) e `*.vercel.app`. Helmet + rate-limit em `/api`.
 - Camada de dados isolada: front fala só com a API; trocar mock↔API é trivial.
 
 ### Estado atual (slices)

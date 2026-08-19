@@ -4,9 +4,9 @@
 > Fluxo: você dá `git push` → Vercel e Railway atualizam sozinhos. Sem upload manual.
 
 ```
-360-hospitalar.verificadoagora.com.br      → Frontend Next.js (Vercel)
-api-360-hospitalar.verificadoagora.com.br  → Backend Express  (Railway)
-Banco de dados                             → Postgres (plugin do Railway)
+360hospitalar.com.br      → Frontend Next.js (Vercel)
+api.360hospitalar.com.br  → Backend Express  (Railway)
+Banco de dados             → Postgres (plugin do Railway)
 ```
 
 ---
@@ -48,7 +48,7 @@ No serviço do backend → aba **Variables**, adicione:
 |-----|-------|
 | `NODE_ENV` | `production` |
 | `JWT_SECRET` | *(uma chave longa e aleatória — só será usada na Parte B)* |
-| `CORS_ORIGIN` | `https://360-hospitalar.verificadoagora.com.br` |
+| `CORS_ORIGIN` | `https://360hospitalar.com.br` |
 
 > `DATABASE_URL` e `PORT` já vêm do Railway — não precisa criar.
 > Para gerar o JWT_SECRET: https://generate-secret.now.sh/64
@@ -69,7 +69,7 @@ No serviço do backend → aba **Variables**, adicione:
 
    | Key | Value |
    |-----|-------|
-   | `NEXT_PUBLIC_API_URL` | `https://api-360-hospitalar.verificadoagora.com.br` |
+   | `NEXT_PUBLIC_API_URL` | `https://api.360hospitalar.com.br` |
 
    > Se ainda não criou o subdomínio da API (Parte 4), use **temporariamente** a URL
    > `*.up.railway.app` do passo 2.3. Depois troque e faça **Redeploy**.
@@ -79,28 +79,39 @@ No serviço do backend → aba **Variables**, adicione:
 
 ---
 
-## PARTE 4 — Subdomínios na Hostinger (DNS)
+## PARTE 4 — Domínio na Hostinger (DNS)
 
-A Hostinger guarda só o **DNS** do `verificadoagora.com.br`. Você cria 2 apontamentos (CNAME):
+A Hostinger guarda só o **DNS** do `360hospitalar.com.br`. O front fica no domínio **raiz**
+(por isso é registro `A`, não `CNAME` — raiz de domínio não aceita CNAME) e a API num subdomínio.
 
-### 4.1 Frontend → Vercel
-1. Vercel: **Project (frontend) → Settings → Domains → Add** →
-   `360-hospitalar.verificadoagora.com.br`. O Vercel mostra um CNAME (ex.: `cname.vercel-dns.com`).
-2. Hostinger: **hPanel → Domínios → verificadoagora.com.br → DNS / Zona DNS → Adicionar registro**:
-   - **Tipo:** `CNAME` · **Nome:** `360-hospitalar` · **Valor:** `cname.vercel-dns.com` · **TTL:** padrão
+### 4.1 Frontend (raiz) → Vercel
+1. Vercel: **Project (frontend) → Settings → Domains → Add** → `360hospitalar.com.br`.
+   O Vercel mostra o IP a apontar (histórico: `76.76.21.21` — use o valor exato que a Vercel exibir
+   na hora, pode mudar).
+2. Hostinger → **hPanel → Domínios → 360hospitalar.com.br → DNS / Zona DNS → Adicionar registro**:
+   - **Tipo:** `A` · **Nome:** `@` (raiz) · **Valor:** *(IP que a Vercel mostrar)* · **TTL:** padrão
+3. (Opcional, recomendado) Adicione também `www`: na Vercel, **Add** → `www.360hospitalar.com.br`
+   → ela sugere redirecionar para a raiz e mostra um CNAME (`cname.vercel-dns.com`).
+   Hostinger: **Tipo:** `CNAME` · **Nome:** `www` · **Valor:** `cname.vercel-dns.com`.
 
 ### 4.2 Backend → Railway
 1. Railway: serviço do backend → **Settings → Networking → Custom Domain** →
-   `api-360-hospitalar.verificadoagora.com.br`. O Railway mostra um CNAME (ex.: `xxx.up.railway.app`).
+   `api.360hospitalar.com.br`. O Railway mostra um CNAME (ex.: `xxx.up.railway.app`).
 2. Hostinger → Zona DNS → Adicionar registro:
-   - **Tipo:** `CNAME` · **Nome:** `api-360-hospitalar` · **Valor:** *(o que o Railway mostrar)* · **TTL:** padrão
+   - **Tipo:** `CNAME` · **Nome:** `api` · **Valor:** *(o que o Railway mostrar)* · **TTL:** padrão
 
 > Em minutos a algumas horas o HTTPS é emitido automaticamente nos dois lados.
-> O CORS do backend já libera `*.verificadoagora.com.br` e `*.vercel.app` — não precisa mexer.
+> O CORS do backend já libera `360hospitalar.com.br` (raiz + subdomínios) e `*.vercel.app`.
 
 ### 4.3 Conferir
-- `https://api-360-hospitalar.verificadoagora.com.br/health` → `{"status":"ok"}`
-- `https://360-hospitalar.verificadoagora.com.br` → abre o diretório, busca e perfis funcionando.
+- `https://api.360hospitalar.com.br/health` → `{"status":"ok"}`
+- `https://360hospitalar.com.br` → abre o diretório, busca e perfis funcionando.
+
+### 4.4 Desligar o domínio antigo (depois de confirmar o novo)
+1. Atualize `CORS_ORIGIN` no Railway para `https://360hospitalar.com.br` (remova a URL antiga).
+2. Remova o domínio antigo em **Vercel → Domains** e **Railway → Networking → Custom Domain**.
+3. Apague os registros CNAME antigos (`360-hospitalar` e `api-360-hospitalar`) na zona DNS de
+   `verificadoagora.com.br` na Hostinger.
 
 ---
 

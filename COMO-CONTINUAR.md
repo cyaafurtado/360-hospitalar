@@ -21,7 +21,7 @@ Sem o `push`, o próximo dia / o celular não veem suas mudanças.
 
 | O que é | Onde |
 |---|---|
-| Site no ar (cliente vê) | https://360-hospitalar.verificadoagora.com.br |
+| Site no ar (cliente vê) | https://360hospitalar.com.br |
 | Painel **Vercel** (frontend) | https://vercel.com/dashboard |
 | Painel **Railway** (backend + banco) | https://railway.app/dashboard |
 | Código no GitHub | https://github.com/SEU_USUARIO/360-hospitalar |

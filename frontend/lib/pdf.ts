@@ -221,7 +221,7 @@ export async function gerarPdfSolicitacao(req: SolicitacaoRequest): Promise<void
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...MUTED);
-    doc.text('360 Hospitalar · Rede de Prestadores · 360-hospitalar.verificadoagora.com.br', margin, pH - 8);
+    doc.text('360 Hospitalar · Rede de Prestadores · 360hospitalar.com.br', margin, pH - 8);
     doc.text(`Página ${i} de ${pageCount}`, W - margin, pH - 8, { align: 'right' });
   }
 
