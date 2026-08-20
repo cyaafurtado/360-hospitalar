@@ -20,6 +20,7 @@ export type SolEnviada = {
   prazo?: string;
   resposta?: RespostaFornecedor;
   resultado?: 'aprovada' | 'nao-aprovada';
+  avaliacaoPrestador?: number;
   encerradaEm?: string;
   cancelResultado?: 'positivo' | 'negativo';
   cancelMotivo?: string;

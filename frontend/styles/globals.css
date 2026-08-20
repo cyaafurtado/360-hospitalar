@@ -1208,6 +1208,13 @@ em { font-style: italic; }
 .sol-modal-icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none; margin: 0 auto 4px; }
 .sol-modal-icon.warn { background: oklch(0.96 0.04 45); color: oklch(0.5 0.14 45); }
 .sol-modal-icon.success { background: color-mix(in oklch, var(--accent), white 88%); color: var(--accent); }
+
+.sol-star-picker { display: flex; gap: 6px; }
+.sol-star-btn { background: none; border: none; cursor: pointer; padding: 2px; line-height: 0; color: var(--border-strong); transition: color .12s, transform .1s; }
+.sol-star-btn:hover { transform: scale(1.1); }
+.sol-star-btn.filled { color: var(--star); }
+.sol-star-btn:active { transform: scale(0.94); }
+.sol-stars-readonly { display: inline-flex; gap: 2px; color: var(--star); vertical-align: -3px; }
 .sol-modal-title { font-size: 20px; font-weight: 760; color: var(--text-strong); text-align: center; letter-spacing: -0.015em; }
 .sol-modal-desc { font-size: 14.5px; color: var(--text); line-height: 1.55; text-align: center; }
 .sol-modal-field { display: flex; flex-direction: column; gap: 6px; }

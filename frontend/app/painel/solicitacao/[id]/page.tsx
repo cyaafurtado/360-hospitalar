@@ -5,7 +5,7 @@ import { useAppStore } from '../../../../lib/store';
 import { typeLabel, segmentLabel } from '../../../../data/reference';
 import { EXEMPLOS_PAINEL } from '../../../../data/exemplos-painel';
 import type { RequestStatus } from '../../../../data/types';
-import { Icon } from '../../../../lib/icons';
+import { Icon, ICON_PATHS } from '../../../../lib/icons';
 import { PainelNav } from '../../../../components/PainelNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
 
@@ -19,6 +19,44 @@ const STATUS_STEPS: { id: RequestStatus; label: string; desc: string }[] = [
 const STATUS_ORDER: Record<RequestStatus, number> = {
   nova: 0, andamento: 1, respondida: 2, fechada: 3, cancelada: -1, declinada: -1,
 };
+
+function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hover, setHover] = useState(0);
+  const display = hover || value;
+  return (
+    <div className="sol-star-picker" role="radiogroup" aria-label="Avaliação de satisfação, de 1 a 5 estrelas">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          role="radio"
+          aria-checked={value === n}
+          aria-label={`${n} de 5 estrelas`}
+          className={'sol-star-btn' + (n <= display ? ' filled' : '')}
+          onMouseEnter={() => setHover(n)}
+          onMouseLeave={() => setHover(0)}
+          onClick={() => onChange(n)}
+        >
+          <svg width={26} height={26} viewBox="0 0 24 24" fill={n <= display ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5}>
+            <path d={ICON_PATHS.star} />
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function StarsReadOnly({ value, size = 14 }: { value: number; size?: number }) {
+  return (
+    <span className="sol-stars-readonly" aria-label={`${value} de 5 estrelas`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <svg key={n} width={size} height={size} viewBox="0 0 24 24" fill={n <= value ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.4}>
+          <path d={ICON_PATHS.star} />
+        </svg>
+      ))}
+    </span>
+  );
+}
 
 export default function AcompanharSolicitacaoPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +73,7 @@ export default function AcompanharSolicitacaoPage() {
   const [cancelado, setCancelado] = useState(false);
   const [encerrarModal, setEncerrarModal] = useState(false);
   const [aprovada, setAprovada] = useState<boolean | null>(null);
+  const [avaliacao, setAvaliacao] = useState(0);
   const [encerrando, setEncerrando] = useState(false);
   const [cancelarModal, setCancelarModal] = useState(false);
   const [cancelResultado, setCancelResultado] = useState<'positivo' | 'negativo' | null>(null);
@@ -87,21 +126,24 @@ export default function AcompanharSolicitacaoPage() {
     if (encerrando) return;
     setEncerrarModal(false);
     setAprovada(null);
+    setAvaliacao(0);
   };
 
   const confirmarEncerramento = () => {
-    if (aprovada === null || encerrando) return;
+    if (aprovada === null || avaliacao === 0 || encerrando) return;
     setEncerrando(true);
     setTimeout(() => {
       setSol((prev) => prev ? {
         ...prev,
         status: 'fechada',
         resultado: aprovada ? 'aprovada' : 'nao-aprovada',
+        avaliacaoPrestador: avaliacao,
         encerradaEm: new Date().toLocaleDateString('pt-BR'),
       } : prev);
       setEncerrando(false);
       setEncerrarModal(false);
       setAprovada(null);
+      setAvaliacao(0);
     }, 600);
   };
 
@@ -161,23 +203,39 @@ export default function AcompanharSolicitacaoPage() {
         )}
         {sol.status === 'fechada' && sol.resultado === 'aprovada' && (
           <div className="sol-terminal-banner approved">
-            <div className="sol-banner-row">
-              <Icon name="check" size={16} stroke={2.4} />
-              <span>
-                Cotação encerrada — proposta <strong>aprovada</strong> e venda concluída
-                {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
-              </span>
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="check" size={16} stroke={2.4} />
+                <span>
+                  Cotação encerrada — proposta <strong>aprovada</strong> e venda concluída
+                  {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
+                </span>
+              </div>
+              {!!sol.avaliacaoPrestador && (
+                <div className="sol-banner-obs">
+                  <span className="sol-banner-obs-label">Sua avaliação do fornecedor:</span>{' '}
+                  <StarsReadOnly value={sol.avaliacaoPrestador} /> ({sol.avaliacaoPrestador}/5)
+                </div>
+              )}
             </div>
           </div>
         )}
         {sol.status === 'fechada' && sol.resultado === 'nao-aprovada' && (
           <div className="sol-terminal-banner warn">
-            <div className="sol-banner-row">
-              <Icon name="close" size={16} stroke={2.4} />
-              <span>
-                Cotação encerrada — proposta <strong>não aprovada</strong>, sem venda concluída
-                {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
-              </span>
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="close" size={16} stroke={2.4} />
+                <span>
+                  Cotação encerrada — proposta <strong>não aprovada</strong>, sem venda concluída
+                  {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
+                </span>
+              </div>
+              {!!sol.avaliacaoPrestador && (
+                <div className="sol-banner-obs">
+                  <span className="sol-banner-obs-label">Sua avaliação do fornecedor:</span>{' '}
+                  <StarsReadOnly value={sol.avaliacaoPrestador} /> ({sol.avaliacaoPrestador}/5)
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -373,11 +431,21 @@ export default function AcompanharSolicitacaoPage() {
                 </button>
               </div>
             </div>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">
+                Como você avalia o atendimento do fornecedor? <span className="sol-modal-opt">(satisfação)</span>
+              </label>
+              <StarPicker value={avaliacao} onChange={setAvaliacao} />
+            </div>
             <div className="sol-modal-actions">
               <button className="btn-ghost" onClick={fecharModalEncerrar} disabled={encerrando}>
                 Voltar
               </button>
-              <button className="btn-primary" onClick={confirmarEncerramento} disabled={encerrando || aprovada === null}>
+              <button
+                className="btn-primary"
+                onClick={confirmarEncerramento}
+                disabled={encerrando || aprovada === null || avaliacao === 0}
+              >
                 {encerrando ? 'Encerrando…' : 'Confirmar encerramento'}
               </button>
             </div>
