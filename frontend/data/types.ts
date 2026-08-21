@@ -108,3 +108,19 @@ export type Usuario = {
   organizacao: string;
   telefone: string;
 };
+
+/* ---------- Consulta de CNPJ ---------- */
+
+export type EmpresaConsultada = {
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  nome: string;
+  uf: string;
+  cidade: string;
+  telefone: string;
+  atividade: string;
+  situacao: string;
+  ativa: boolean;
+  fundacao: number | null;
+};

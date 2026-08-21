@@ -10,6 +10,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { optionalAuth } from './middleware/auth';
 
 import authRoutes from './routes/auth.routes';
+import cnpjRoutes from './routes/cnpj.routes';
 import companiesRoutes from './routes/companies.routes';
 import solicitacoesRoutes from './routes/solicitacoes.routes';
 import profileRoutes from './routes/profile.routes';
@@ -51,6 +52,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/cnpj', cnpjRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/requests', solicitacoesRoutes);
 app.use('/api/profile', profileRoutes);

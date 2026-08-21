@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SEGMENTS, STATES } from '../../data/reference';
 import type { Plan } from '../../data/types';
@@ -9,6 +9,7 @@ import { Field } from '../../components/Field';
 import { PreviewCard } from '../../components/PreviewCard';
 import { createCompany, mensagemDeErro } from '../../lib/services';
 import { useAppStore } from '../../lib/store';
+import { consultarCnpj, cnpjValido, apenasDigitos, CnpjErro } from '../../lib/cnpj';
 
 type TipoConta = '' | 'empresa' | 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_pub';
 
@@ -48,6 +49,10 @@ export default function CadastrarPage() {
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [erroEnvio, setErroEnvio] = useState('');
+  const [buscandoCnpj, setBuscandoCnpj] = useState(false);
+  const [avisoCnpj, setAvisoCnpj] = useState('');
+  const [empresaEncontrada, setEmpresaEncontrada] = useState('');
+  const ultimoCnpjBuscado = useRef('');
   const authEmail = useAppStore((s) => s.authEmail);
   const hydrated = useAppStore((s) => s.hydrated);
 
@@ -73,7 +78,7 @@ export default function CadastrarPage() {
     if (form.tipoConta === 'empresa') {
       return [
         tipoStep,
-        { key: 'precadastro', label: 'Pré-cadastro',      fields: ['name', 'cnpj', 'segment', 'uf', 'city', 'about'] as (keyof RegisterForm)[] },
+        { key: 'precadastro', label: 'Pré-cadastro',      fields: ['cnpj', 'name', 'segment', 'uf', 'city'] as (keyof RegisterForm)[] },
         { key: 'atuacao',     label: 'Área de atuação',   fields: ['tagline'] as (keyof RegisterForm)[] },
         { key: 'contato',     label: 'Contato & selos',   fields: ['email', 'phone', 'site'] as (keyof RegisterForm)[] },
         { key: 'plano',       label: 'Plano & verificação', fields: [] as (keyof RegisterForm)[] },
@@ -100,6 +105,48 @@ export default function CadastrarPage() {
       if (!c.every((k) => String(form[k] ?? '').trim())) return false;
     }
     return true;
+  };
+
+  // Dispara ao sair do campo, quando o CNPJ está completo. Só preenche campo
+  // vazio: nada que a pessoa já escreveu é sobrescrito.
+  const buscarPorCnpj = async () => {
+    const digitos = apenasDigitos(form.cnpj);
+    if (digitos.length !== 14 || digitos === ultimoCnpjBuscado.current) return;
+
+    if (!cnpjValido(digitos)) {
+      setAvisoCnpj('CNPJ inválido. Confira os números digitados.');
+      setEmpresaEncontrada('');
+      return;
+    }
+
+    ultimoCnpjBuscado.current = digitos;
+    setBuscandoCnpj(true);
+    setAvisoCnpj('');
+    setEmpresaEncontrada('');
+
+    try {
+      const e = await consultarCnpj(digitos);
+      setForm((f) => ({
+        ...f,
+        name: f.name.trim() || e.nome,
+        uf: f.uf || e.uf,
+        city: f.city.trim() || e.cidade,
+        phone: f.phone.trim() || e.telefone,
+      }));
+      setEmpresaEncontrada(e.razaoSocial || e.nome);
+      // Situação cadastral irregular não bloqueia, mas a pessoa precisa saber:
+      // o selo de verificação depende disso.
+      if (!e.ativa && e.situacao) {
+        setAvisoCnpj(`Atenção: na Receita Federal este CNPJ consta como ${e.situacao.toLowerCase()}.`);
+      }
+    } catch (err) {
+      ultimoCnpjBuscado.current = '';
+      setAvisoCnpj(
+        err instanceof CnpjErro ? err.message : 'Não foi possível consultar o CNPJ. Preencha os dados à mão.'
+      );
+    } finally {
+      setBuscandoCnpj(false);
+    }
   };
 
   const submit = async () => {
@@ -319,11 +366,39 @@ export default function CadastrarPage() {
             {/* ── Step: Pré-cadastro (fornecedor) ── */}
             {currentKey === 'precadastro' && (
               <div className="reg-grid">
+                <Field
+                  label="CNPJ"
+                  required
+                  hint={
+                    buscandoCnpj
+                      ? 'Buscando os dados na Receita Federal…'
+                      : empresaEncontrada
+                        ? `Encontrado: ${empresaEncontrada}`
+                        : 'Preencha e saia do campo: buscamos os dados da empresa para você.'
+                  }
+                >
+                  <input
+                    value={form.cnpj}
+                    onChange={(e) => {
+                      set('cnpj', maskCNPJ(e.target.value));
+                      setAvisoCnpj('');
+                      setEmpresaEncontrada('');
+                    }}
+                    onBlur={() => void buscarPorCnpj()}
+                    placeholder="00.000.000/0000-00"
+                    inputMode="numeric"
+                    autoFocus
+                  />
+                </Field>
+
+                {avisoCnpj && (
+                  <div className="login-error">
+                    <Icon name="close" size={14} stroke={2.4} /> {avisoCnpj}
+                  </div>
+                )}
+
                 <Field label="Nome da empresa" required>
                   <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ex: MedLab Diagnósticos" />
-                </Field>
-                <Field label="CNPJ" required hint="Usado para verificação cadastral.">
-                  <input value={form.cnpj} onChange={(e) => set('cnpj', maskCNPJ(e.target.value))} placeholder="00.000.000/0000-00" inputMode="numeric" />
                 </Field>
                 <Field label="Segmento principal" required>
                   <div className="reg-select">
@@ -352,10 +427,6 @@ export default function CadastrarPage() {
                     <input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="Ex: Belém" />
                   </Field>
                 </div>
-                <Field label="Sobre a empresa" required>
-                  <textarea rows={4} value={form.about} onChange={(e) => set('about', e.target.value)}
-                    placeholder="Descreva o que sua empresa faz, diferenciais e quem atende." />
-                </Field>
               </div>
             )}
 
