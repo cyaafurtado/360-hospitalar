@@ -2,10 +2,11 @@ import api from './api';
 import type { EmpresaConsultada } from '../data/types';
 
 // A consulta pública é limitada por IP. Por isso ela sai do navegador: cada
-// pessoa gasta a própria cota. Se falhar (rede corporativa, CORS bloqueado, ou
-// o IP já no limite), caímos para a nossa API, que tem cota e cache próprios.
+// pessoa gasta a própria cota. Dois provedores em cascata — a CNPJá primeiro,
+// porque devolve a cidade acentuada ("São Paulo") e a BrasilAPI não. Se as duas
+// falharem (rede corporativa, CORS bloqueado, IP no limite), caímos para a
+// nossa API, que tem cota separada e cache de 24h.
 
-const BRASIL_API = 'https://brasilapi.com.br/api/cnpj/v1';
 const TIMEOUT_MS = 8000;
 
 export class CnpjErro extends Error {
@@ -38,11 +39,14 @@ export function cnpjValido(cnpj: string): boolean {
 }
 
 const MINUSCULAS = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+
 function capitalizar(texto: string): string {
-  return (texto ?? '')
+  const t = (texto ?? '').trim();
+  if (!t) return '';
+  if (t !== t.toUpperCase()) return t;
+  return t
     .toLowerCase()
     .split(/\s+/)
-    .filter(Boolean)
     .map((p, i) => (i > 0 && MINUSCULAS.has(p) ? p : p[0].toUpperCase() + p.slice(1)))
     .join(' ');
 }
@@ -55,33 +59,77 @@ function telefoneFormatado(bruto: string): string {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function normalizar(d: any, cnpj: string): EmpresaConsultada {
-  const razaoSocial = capitalizar(d.razao_social ?? '');
-  const nomeFantasia = capitalizar(d.nome_fantasia ?? '');
-  const situacao = String(d.descricao_situacao_cadastral ?? '');
+function montar(p: Partial<EmpresaConsultada> & { cnpj: string }): EmpresaConsultada {
+  const razaoSocial = capitalizar(p.razaoSocial ?? '');
+  const nomeFantasia = capitalizar(p.nomeFantasia ?? '');
   return {
-    cnpj,
+    cnpj: p.cnpj,
     razaoSocial,
     nomeFantasia,
     nome: nomeFantasia || razaoSocial,
-    uf: String(d.uf ?? '').toUpperCase(),
-    cidade: capitalizar(d.municipio ?? ''),
-    telefone: telefoneFormatado(d.ddd_telefone_1 ?? ''),
-    atividade: d.cnae_fiscal_descricao ?? '',
-    situacao,
-    ativa: situacao.toUpperCase() === 'ATIVA',
-    fundacao: d.data_inicio_atividade ? Number(String(d.data_inicio_atividade).slice(0, 4)) : null,
+    uf: (p.uf ?? '').toUpperCase(),
+    cidade: p.cidade ?? '',
+    telefone: p.telefone ?? '',
+    atividade: p.atividade ?? '',
+    situacao: p.situacao ?? '',
+    ativa: p.ativa ?? false,
+    fundacao: p.fundacao ?? null,
   };
 }
 
-async function consultaDireta(cnpj: string): Promise<EmpresaConsultada> {
+type Provedor = {
+  nome: string;
+  url: (cnpj: string) => string;
+  normalizar: (d: any, cnpj: string) => EmpresaConsultada;
+};
+
+const PROVEDORES: Provedor[] = [
+  {
+    nome: 'cnpja',
+    url: (cnpj) => `https://open.cnpja.com/office/${cnpj}`,
+    normalizar: (d, cnpj) => {
+      const tel = d.phones?.[0];
+      return montar({
+        cnpj,
+        razaoSocial: d.company?.name ?? '',
+        nomeFantasia: d.alias ?? '',
+        uf: d.address?.state ?? '',
+        cidade: d.address?.city ?? '',
+        telefone: tel ? telefoneFormatado(`${tel.area ?? ''}${tel.number ?? ''}`) : '',
+        atividade: d.mainActivity?.text ?? '',
+        situacao: d.status?.text ?? '',
+        ativa: d.status?.id === 2,
+        fundacao: d.founded ? Number(String(d.founded).slice(0, 4)) : null,
+      });
+    },
+  },
+  {
+    nome: 'brasilapi',
+    url: (cnpj) => `https://brasilapi.com.br/api/cnpj/v1/${cnpj}`,
+    normalizar: (d, cnpj) =>
+      montar({
+        cnpj,
+        razaoSocial: d.razao_social ?? '',
+        nomeFantasia: d.nome_fantasia ?? '',
+        uf: d.uf ?? '',
+        cidade: capitalizar(d.municipio ?? ''),
+        telefone: telefoneFormatado(d.ddd_telefone_1 ?? ''),
+        atividade: d.cnae_fiscal_descricao ?? '',
+        situacao: d.descricao_situacao_cadastral ?? '',
+        ativa: String(d.descricao_situacao_cadastral ?? '').toUpperCase() === 'ATIVA',
+        fundacao: d.data_inicio_atividade ? Number(String(d.data_inicio_atividade).slice(0, 4)) : null,
+      }),
+  },
+];
+
+async function tentarDireto(p: Provedor, cnpj: string): Promise<EmpresaConsultada> {
   const controle = new AbortController();
   const relogio = setTimeout(() => controle.abort(), TIMEOUT_MS);
   try {
-    const r = await fetch(`${BRASIL_API}/${cnpj}`, { signal: controle.signal });
+    const r = await fetch(p.url(cnpj), { signal: controle.signal, headers: { Accept: 'application/json' } });
     if (r.status === 404) throw new CnpjErro('CNPJ não encontrado na Receita Federal.', true);
-    if (!r.ok) throw new CnpjErro('consulta direta indisponível');
-    return normalizar(await r.json(), cnpj);
+    if (!r.ok) throw new CnpjErro(`${p.nome} indisponível`);
+    return p.normalizar(await r.json(), cnpj);
   } finally {
     clearTimeout(relogio);
   }
@@ -105,11 +153,14 @@ export async function consultarCnpj(cnpjBruto: string): Promise<EmpresaConsultad
   const cnpj = apenasDigitos(cnpjBruto);
   if (!cnpjValido(cnpj)) throw new CnpjErro('CNPJ inválido. Confira os números digitados.');
 
-  try {
-    return await consultaDireta(cnpj);
-  } catch (err) {
-    // "Não existe" é resposta definitiva: não adianta perguntar de novo pela API.
-    if (err instanceof CnpjErro && err.naoEncontrado) throw err;
-    return consultaPelaNossaApi(cnpj);
+  for (const provedor of PROVEDORES) {
+    try {
+      return await tentarDireto(provedor, cnpj);
+    } catch (err) {
+      // "Não existe" é definitivo: os provedores leem a mesma base da Receita.
+      if (err instanceof CnpjErro && err.naoEncontrado) throw err;
+    }
   }
+
+  return consultaPelaNossaApi(cnpj);
 }

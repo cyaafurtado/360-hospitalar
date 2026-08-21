@@ -29,7 +29,9 @@ export class CnpjController {
       }
       if (err instanceof CnpjIndisponivel) {
         // 503: o problema é do serviço externo, não do que a pessoa digitou.
-        res.status(503).json({ error: err.message });
+        // `detalhe` diz qual provedor falhou e como — sem isso, investigar em
+        // producao vira adivinhacao.
+        res.status(503).json({ error: err.message, detalhe: err.detalhe });
         return;
       }
       throw err;
