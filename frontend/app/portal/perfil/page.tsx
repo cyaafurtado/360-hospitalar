@@ -240,6 +240,25 @@ export default function PerfilPage() {
     setTimeout(() => setSaved(false), 2600);
   };
 
+  // A conta existe, mas ainda não tem empresa: isso não é falha de carga.
+  if (initial === null) {
+    return (
+      <div className="portal-screen">
+        <PortalNav />
+        <div className="portal-body">
+          <div className="empty">
+            <Icon name="clipboard" size={32} />
+            <h3>Sua empresa ainda não está cadastrada</h3>
+            <p>Cadastre a empresa para aparecer no diretório e receber pedidos de orçamento.</p>
+            <button className="btn-primary" onClick={() => router.push('/cadastrar')}>
+              Cadastrar empresa <Icon name="arrow" size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!form) {
     return (
       <div className="portal-screen">

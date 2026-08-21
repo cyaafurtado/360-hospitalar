@@ -24,8 +24,9 @@ export async function getCompany(id: string): Promise<Company | null> {
   }
 }
 
-export async function getRequests(): Promise<SolicitacaoRequest[]> {
-  const { data } = await api.get<SolicitacaoRequest[]>('/requests');
+// 'recebidas' = caixa de entrada do fornecedor; 'enviadas' = o que a conta pediu.
+export async function getRequests(caixa: 'recebidas' | 'enviadas' = 'recebidas'): Promise<SolicitacaoRequest[]> {
+  const { data } = await api.get<SolicitacaoRequest[]>('/requests', { params: { caixa } });
   return data;
 }
 
@@ -39,9 +40,19 @@ export async function updateRequestContract(id: string, contrato: ContratoInfo):
   return data;
 }
 
-export async function getMyProfile(): Promise<SupplierProfileData> {
-  const { data } = await api.get<SupplierProfileData>('/profile');
-  return data;
+// null = a conta existe mas ainda não cadastrou empresa (não é erro de carga).
+export async function getMyProfile(): Promise<SupplierProfileData | null> {
+  try {
+    const { data } = await api.get<SupplierProfileData>('/profile');
+    return data;
+  } catch (err) {
+    if (codigoDoErro(err) === 'SEM_EMPRESA') return null;
+    throw err;
+  }
+}
+
+function codigoDoErro(err: unknown): string | undefined {
+  return (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
 }
 
 export async function updateMyProfile(profile: SupplierProfileData): Promise<SupplierProfileData> {

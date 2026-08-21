@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SEGMENTS, STATES } from '../../data/reference';
 import type { Plan } from '../../data/types';
@@ -7,7 +7,8 @@ import { Icon } from '../../lib/icons';
 import { maskCNPJ, maskCNES, maskCard, maskExp } from '../../lib/masks';
 import { Field } from '../../components/Field';
 import { PreviewCard } from '../../components/PreviewCard';
-import { createCompany } from '../../lib/services';
+import { createCompany, mensagemDeErro } from '../../lib/services';
+import { useAppStore } from '../../lib/store';
 
 type TipoConta = '' | 'empresa' | 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_pub';
 
@@ -46,6 +47,14 @@ export default function CadastrarPage() {
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState('');
+  const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
+
+  // A empresa fica amarrada a uma conta, então o cadastro exige estar logado.
+  useEffect(() => {
+    if (hydrated && !authEmail) router.replace('/entrar?from=/cadastrar');
+  }, [hydrated, authEmail, router]);
   const [instExpanded, setInstExpanded] = useState(false);
   const [form, setForm] = useState<RegisterForm>({ ...INITIAL });
 
@@ -95,6 +104,7 @@ export default function CadastrarPage() {
 
   const submit = async () => {
     setSubmitting(true);
+    setErroEnvio('');
     try {
       if (form.tipoConta === 'empresa') {
         await createCompany({
@@ -104,12 +114,13 @@ export default function CadastrarPage() {
         });
       }
       // instituição: endpoint será adicionado na Parte B
-    } catch (e) {
-      console.error('Falha ao enviar cadastro:', e);
-    } finally {
-      setSubmitting(false);
       setDone(true);
       window.scrollTo({ top: 0 });
+    } catch (e) {
+      // Antes isto virava tela de sucesso mesmo com a API recusando o cadastro.
+      setErroEnvio(mensagemDeErro(e, 'Não foi possível enviar o cadastro. Tente novamente.'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -550,6 +561,12 @@ export default function CadastrarPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {erroEnvio && (
+              <div className="login-error" style={{ marginBottom: 16 }}>
+                <Icon name="close" size={14} stroke={2.4} /> {erroEnvio}
               </div>
             )}
 
