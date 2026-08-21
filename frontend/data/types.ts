@@ -94,3 +94,17 @@ export type SupplierProfileData = {
   fotos?: string[];
   catalogo?: CatalogoServico[];
 };
+
+/* ---------- Sessão (auth real) ---------- */
+
+export type UsuarioTipo = 'fornecedor' | 'contratante';
+
+export type Usuario = {
+  id: string;
+  nome: string;
+  email: string;
+  tipo: UsuarioTipo;
+  companyId: string | null;
+  organizacao: string;
+  telefone: string;
+};

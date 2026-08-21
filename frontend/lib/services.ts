@@ -6,6 +6,8 @@ import type {
   RequestStatus,
   ContratoInfo,
   SupplierProfileData,
+  Usuario,
+  UsuarioTipo,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -92,5 +94,55 @@ export async function updateRequestStatus(
   obs?: string
 ): Promise<SolicitacaoRequest> {
   const { data } = await api.patch<SolicitacaoRequest>(`/requests/${id}/status`, { status, obs });
+  return data;
+}
+
+/* ---------- Sessão ---------- */
+
+export type CredenciaisLogin = { email: string; senha: string };
+
+export type NovaContaInput = {
+  nome: string;
+  email: string;
+  senha: string;
+  tipo: UsuarioTipo;
+  organizacao?: string;
+  telefone?: string;
+  companyId?: string;
+};
+
+type RespostaSessao = { token: string; usuario: Usuario };
+
+export async function login(cred: CredenciaisLogin): Promise<RespostaSessao> {
+  const { data } = await api.post<RespostaSessao>('/auth/login', cred);
+  return data;
+}
+
+export async function registrar(input: NovaContaInput): Promise<RespostaSessao> {
+  const { data } = await api.post<RespostaSessao>('/auth/register', input);
+  return data;
+}
+
+export async function getUsuarioLogado(): Promise<Usuario> {
+  const { data } = await api.get<{ usuario: Usuario }>('/auth/me');
+  return data.usuario;
+}
+
+export async function logoutApi(): Promise<void> {
+  try {
+    await api.post('/auth/logout');
+  } catch {
+    // Servidor fora do ar não pode impedir o usuário de sair localmente.
+  }
+}
+
+// Traduz o erro do axios na frase que a tela mostra.
+export function mensagemDeErro(err: unknown, padrao: string): string {
+  const resposta = (err as { response?: { data?: { error?: string } } })?.response;
+  return resposta?.data?.error ?? padrao;
+}
+
+export async function renovarSessao(): Promise<RespostaSessao> {
+  const { data } = await api.post<RespostaSessao>('/auth/refresh');
   return data;
 }

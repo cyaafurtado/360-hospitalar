@@ -67,3 +67,26 @@ export interface SupplierProfile {
   reviews: number;
   verified: boolean;
 }
+
+/* ---------- Auth (usuários e sessões) ---------- */
+
+export type UsuarioTipo = 'fornecedor' | 'contratante';
+
+// Usuário como o front enxerga — nunca inclui senha_hash
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  tipo: UsuarioTipo;
+  companyId: string | null;
+  organizacao: string;
+  telefone: string;
+}
+
+// O que viaja dentro do access token
+export interface AuthTokenPayload {
+  sub: string;
+  email: string;
+  tipo: UsuarioTipo;
+  companyId: string | null;
+}

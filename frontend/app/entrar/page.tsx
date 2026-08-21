@@ -4,12 +4,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '../../lib/icons';
 import { BrandLogo } from '../../components/BrandLogo';
 import { useAppStore } from '../../lib/store';
+import { login as loginApi, mensagemDeErro } from '../../lib/services';
 
 function EntrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
-  const login = useAppStore((s) => s.login);
+  const signIn = useAppStore((s) => s.signIn);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [show, setShow] = useState(false);
@@ -19,7 +20,7 @@ function EntrarForm() {
 
   const valid = /\S+@\S+\.\S+/.test(email) && pass.length >= 4;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!valid) {
       setError('Informe um e-mail válido e a senha (mín. 4 caracteres).');
@@ -27,11 +28,14 @@ function EntrarForm() {
     }
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      login(email);
+    try {
+      const { token, usuario } = await loginApi({ email, senha: pass });
+      signIn(token, usuario);
       router.push(from || '/escolher-perfil');
-    }, 700);
+    } catch (err) {
+      setError(mensagemDeErro(err, 'Não foi possível entrar agora. Tente novamente.'));
+      setLoading(false);
+    }
   };
 
   return (

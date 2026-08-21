@@ -3,10 +3,13 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 
 import { config } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
+import { optionalAuth } from './middleware/auth';
 
+import authRoutes from './routes/auth.routes';
 import companiesRoutes from './routes/companies.routes';
 import solicitacoesRoutes from './routes/solicitacoes.routes';
 import profileRoutes from './routes/profile.routes';
@@ -31,6 +34,10 @@ app.use(
   })
 );
 app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
+
+// Identifica quem está chamando quando há token, sem bloquear rota pública.
+app.use(optionalAuth);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -43,6 +50,7 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: '360-hospitalar-api', timestamp: new Date().toISOString() });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/requests', solicitacoesRoutes);
 app.use('/api/profile', profileRoutes);

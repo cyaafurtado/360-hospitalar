@@ -74,10 +74,11 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 export default function DashboardPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
 
   useEffect(() => {
-    if (!authEmail) router.replace('/entrar');
-  }, [authEmail, router]);
+    if (hydrated && !authEmail) router.replace('/entrar');
+  }, [hydrated, authEmail, router]);
 
   const [periodo, setPeriodo] = useState<Periodo>('30d');
 

@@ -30,10 +30,11 @@ export default function SolicitacaoPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
 
   useEffect(() => {
-    if (!authEmail) router.replace('/entrar');
-  }, [authEmail, router]);
+    if (hydrated && !authEmail) router.replace('/entrar');
+  }, [hydrated, authEmail, router]);
 
   const { data: all, loading, error } = useAsync(() => getRequests(), []);
   const [req, setReq] = useState(all?.find((r) => r.id === id) ?? null);

@@ -8,12 +8,13 @@ import { Icon } from '../../lib/icons';
 export default function EscolherPerfilPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
   const setProfileRole = useAppStore((s) => s.setProfileRole);
   const logout = useAppStore((s) => s.logout);
 
   useEffect(() => {
-    if (!authEmail) router.replace('/entrar');
-  }, [authEmail, router]);
+    if (hydrated && !authEmail) router.replace('/entrar');
+  }, [hydrated, authEmail, router]);
 
   const choose = (role: 'fornecedor' | 'contratante') => {
     setProfileRole(role);

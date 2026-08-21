@@ -13,6 +13,7 @@ import { gerarPdfSolicitacao } from '../../lib/pdf';
 export default function PainelPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
   const [openId, setOpenId] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<'' | RequestStatus>('');
   const [filtroTipo, setFiltroTipo] = useState<'' | RequestType>('');
@@ -20,8 +21,8 @@ export default function PainelPage() {
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authEmail) router.replace('/entrar');
-  }, [authEmail, router]);
+    if (hydrated && !authEmail) router.replace('/entrar');
+  }, [hydrated, authEmail, router]);
 
   const baixarPdf = async (r: (typeof EXEMPLOS_PAINEL)[0]) => {
     setPdfLoading(r.id);

@@ -1,4 +1,8 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import type { Usuario } from '../data/types';
+import { clearToken, setToken } from './token';
+import { logoutApi } from './services';
 
 export type ThemeName = 'trust' | 'clinic' | 'editorial';
 export type Density = 'compact' | 'regular' | 'comfy';
@@ -19,10 +23,13 @@ type AppState = {
   setDensity: (d: Density) => void;
   setAccent: (a: string) => void;
 
-  // auth (mock por enquanto)
+  // sessão
+  hydrated: boolean;
+  setHydrated: (v: boolean) => void;
+  usuario: Usuario | null;
   authEmail: string | null;
   profileRole: 'fornecedor' | 'contratante' | null;
-  login: (email: string) => void;
+  signIn: (token: string, usuario: Usuario) => void;
   setProfileRole: (role: 'fornecedor' | 'contratante') => void;
   logout: () => void;
 
@@ -41,30 +48,62 @@ type AppState = {
   applySearchUf: () => void;
 };
 
-export const useAppStore = create<AppState>((set, get) => ({
-  theme: 'trust',
-  density: 'regular',
-  accent: DEFAULT_ACCENT,
-  setTheme: (theme) => set({ theme }),
-  setDensity: (density) => set({ density }),
-  setAccent: (accent) => set({ accent }),
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      theme: 'trust',
+      density: 'regular',
+      accent: DEFAULT_ACCENT,
+      setTheme: (theme) => set({ theme }),
+      setDensity: (density) => set({ density }),
+      setAccent: (accent) => set({ accent }),
 
-  authEmail: null,
-  profileRole: null,
-  login: (authEmail) => set({ authEmail }),
-  setProfileRole: (profileRole) => set({ profileRole }),
-  logout: () => set({ authEmail: null, profileRole: null }),
+      hydrated: false,
+      setHydrated: (hydrated) => set({ hydrated }),
+      usuario: null,
+      authEmail: null,
+      profileRole: null,
 
-  query: '',
-  uf: 'PA',
-  filters: { ...EMPTY_FILTERS },
-  sort: 'rating',
-  layout: 'grid',
-  setQuery: (query) => set({ query }),
-  setUf: (uf) => set({ uf }),
-  setFilters: (filters) => set({ filters }),
-  setSort: (sort) => set({ sort }),
-  setLayout: (layout) => set({ layout }),
-  pickSegment: (segId) => set({ filters: { segments: [segId], uf: get().uf || '', minRating: 0, onlyVerified: false } }),
-  applySearchUf: () => set((s) => ({ filters: { ...s.filters, uf: s.uf || s.filters.uf } })),
-}));
+      signIn: (token, usuario) => {
+        setToken(token);
+        // Quem se cadastrou como instituição já entra no perfil dela; fornecedor idem.
+        set({ usuario, authEmail: usuario.email, profileRole: usuario.tipo });
+      },
+
+      setProfileRole: (profileRole) => set({ profileRole }),
+
+      logout: () => {
+        // Revoga o refresh token no servidor; a saída local não espera a rede.
+        void logoutApi();
+        clearToken();
+        set({ usuario: null, authEmail: null, profileRole: null });
+      },
+
+      query: '',
+      uf: 'PA',
+      filters: { ...EMPTY_FILTERS },
+      sort: 'rating',
+      layout: 'grid',
+      setQuery: (query) => set({ query }),
+      setUf: (uf) => set({ uf }),
+      setFilters: (filters) => set({ filters }),
+      setSort: (sort) => set({ sort }),
+      setLayout: (layout) => set({ layout }),
+      pickSegment: (segId) =>
+        set({ filters: { segments: [segId], uf: get().uf || '', minRating: 0, onlyVerified: false } }),
+      applySearchUf: () => set((s) => ({ filters: { ...s.filters, uf: s.uf || s.filters.uf } })),
+    }),
+    {
+      name: '360h-sessao',
+      storage: createJSONStorage(() => localStorage),
+      // Rehidratamos à mão no AppShell: assim o primeiro render do cliente é igual
+      // ao HTML do servidor e o React não acusa divergência de hidratação.
+      skipHydration: true,
+      partialize: (s) => ({
+        usuario: s.usuario,
+        authEmail: s.authEmail,
+        profileRole: s.profileRole,
+      }),
+    }
+  )
+);

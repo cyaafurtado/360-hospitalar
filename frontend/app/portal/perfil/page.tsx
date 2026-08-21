@@ -39,9 +39,10 @@ const fmtDate = (iso: string) => {
 export default function PerfilPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const hydrated = useAppStore((s) => s.hydrated);
   useEffect(() => {
-    if (!authEmail) router.replace('/entrar');
-  }, [authEmail, router]);
+    if (hydrated && !authEmail) router.replace('/entrar');
+  }, [hydrated, authEmail, router]);
 
   const { data: initial, error } = useAsync(() => getMyProfile(), []);
   const [edit, setEdit] = useState(false);
