@@ -1,4 +1,4 @@
-import { query } from '../connection';
+import { getClient, query } from '../connection';
 import { Company } from '../../models/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -25,6 +25,24 @@ function rowToCompany(r: any): Company {
   };
 }
 
+export interface NovaEmpresa {
+  id: string;
+  name: string;
+  segment: string;
+  tagline: string;
+  city: string;
+  uf: string;
+  founded: number;
+  employees: string;
+  services: string[];
+  badges: string[];
+  about: string;
+  phone: string;
+  site: string;
+  email: string | null;
+  atendeUfs: string[];
+}
+
 export const CompaniesRepo = {
   async list(): Promise<Company[]> {
     const { rows } = await query('SELECT * FROM companies ORDER BY rating DESC');
@@ -36,23 +54,7 @@ export const CompaniesRepo = {
     return rows[0] ? rowToCompany(rows[0]) : null;
   },
 
-  async create(c: {
-    id: string;
-    name: string;
-    segment: string;
-    tagline: string;
-    city: string;
-    uf: string;
-    founded: number;
-    employees: string;
-    services: string[];
-    badges: string[];
-    about: string;
-    phone: string;
-    site: string;
-    email: string | null;
-    atendeUfs: string[];
-  }): Promise<Company> {
+  async create(c: NovaEmpresa): Promise<Company> {
     const { rows } = await query(
       `INSERT INTO companies
         (id, name, segment, tagline, city, uf, rating, reviews, verified,
@@ -66,6 +68,42 @@ export const CompaniesRepo = {
       ]
     );
     return rowToCompany(rows[0]);
+  },
+
+  // Empresa administrada por esta conta. É a fonte da verdade da posse: nunca
+  // confiamos no companyId que veio dentro do token, que pode estar velho.
+  async getByUsuario(usuarioId: string): Promise<Company | null> {
+    const { rows } = await query('SELECT * FROM companies WHERE usuario_id = $1', [usuarioId]);
+    return rows[0] ? rowToCompany(rows[0]) : null;
+  },
+
+  // Cria a empresa e amarra na conta no mesmo commit: nunca sobra empresa sem
+  // dono nem conta apontando para empresa que não existe.
+  async createParaUsuario(c: NovaEmpresa, usuarioId: string): Promise<Company> {
+    const client = await getClient();
+    try {
+      await client.query('BEGIN');
+      const { rows } = await client.query(
+        `INSERT INTO companies
+          (id, name, segment, tagline, city, uf, rating, reviews, verified,
+           founded, employees, services, badges, about, phone, site, email, atende_ufs, usuario_id)
+         VALUES ($1,$2,$3,$4,$5,$6,0,0,FALSE,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+         RETURNING *`,
+        [
+          c.id, c.name, c.segment, c.tagline, c.city, c.uf,
+          c.founded, c.employees, c.services, c.badges, c.about,
+          c.phone, c.site, c.email, c.atendeUfs, usuarioId,
+        ]
+      );
+      await client.query('UPDATE usuarios SET company_id = $1 WHERE id = $2', [c.id, usuarioId]);
+      await client.query('COMMIT');
+      return rowToCompany(rows[0]);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   },
 
   async existsId(id: string): Promise<boolean> {

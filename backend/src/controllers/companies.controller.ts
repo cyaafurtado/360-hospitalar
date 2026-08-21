@@ -1,7 +1,37 @@
 import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
+import { Company } from '../models/types';
 
-const LOGGED_SUPPLIER_ID = 'medlab';
+const SEM_EMPRESA = {
+  error: 'Sua conta ainda não tem empresa cadastrada.',
+  code: 'SEM_EMPRESA',
+};
+
+// Resolve a empresa da conta pelo banco. O companyId do token é informativo:
+// ele congela no login e fica velho assim que a pessoa cadastra a empresa.
+async function empresaDoUsuario(req: Request): Promise<Company | null> {
+  if (!req.user) return null;
+  return CompaniesRepo.getByUsuario(req.user.sub);
+}
+
+function paraPerfil(c: Company) {
+  return {
+    name: c.name,
+    tagline: c.tagline,
+    about: c.about,
+    segment: c.segment,
+    uf: c.uf,
+    city: c.city,
+    email: c.email ?? `contato@${c.site}`,
+    phone: c.phone,
+    site: c.site,
+    employees: c.employees,
+    atendeUfs: c.atendeUfs,
+    rating: c.rating,
+    reviews: c.reviews,
+    verified: c.verified,
+  };
+}
 
 function slugify(name: string): string {
   return name
@@ -28,16 +58,24 @@ export class CompaniesController {
   }
 
   static async create(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ error: 'Entre na sua conta para cadastrar a empresa.' });
+      return;
+    }
     const b = req.body ?? {};
     if (!b.name || !b.segment) {
       res.status(400).json({ error: 'Campos obrigatórios: name, segment' });
+      return;
+    }
+    if (await CompaniesRepo.getByUsuario(req.user.sub)) {
+      res.status(409).json({ error: 'Esta conta já administra uma empresa.' });
       return;
     }
     let id = slugify(b.name) || 'empresa';
     if (await CompaniesRepo.existsId(id)) {
       id = `${id}-${Math.random().toString(36).slice(2, 7)}`;
     }
-    const company = await CompaniesRepo.create({
+    const company = await CompaniesRepo.createParaUsuario({
       id,
       name: b.name,
       segment: b.segment,
@@ -53,38 +91,28 @@ export class CompaniesController {
       site: b.site ?? '',
       email: b.email ?? null,
       atendeUfs: Array.isArray(b.atendeUfs) ? b.atendeUfs : [],
-    });
+    }, req.user.sub);
     res.status(201).json(company);
   }
 
-  // Perfil do fornecedor logado (mock = medlab)
-  static async getProfile(_req: Request, res: Response): Promise<void> {
-    const c = await CompaniesRepo.getById(LOGGED_SUPPLIER_ID);
-    if (!c) {
-      res.status(404).json({ error: 'Perfil não encontrado' });
+  // Perfil da empresa desta conta.
+  static async getProfile(req: Request, res: Response): Promise<void> {
+    const empresa = await empresaDoUsuario(req);
+    if (!empresa) {
+      res.status(404).json(SEM_EMPRESA);
       return;
     }
-    res.json({
-      name: c.name,
-      tagline: c.tagline,
-      about: c.about,
-      segment: c.segment,
-      uf: c.uf,
-      city: c.city,
-      email: c.email ?? `contato@${c.site}`,
-      phone: c.phone,
-      site: c.site,
-      employees: c.employees,
-      atendeUfs: c.atendeUfs,
-      rating: c.rating,
-      reviews: c.reviews,
-      verified: c.verified,
-    });
+    res.json(paraPerfil(empresa));
   }
 
   static async updateProfile(req: Request, res: Response): Promise<void> {
+    const empresa = await empresaDoUsuario(req);
+    if (!empresa) {
+      res.status(404).json(SEM_EMPRESA);
+      return;
+    }
     const b = req.body ?? {};
-    const c = await CompaniesRepo.updateProfile(LOGGED_SUPPLIER_ID, {
+    const c = await CompaniesRepo.updateProfile(empresa.id, {
       name: b.name ?? '',
       tagline: b.tagline ?? '',
       about: b.about ?? '',
@@ -97,14 +125,9 @@ export class CompaniesController {
       atendeUfs: Array.isArray(b.atendeUfs) ? b.atendeUfs : [],
     });
     if (!c) {
-      res.status(404).json({ error: 'Perfil não encontrado' });
+      res.status(404).json(SEM_EMPRESA);
       return;
     }
-    res.json({
-      name: c.name, tagline: c.tagline, about: c.about, segment: c.segment,
-      uf: c.uf, city: c.city, email: c.email ?? `contato@${c.site}`, phone: c.phone,
-      site: c.site, employees: c.employees, atendeUfs: c.atendeUfs,
-      rating: c.rating, reviews: c.reviews, verified: c.verified,
-    });
+    res.json(paraPerfil(c));
   }
 }

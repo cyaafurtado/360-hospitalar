@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import { SolicitacoesController } from '../controllers/solicitacoes.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+// Toda solicitação pertence a alguém: nenhuma rota aqui é anônima.
+router.use(requireAuth);
 
 router.get('/', asyncHandler(SolicitacoesController.list));
 router.post('/', asyncHandler(SolicitacoesController.create));

@@ -24,17 +24,33 @@ function rowToReq(r: any): SolicitacaoRequest {
 }
 
 export const SolicitacoesRepo = {
-  // No mock, o fornecedor logado é "medlab"; lista as solicitações dele (ou todas se prestadorId vazio).
-  async listByPrestador(prestadorId?: string): Promise<SolicitacaoRequest[]> {
-    if (prestadorId) {
-      const { rows } = await query(
-        'SELECT * FROM solicitacoes WHERE prestador_id = $1 ORDER BY created_at ASC',
-        [prestadorId]
-      );
-      return rows.map(rowToReq);
-    }
-    const { rows } = await query('SELECT * FROM solicitacoes ORDER BY created_at ASC');
+  // Caixa de entrada do fornecedor: só o que foi endereçado à empresa dele.
+  async listByPrestador(prestadorId: string): Promise<SolicitacaoRequest[]> {
+    const { rows } = await query(
+      'SELECT * FROM solicitacoes WHERE prestador_id = $1 ORDER BY created_at ASC',
+      [prestadorId]
+    );
     return rows.map(rowToReq);
+  },
+
+  // Caixa de saída do comprador: o que esta conta enviou.
+  async listBySolicitante(usuarioId: string): Promise<SolicitacaoRequest[]> {
+    const { rows } = await query(
+      'SELECT * FROM solicitacoes WHERE solicitante_usuario_id = $1 ORDER BY created_at ASC',
+      [usuarioId]
+    );
+    return rows.map(rowToReq);
+  },
+
+  // Dono dos dois lados, para checar permissão antes de alterar.
+  async donos(id: string): Promise<{ prestadorId: string | null; solicitanteUsuarioId: string | null } | null> {
+    const { rows } = await query(
+      'SELECT prestador_id, solicitante_usuario_id FROM solicitacoes WHERE id = $1',
+      [id]
+    );
+    return rows[0]
+      ? { prestadorId: rows[0].prestador_id ?? null, solicitanteUsuarioId: rows[0].solicitante_usuario_id ?? null }
+      : null;
   },
 
   async create(s: {
@@ -50,16 +66,17 @@ export const SolicitacoesRepo = {
     email: string;
     phone: string;
     resumo: string;
+    solicitanteUsuarioId: string | null;
   }): Promise<SolicitacaoRequest> {
     const { rows } = await query(
       `INSERT INTO solicitacoes
         (id, solicitante, cargo, organizacao, tipo, status, prestador, prestador_id,
-         uf, cidade, email, phone, quando, resumo)
-       VALUES ($1,$2,$3,$4,$5,'nova',$6,$7,$8,$9,$10,$11,'agora',$12)
+         uf, cidade, email, phone, quando, resumo, solicitante_usuario_id)
+       VALUES ($1,$2,$3,$4,$5,'nova',$6,$7,$8,$9,$10,$11,'agora',$12,$13)
        RETURNING *`,
       [
         s.id, s.solicitante, s.cargo, s.organizacao, s.tipo, s.prestador, s.prestadorId,
-        s.uf, s.cidade, s.email, s.phone, s.resumo,
+        s.uf, s.cidade, s.email, s.phone, s.resumo, s.solicitanteUsuarioId,
       ]
     );
     return rowToReq(rows[0]);

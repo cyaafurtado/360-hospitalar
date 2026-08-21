@@ -5,15 +5,43 @@ import { RequestStatus, ContratoInfo } from '../models/types';
 
 const VALID_STATUS: RequestStatus[] = ['nova', 'andamento', 'respondida', 'fechada'];
 
+// Quem pode mexer numa solicitação: o fornecedor que a recebeu ou a conta que a enviou.
+async function podeAlterar(req: Request, solicitacaoId: string): Promise<boolean> {
+  if (!req.user) return false;
+  const donos = await SolicitacoesRepo.donos(solicitacaoId);
+  if (!donos) return false;
+  if (donos.solicitanteUsuarioId && donos.solicitanteUsuarioId === req.user.sub) return true;
+  if (!donos.prestadorId) return false;
+  const empresa = await CompaniesRepo.getByUsuario(req.user.sub);
+  return !!empresa && empresa.id === donos.prestadorId;
+}
+
 export class SolicitacoesController {
-  // Lista as solicitações do fornecedor logado (mock = medlab)
+  // Duas caixas diferentes na mesma rota: o fornecedor vê o que recebeu, o
+  // comprador vê o que enviou. Nunca a lista inteira.
   static async list(req: Request, res: Response): Promise<void> {
-    const prestadorId = (req.query.prestador as string) || undefined;
-    res.json(await SolicitacoesRepo.listByPrestador(prestadorId));
+    if (!req.user) {
+      res.status(401).json({ error: 'Entre na sua conta para ver as solicitações.' });
+      return;
+    }
+    const caixa = req.query.caixa === 'enviadas' ? 'enviadas' : 'recebidas';
+
+    if (caixa === 'enviadas') {
+      res.json(await SolicitacoesRepo.listBySolicitante(req.user.sub));
+      return;
+    }
+
+    const empresa = await CompaniesRepo.getByUsuario(req.user.sub);
+    // Sem empresa não há caixa de entrada — e devolver tudo seria o vazamento.
+    res.json(empresa ? await SolicitacoesRepo.listByPrestador(empresa.id) : []);
   }
 
-  // Cria a partir do formulário de orçamento (público)
+  // Cria a partir do formulário de orçamento (exige conta: o front já pede login)
   static async create(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ error: 'Entre na sua conta para pedir orçamento.' });
+      return;
+    }
     const b = req.body ?? {};
     if (!b.solicitante || !b.organizacao || !b.email || !b.detalhes) {
       res.status(400).json({ error: 'Campos obrigatórios: solicitante, organizacao, email, detalhes' });
@@ -40,6 +68,7 @@ export class SolicitacoesController {
       email: b.email,
       phone: b.telefone ?? b.phone ?? '',
       resumo,
+      solicitanteUsuarioId: req.user.sub,
     });
     res.status(201).json(sol);
   }
@@ -48,6 +77,10 @@ export class SolicitacoesController {
     const { status } = req.body ?? {};
     if (!VALID_STATUS.includes(status)) {
       res.status(400).json({ error: 'Status inválido' });
+      return;
+    }
+    if (!(await podeAlterar(req, req.params.id))) {
+      res.status(403).json({ error: 'Esta solicitação não é da sua conta.' });
       return;
     }
     const updated = await SolicitacoesRepo.updateStatus(req.params.id, status);
@@ -62,6 +95,10 @@ export class SolicitacoesController {
     const contrato = req.body?.contrato as ContratoInfo | undefined;
     if (!contrato || typeof contrato.assinado !== 'boolean') {
       res.status(400).json({ error: 'Campo contrato inválido' });
+      return;
+    }
+    if (!(await podeAlterar(req, req.params.id))) {
+      res.status(403).json({ error: 'Esta solicitação não é da sua conta.' });
       return;
     }
     const updated = await SolicitacoesRepo.updateContract(req.params.id, contrato);
