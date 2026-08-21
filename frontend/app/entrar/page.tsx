@@ -4,13 +4,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '../../lib/icons';
 import { BrandLogo } from '../../components/BrandLogo';
 import { useAppStore } from '../../lib/store';
-import { login as loginApi, mensagemDeErro } from '../../lib/services';
+import { login as loginApi, registrar, mensagemDeErro } from '../../lib/services';
+import type { UsuarioTipo } from '../../data/types';
 
 function EntrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
   const signIn = useAppStore((s) => s.signIn);
+  const [modo, setModo] = useState<'entrar' | 'criar'>('entrar');
+  const [nome, setNome] = useState('');
+  const [tipo, setTipo] = useState<UsuarioTipo>('fornecedor');
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [show, setShow] = useState(false);
@@ -18,22 +22,43 @@ function EntrarForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const valid = /\S+@\S+\.\S+/.test(email) && pass.length >= 4;
+  const criando = modo === 'criar';
+  const emailOk = /\S+@\S+\.\S+/.test(email);
+  const valid = criando
+    ? emailOk && nome.trim().length >= 2 && pass.length >= 8
+    : emailOk && pass.length >= 4;
+
+  const trocarModo = () => {
+    setModo(criando ? 'entrar' : 'criar');
+    setError('');
+    setPass('');
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!valid) {
-      setError('Informe um e-mail válido e a senha (mín. 4 caracteres).');
+      setError(
+        criando
+          ? 'Informe seu nome, um e-mail válido e uma senha de pelo menos 8 caracteres.'
+          : 'Informe um e-mail válido e a senha.'
+      );
       return;
     }
     setError('');
     setLoading(true);
     try {
-      const { token, usuario } = await loginApi({ email, senha: pass });
+      const { token, usuario } = criando
+        ? await registrar({ nome: nome.trim(), email, senha: pass, tipo })
+        : await loginApi({ email, senha: pass });
       signIn(token, usuario);
       router.push(from || '/escolher-perfil');
     } catch (err) {
-      setError(mensagemDeErro(err, 'Não foi possível entrar agora. Tente novamente.'));
+      setError(
+        mensagemDeErro(
+          err,
+          criando ? 'Não foi possível criar a conta agora. Tente novamente.' : 'Não foi possível entrar agora. Tente novamente.'
+        )
+      );
       setLoading(false);
     }
   };
@@ -67,13 +92,54 @@ function EntrarForm() {
       <main className="login-main">
         <div className="login-card">
           <div className="login-head">
-            <h1>Entrar no portal</h1>
-            <p>Use suas credenciais de acesso.</p>
+            <h1>{criando ? 'Criar conta' : 'Entrar no portal'}</h1>
+            <p>{criando ? 'Leva menos de um minuto.' : 'Use suas credenciais de acesso.'}</p>
           </div>
 
           <form className="login-form" onSubmit={submit}>
+            {criando && (
+              <>
+                <label className="reg-field">
+                  <span className="reg-label">Seu nome</span>
+                  <div className="login-input">
+                    <Icon name="users" size={17} />
+                    <input
+                      type="text"
+                      value={nome}
+                      autoComplete="name"
+                      onChange={(e) => {
+                        setNome(e.target.value);
+                        setError('');
+                      }}
+                      placeholder="Como devemos te chamar"
+                    />
+                  </div>
+                </label>
+
+                <div className="reg-field">
+                  <span className="reg-label">Você é</span>
+                  <div className="role-toggle">
+                    <button
+                      type="button"
+                      className={tipo === 'fornecedor' ? 'role-toggle-on' : ''}
+                      onClick={() => setTipo('fornecedor')}
+                    >
+                      Fornecedor
+                    </button>
+                    <button
+                      type="button"
+                      className={tipo === 'contratante' ? 'role-toggle-on' : ''}
+                      onClick={() => setTipo('contratante')}
+                    >
+                      Unidade de saúde
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
             <label className="reg-field">
-              <span className="reg-label">E-mail ou login</span>
+              <span className="reg-label">{criando ? 'E-mail' : 'E-mail ou login'}</span>
               <div className="login-input">
                 <Icon name="users" size={17} />
                 <input
@@ -90,13 +156,13 @@ function EntrarForm() {
             </label>
 
             <label className="reg-field">
-              <span className="reg-label">Senha</span>
+              <span className="reg-label">{criando ? 'Senha (mín. 8 caracteres)' : 'Senha'}</span>
               <div className="login-input">
                 <Icon name="shield2" size={17} />
                 <input
                   type={show ? 'text' : 'password'}
                   value={pass}
-                  autoComplete="current-password"
+                  autoComplete={criando ? 'new-password' : 'current-password'}
                   onChange={(e) => {
                     setPass(e.target.value);
                     setError('');
@@ -120,7 +186,7 @@ function EntrarForm() {
               </div>
             )}
 
-            <div className="login-row">
+            <div className="login-row" style={{ display: criando ? 'none' : undefined }}>
               <label className="login-remember">
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
                 <span className="fr-box">
@@ -134,7 +200,13 @@ function EntrarForm() {
             </div>
 
             <button type="submit" className="btn-primary login-submit" disabled={loading}>
-              {loading ? 'Entrando…' : <>Entrar <Icon name="arrow" size={16} /></>}
+              {loading ? (
+                criando ? 'Criando conta…' : 'Entrando…'
+              ) : (
+                <>
+                  {criando ? 'Criar conta' : 'Entrar'} <Icon name="arrow" size={16} />
+                </>
+              )}
             </button>
           </form>
 
@@ -143,11 +215,19 @@ function EntrarForm() {
           </div>
 
           <div className="login-foot">
-            Ainda não tem cadastro?
-            <a className="login-link" onClick={() => router.push('/cadastrar')}>
+            {criando ? 'Já tem conta?' : 'Ainda não tem conta?'}
+            <a className="login-link" onClick={trocarModo}>
               {' '}
-              Cadastrar empresa
+              {criando ? 'Entrar' : 'Criar conta'}
             </a>
+            {!criando && (
+              <>
+                {' · '}
+                <a className="login-link" onClick={() => router.push('/cadastrar')}>
+                  Cadastrar empresa
+                </a>
+              </>
+            )}
           </div>
         </div>
       </main>
