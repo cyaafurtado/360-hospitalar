@@ -20,7 +20,7 @@ export function BrandLogo({
 
   if (imgError) {
     return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+      <span className="brand-fallback">
         <OrbitMark size={height} ring={ring} plus={plus} node={node} />
         <span className="brand-lockup">
           <span className="brand-name">360 <span>Hospitalar</span></span>
@@ -36,7 +36,10 @@ export function BrandLogo({
       alt="360 Hospitalar — Plataforma de Prestadores de Serviços"
       width={200}
       height={260}
-      style={{ height, width: 'auto' }}
+      // A altura vira variavel CSS para o header poder encolher a marca no
+      // celular: estilo inline ganha da folha de estilo, entao sem isto nao ha
+      // como reduzir por media query.
+      style={{ height: `var(--brand-logo-h, ${height}px)`, width: 'auto', maxWidth: '100%' }}
       className={className}
       priority
       onError={() => setImgError(true)}

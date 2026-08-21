@@ -186,8 +186,23 @@ export default function CadastrarPage() {
     }
   };
 
+  // Enquanto nao sabemos se ha sessao, nao mostramos o formulario: ele apareceria
+  // por um instante e sumiria no redirecionamento.
+  const conferindoSessao = !hydrated || !authEmail;
+
   const inst = isInstituicao(form.tipoConta);
   const instLabel = INST_TYPES.find((t) => t.id === form.tipoConta)?.label ?? '';
+
+  if (conferindoSessao) {
+    return (
+      <div className="screen register">
+        <div className="empty">
+          <Icon name="signal" size={32} />
+          <h3>Um instante…</h3>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Tela de sucesso ── */
   if (done) {

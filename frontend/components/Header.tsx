@@ -36,8 +36,9 @@ export function Header() {
               <a className="header-login" onClick={() => router.push('/entrar')}>
                 Entrar
               </a>
-              <button className="btn-primary" onClick={() => router.push('/cadastrar')}>
-                Cadastrar empresa
+              <button className="btn-primary nav-cta" onClick={() => router.push('/cadastrar')}>
+                <span className="so-desktop">Cadastrar empresa</span>
+                <span className="so-mobile">Cadastrar</span>
               </button>
             </>
           )}

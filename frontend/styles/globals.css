@@ -6,7 +6,9 @@
 
 /* ===== Design 360 Hospitalar — portado de sautek/styles.css (fonte da verdade visual) ===== */
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; overflow-x: hidden; overflow-x: clip; }
+/* overflow-x: clip (com hidden de reserva para navegador antigo) impede que a
+   pagina deslize de lado. 'clip' nao quebra o position:sticky do header. */
+html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
 body { background: var(--bg); }
 img, video, table { max-width: 100%; height: auto; }
 
@@ -165,10 +167,15 @@ em { font-style: italic; }
 }
 .header-inner {
   max-width: 1240px; margin: 0 auto; padding: 0 28px; height: 68px;
-  display: flex; align-items: center; gap: 28px;
+  display: flex; align-items: center; gap: 28px; min-width: 0;
 }
-.brand { display: flex; align-items: center; gap: 11px; cursor: pointer; }
+/* min-width:0 deixa a marca encolher; sem isso ela empurra o botao para fora
+   da tela e a pagina inteira passa a rolar na horizontal. */
+.brand { display: flex; align-items: center; gap: 11px; cursor: pointer; min-width: 0; flex: 0 1 auto; overflow: hidden; }
 .brand-shield { flex: none; display: block; }
+/* Enquanto o PNG da marca nao existe em /public, este fallback e o que aparece
+   em todas as telas — e e ele que precisa caber no celular. */
+.brand-fallback { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 .brand-lockup { display: flex; flex-direction: column; gap: 2px; }
 .brand-name { font-family: "Bricolage Grotesque", var(--font); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; line-height: 1; color: var(--header-text); white-space: nowrap; }
 .brand-tagline { font-family: "Nunito Sans", var(--font); font-weight: 700; font-size: 8.5px; letter-spacing: 0.16em; line-height: 1; color: var(--muted); white-space: nowrap; }
@@ -178,7 +185,7 @@ em { font-style: italic; }
 .brand img { display: block; object-fit: contain; }
 .login-logo-wrap { display: inline-flex; background: #fff; border-radius: 14px; padding: 10px 14px; }
 .footer-brand-logo img { display: block; }
-.nav { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.nav { display: flex; align-items: center; gap: 4px; margin-left: auto; flex: none; }
 .nav a {
   color: var(--header-text); opacity: 0.82; text-decoration: none; font-weight: 550; font-size: 14.5px;
   padding: 8px 13px; border-radius: 8px; cursor: pointer; transition: opacity .15s, background .15s;
@@ -186,6 +193,7 @@ em { font-style: italic; }
 .nav a:hover { opacity: 1; background: color-mix(in oklch, var(--header-text), transparent 92%); }
 .nav .btn-primary { margin-left: 10px; }
 .header-login { background: transparent; border: none; }
+.so-mobile { display: none; }
 
 /* ============ layout containers ============ */
 .screen { max-width: 1240px; margin: 0 auto; padding: 0 28px 100px; }
@@ -540,6 +548,14 @@ em { font-style: italic; }
 }
 .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,.55); }
 @media (max-width: 480px) { .wa-float { bottom: 18px; right: 18px; width: 50px; height: 50px; } }
+
+/* Abaixo disto o nome escrito por extenso nao cabe junto dos dois botoes:
+   fica so o simbolo, que continua identificando a marca. */
+@media (max-width: 430px) {
+  .site-header .brand-lockup { display: none; }
+  .header-inner { padding: 0 12px; }
+  .nav-cta { padding: 10px 12px; }
+}
 
 /* ============ TICKER ============ */
 @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -1351,9 +1367,19 @@ em { font-style: italic; }
 }
 @media (max-width: 680px) {
   .screen { padding: 0 18px 70px; }
-  .header-inner { padding: 0 18px; gap: 14px; }
+  .header-inner { padding: 0 14px; gap: 8px; }
   .nav { gap: 0; }
   .nav a:not(.btn-primary):not(.header-login) { display: none; }
+  .brand { --brand-logo-h: 40px; }
+  .brand-fallback { gap: 8px; }
+  .brand-shield { width: 36px; height: 36px; }
+  .brand-name { font-size: 17px; }
+  .brand-tagline { font-size: 7.5px; letter-spacing: 0.12em; }
+  .nav .btn-primary { margin-left: 4px; }
+  .nav a, .header-login { padding: 8px 10px; font-size: 14px; }
+  .nav-cta { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
+  .so-desktop { display: none; }
+  .so-mobile { display: inline; }
   .hero { padding: 44px 0 8px; }
   .searchbar.big { flex-wrap: wrap; }
   .sb-seg { border-left: none; border-top: 1px solid var(--border); width: 100%; }

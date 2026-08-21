@@ -12,7 +12,10 @@ function EntrarForm() {
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
   const signIn = useAppStore((s) => s.signIn);
-  const [modo, setModo] = useState<'entrar' | 'criar'>('entrar');
+  // Quem clicou em "Cadastrar empresa" nao veio para fazer login: a empresa fica
+  // vinculada a uma conta, entao a tela abre ja em "criar conta" e diz o porque.
+  const vindoDoCadastro = from === '/cadastrar';
+  const [modo, setModo] = useState<'entrar' | 'criar'>(vindoDoCadastro ? 'criar' : 'entrar');
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState<UsuarioTipo>('fornecedor');
   const [email, setEmail] = useState('');
@@ -93,7 +96,13 @@ function EntrarForm() {
         <div className="login-card">
           <div className="login-head">
             <h1>{criando ? 'Criar conta' : 'Entrar no portal'}</h1>
-            <p>{criando ? 'Leva menos de um minuto.' : 'Use suas credenciais de acesso.'}</p>
+            <p>
+              {vindoDoCadastro && criando
+                ? 'Sua empresa fica vinculada a esta conta. Leva menos de um minuto.'
+                : criando
+                  ? 'Leva menos de um minuto.'
+                  : 'Use suas credenciais de acesso.'}
+            </p>
           </div>
 
           <form className="login-form" onSubmit={submit}>
