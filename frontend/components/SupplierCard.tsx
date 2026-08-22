@@ -1,6 +1,6 @@
 'use client';
 import { Icon, ICON_PATHS } from '../lib/icons';
-import type { Supplier } from '../data/exemplos-diferenciais';
+import type { Supplier } from '../data/types';
 
 const ANO_ATUAL = new Date().getFullYear();
 

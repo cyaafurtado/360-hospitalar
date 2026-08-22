@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '../../../../lib/store';
-import { typeLabel, segmentLabel } from '../../../../data/reference';
-import { EXEMPLOS_PAINEL } from '../../../../data/exemplos-painel';
-import type { RequestStatus } from '../../../../data/types';
+import { typeLabel } from '../../../../data/reference';
+import { getRequest } from '../../../../lib/services';
+import { useAsync } from '../../../../lib/useAsync';
+import type { RequestStatus, SolicitacaoRequest } from '../../../../data/types';
 import { Icon, ICON_PATHS } from '../../../../lib/icons';
 import { PainelNav } from '../../../../components/PainelNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
@@ -68,8 +69,10 @@ export default function AcompanharSolicitacaoPage() {
     if (hydrated && !authEmail) router.replace('/entrar');
   }, [hydrated, authEmail, router]);
 
-  const original = EXEMPLOS_PAINEL.find((r) => r.id === id) ?? null;
-  const [sol, setSol] = useState(original);
+  const { data: solApi, loading, error } = useAsync(() => getRequest(id), [id]);
+  const [localStatus, setLocalStatus] = useState<RequestStatus | null>(null);
+  const sol = { ...solApi, status: localStatus || solApi?.status } as SolicitacaoRequest | undefined;
+
   const [cancelando, setCancelando] = useState(false);
   const [cancelado, setCancelado] = useState(false);
   const [encerrarModal, setEncerrarModal] = useState(false);
@@ -80,7 +83,19 @@ export default function AcompanharSolicitacaoPage() {
   const [cancelResultado, setCancelResultado] = useState<'positivo' | 'negativo' | null>(null);
   const [cancelMotivo, setCancelMotivo] = useState('');
 
-  if (!sol) return (
+  if (loading) return (
+    <div className="portal-screen">
+      <PainelNav />
+      <div className="portal-body">
+        <div className="empty">
+          <Icon name="signal" size={32} />
+          <h3>Carregando…</h3>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error || !sol) return (
     <div className="portal-screen">
       <PainelNav />
       <div className="portal-body">
@@ -110,13 +125,7 @@ export default function AcompanharSolicitacaoPage() {
     if (cancelando || cancelResultado === null || !cancelMotivo.trim()) return;
     setCancelando(true);
     setTimeout(() => {
-      setSol((prev) => prev ? {
-        ...prev,
-        status: 'cancelada',
-        cancelResultado,
-        cancelMotivo: cancelMotivo.trim(),
-        canceladoEm: new Date().toLocaleDateString('pt-BR'),
-      } : prev);
+      setLocalStatus('cancelada');
       setCancelando(false);
       setCancelado(true);
       setCancelarModal(false);
@@ -134,13 +143,7 @@ export default function AcompanharSolicitacaoPage() {
     if (aprovada === null || avaliacao === 0 || encerrando) return;
     setEncerrando(true);
     setTimeout(() => {
-      setSol((prev) => prev ? {
-        ...prev,
-        status: 'fechada',
-        resultado: aprovada ? 'aprovada' : 'nao-aprovada',
-        avaliacaoPrestador: avaliacao,
-        encerradaEm: new Date().toLocaleDateString('pt-BR'),
-      } : prev);
+      setLocalStatus('fechada');
       setEncerrando(false);
       setEncerrarModal(false);
       setAprovada(null);
@@ -164,11 +167,11 @@ export default function AcompanharSolicitacaoPage() {
               <TypePill tipo={sol.tipo} />
               <StatusPill status={sol.status} />
             </div>
-            <h1>{typeLabel(sol.tipo)} — {sol.servico}</h1>
-            <p className="muted">Enviada {sol.quando} · {segmentLabel(sol.segmento)}</p>
+            <h1>{typeLabel(sol.tipo)}</h1>
+            <p className="muted">Enviada {sol.quando}</p>
           </div>
           {sol.status === 'respondida' && (
-            <a className="btn-primary sm" href={'mailto:' + sol.prestadorEmail}>
+            <a className="btn-primary sm" href={'mailto:' + sol.email}>
               <Icon name="mail" size={14} /> Responder proposta
             </a>
           )}
@@ -176,21 +179,9 @@ export default function AcompanharSolicitacaoPage() {
 
         {sol.status === 'cancelada' && (
           <div className="sol-terminal-banner canceled">
-            <div className="sol-banner-main">
-              <div className="sol-banner-row">
-                <Icon name="close" size={16} stroke={2.4} />
-                <span>
-                  Esta solicitação foi <strong>cancelada</strong>
-                  {sol.cancelResultado === 'positivo' && ' — atendimento concluído de forma positiva'}
-                  {sol.cancelResultado === 'negativo' && ' — atendimento concluído de forma negativa'}
-                  {sol.canceladoEm ? ` em ${sol.canceladoEm}` : ''}.
-                </span>
-              </div>
-              {sol.cancelMotivo && (
-                <div className="sol-banner-obs">
-                  <span className="sol-banner-obs-label">Motivo informado:</span> {sol.cancelMotivo}
-                </div>
-              )}
+            <div className="sol-banner-row">
+              <Icon name="close" size={16} stroke={2.4} />
+              <span>Esta solicitação foi <strong>cancelada</strong>.</span>
             </div>
           </div>
         )}
@@ -202,41 +193,11 @@ export default function AcompanharSolicitacaoPage() {
             </div>
           </div>
         )}
-        {sol.status === 'fechada' && sol.resultado === 'aprovada' && (
+        {sol.status === 'fechada' && (
           <div className="sol-terminal-banner approved">
-            <div className="sol-banner-main">
-              <div className="sol-banner-row">
-                <Icon name="check" size={16} stroke={2.4} />
-                <span>
-                  Cotação encerrada — proposta <strong>aprovada</strong> e venda concluída
-                  {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
-                </span>
-              </div>
-              {!!sol.avaliacaoPrestador && (
-                <div className="sol-banner-obs">
-                  <span className="sol-banner-obs-label">Sua avaliação do fornecedor:</span>{' '}
-                  <StarsReadOnly value={sol.avaliacaoPrestador} /> ({sol.avaliacaoPrestador}/5)
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {sol.status === 'fechada' && sol.resultado === 'nao-aprovada' && (
-          <div className="sol-terminal-banner warn">
-            <div className="sol-banner-main">
-              <div className="sol-banner-row">
-                <Icon name="close" size={16} stroke={2.4} />
-                <span>
-                  Cotação encerrada — proposta <strong>não aprovada</strong>, sem venda concluída
-                  {sol.encerradaEm ? ` em ${sol.encerradaEm}` : ''}.
-                </span>
-              </div>
-              {!!sol.avaliacaoPrestador && (
-                <div className="sol-banner-obs">
-                  <span className="sol-banner-obs-label">Sua avaliação do fornecedor:</span>{' '}
-                  <StarsReadOnly value={sol.avaliacaoPrestador} /> ({sol.avaliacaoPrestador}/5)
-                </div>
-              )}
+            <div className="sol-banner-row">
+              <Icon name="check" size={16} stroke={2.4} />
+              <span>Cotação <strong>encerrada</strong>.</span>
             </div>
           </div>
         )}
@@ -264,49 +225,23 @@ export default function AcompanharSolicitacaoPage() {
             {/* Dados da solicitação */}
             <div className="sol-card">
               <h3 className="sol-card-title">
-                <Icon name="file" size={16} /> Minha solicitação
+                <Icon name="file" size={16} /> Solicitação
               </h3>
               <div className="sol-info-grid">
-                <div className="sol-info-item">
-                  <span className="sol-info-label">Serviço solicitado</span>
-                  <span className="sol-info-val">{sol.servico}</span>
-                </div>
                 <div className="sol-info-item">
                   <span className="sol-info-label">Tipo</span>
                   <span className="sol-info-val">{typeLabel(sol.tipo)}</span>
                 </div>
-                {sol.prazo && (
-                  <div className="sol-info-item">
-                    <span className="sol-info-label">Prazo desejado</span>
-                    <span className="sol-info-val">{sol.prazo}</span>
-                  </div>
-                )}
                 <div className="sol-info-item">
-                  <span className="sol-info-label">Enviada</span>
+                  <span className="sol-info-label">Quando</span>
                   <span className="sol-info-val">{sol.quando}</span>
                 </div>
               </div>
               <div className="sol-resumo">
-                <span className="sol-info-label">Descrição</span>
+                <span className="sol-info-label">Resumo</span>
                 <p>{sol.resumo}</p>
               </div>
             </div>
-
-            {/* Resposta do fornecedor */}
-            {sol.resposta && (
-              <div className="sol-card">
-                <h3 className="sol-card-title">
-                  <Icon name="mail" size={16} /> Resposta do fornecedor
-                </h3>
-                <div className="sol-resposta-box">
-                  <p>{sol.resposta.texto}</p>
-                  <div className="sol-resposta-meta">
-                    <Icon name="check" size={12} stroke={2.5} />
-                    <span>{sol.resposta.autor ?? sol.prestador} · {sol.resposta.quando}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Dados do fornecedor */}
             <div className="sol-card">
@@ -315,23 +250,19 @@ export default function AcompanharSolicitacaoPage() {
               </h3>
               <div className="sol-info-grid">
                 <div className="sol-info-item">
-                  <span className="sol-info-label">Empresa</span>
+                  <span className="sol-info-label">Nome</span>
                   <span className="sol-info-val">{sol.prestador}</span>
                 </div>
                 <div className="sol-info-item">
-                  <span className="sol-info-label">Segmento</span>
-                  <span className="sol-info-val">{segmentLabel(sol.segmento)}</span>
-                </div>
-                <div className="sol-info-item">
                   <span className="sol-info-label">Telefone</span>
-                  <a className="sol-info-val link" href={'tel:' + sol.prestadorContato.replace(/\D/g, '')}>
-                    {sol.prestadorContato}
+                  <a className="sol-info-val link" href={'tel:' + sol.phone.replace(/\D/g, '')}>
+                    {sol.phone}
                   </a>
                 </div>
                 <div className="sol-info-item">
                   <span className="sol-info-label">E-mail</span>
-                  <a className="sol-info-val link" href={'mailto:' + sol.prestadorEmail}>
-                    {sol.prestadorEmail}
+                  <a className="sol-info-val link" href={'mailto:' + sol.email}>
+                    {sol.email}
                   </a>
                 </div>
               </div>
@@ -390,7 +321,7 @@ export default function AcompanharSolicitacaoPage() {
                 >
                   <Icon name="search" size={14} /> Buscar fornecedores similares
                 </button>
-                <a className="sol-status-btn" href={'mailto:' + sol.prestadorEmail}>
+                <a className="sol-status-btn" href={'mailto:' + sol.email}>
                   <Icon name="mail" size={14} /> Enviar e-mail ao fornecedor
                 </a>
               </div>

@@ -10,6 +10,7 @@ router.use(requireAuth);
 
 router.get('/', asyncHandler(SolicitacoesController.list));
 router.post('/', asyncHandler(SolicitacoesController.create));
+router.get('/:id', asyncHandler(SolicitacoesController.getById));
 router.patch('/:id/status', asyncHandler(SolicitacoesController.updateStatus));
 router.patch('/:id/contract', asyncHandler(SolicitacoesController.updateContract));
 

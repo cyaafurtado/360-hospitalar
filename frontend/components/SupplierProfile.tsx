@@ -1,7 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { Icon, ICON_PATHS } from '../lib/icons';
-import type { Supplier } from '../data/exemplos-diferenciais';
+import type { Supplier } from '../data/types';
 
 const ANO_ATUAL = new Date().getFullYear();
 
@@ -99,12 +99,12 @@ export function SupplierProfile({ supplier }: { supplier: Supplier }) {
           Credenciais verificadas
         </h3>
         <ul className="flex flex-col gap-2">
-          {supplier.credentials.length === 0 && (
+          {(!supplier.credentials || supplier.credentials.length === 0) && (
             <li className="rounded-xl bg-white p-4 text-sm text-slate-500 shadow-sm">
               Nenhuma credencial cadastrada ainda.
             </li>
           )}
-          {supplier.credentials.map((c) => (
+          {supplier.credentials?.map((c) => (
             <li
               key={c.name}
               className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm"
@@ -130,7 +130,7 @@ export function SupplierProfile({ supplier }: { supplier: Supplier }) {
           Áreas de especialização
         </h3>
         <div className="flex flex-wrap gap-2">
-          {supplier.specialties.map((s) => (
+          {supplier.specialties?.map((s) => (
             <span
               key={s}
               className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-semibold text-slate-700"
@@ -146,13 +146,13 @@ export function SupplierProfile({ supplier }: { supplier: Supplier }) {
         <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-600">
           Portfólio de serviços
         </h3>
-        {supplier.portfolio.length === 0 ? (
+        {!supplier.portfolio || supplier.portfolio.length === 0 ? (
           <p className="rounded-xl bg-white p-4 text-sm text-slate-500 shadow-sm">
             Este fornecedor ainda não publicou serviços no portfólio.
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {supplier.portfolio.map((p) => (
+            {supplier.portfolio?.map((p) => (
               <div key={p.title} className="overflow-hidden rounded-xl bg-white shadow-sm">
                 <div className="flex h-32 items-center justify-center bg-slate-100 text-slate-300">
                   {p.imageUrl ? (
@@ -174,13 +174,13 @@ export function SupplierProfile({ supplier }: { supplier: Supplier }) {
         <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-600">
           Avaliações {supplier.reviewsCount > 0 && `(${supplier.reviewsCount})`}
         </h3>
-        {supplier.reviews.length === 0 ? (
+        {!supplier.reviews || supplier.reviews.length === 0 ? (
           <p className="rounded-xl bg-white p-4 text-sm text-slate-500 shadow-sm">
             Ainda não há avaliações para este fornecedor.
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {supplier.reviews.map((r, i) => (
+            {supplier.reviews?.map((r, i) => (
               <div key={i} className="rounded-xl bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

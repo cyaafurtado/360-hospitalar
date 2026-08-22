@@ -17,6 +17,24 @@ async function podeAlterar(req: Request, solicitacaoId: string): Promise<boolean
 }
 
 export class SolicitacoesController {
+  // Detalhe de uma solicitação — só quem é dono consegue ver.
+  static async getById(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ error: 'Entre na sua conta para ver a solicitação.' });
+      return;
+    }
+    if (!(await podeAlterar(req, req.params.id))) {
+      res.status(403).json({ error: 'Esta solicitação não é da sua conta.' });
+      return;
+    }
+    const sol = await SolicitacoesRepo.getById(req.params.id);
+    if (!sol) {
+      res.status(404).json({ error: 'Solicitação não encontrada' });
+      return;
+    }
+    res.json(sol);
+  }
+
   // Duas caixas diferentes na mesma rota: o fornecedor vê o que recebeu, o
   // comprador vê o que enviou. Nunca a lista inteira.
   static async list(req: Request, res: Response): Promise<void> {

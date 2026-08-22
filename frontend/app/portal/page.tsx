@@ -4,9 +4,8 @@ import { useRouter } from 'next/navigation';
 import { getRequests, updateRequestStatus } from '../../lib/services';
 import { useAsync } from '../../lib/useAsync';
 import { useAppStore } from '../../lib/store';
-import { REQUEST_STATUS, REQUEST_TYPES, segmentLabel } from '../../data/reference';
+import { REQUEST_STATUS, REQUEST_TYPES } from '../../data/reference';
 import type { RequestStatus, RequestType, SolicitacaoRequest } from '../../data/types';
-import { EXEMPLOS_ENVIADAS } from '../../data/exemplos-portal-enviadas';
 import { Icon } from '../../lib/icons';
 import { PortalNav } from '../../components/PortalNav';
 import { StatusPill, TypePill } from '../../components/Pills';
@@ -26,9 +25,14 @@ export default function PortalPage() {
   const [tab, setTab] = useState<Tab>('recebidas');
 
   // --- recebidas ---
-  const { data, loading, error } = useAsync(() => getRequests(), []);
+  const { data: dataRecebidas, loading: loadingRecebidas, error: errorRecebidas } = useAsync(() => getRequests('recebidas'), []);
   const [rowsState, setRowsState] = useState<SolicitacaoRequest[] | null>(null);
-  useEffect(() => { if (data) setRowsState(data); }, [data]);
+  useEffect(() => { if (dataRecebidas) setRowsState(dataRecebidas); }, [dataRecebidas]);
+
+  // --- enviadas ---
+  const { data: dataEnviadas, loading: loadingEnviadas, error: errorEnviadas } = useAsync(() => getRequests('enviadas'), []);
+  const [rowsEnviadosState, setRowsEnviadosState] = useState<SolicitacaoRequest[] | null>(null);
+  useEffect(() => { if (dataEnviadas) setRowsEnviadosState(dataEnviadas); }, [dataEnviadas]);
 
   const [tipo, setTipo] = useState<'' | RequestType>('');
   const [status, setStatus] = useState<'' | RequestStatus>('');
@@ -72,28 +76,30 @@ export default function PortalPage() {
     }
   };
 
-  // --- enviadas ---
+  // --- enviadas (agora sem importar EXEMPLOS_ENVIADAS) ---
   const [qEnv, setQEnv] = useState('');
   const [statusEnv, setStatusEnv] = useState<'' | RequestStatus>('');
   const [openEnvId, setOpenEnvId] = useState<string | null>(null);
 
+  const rowsEnviadosData = rowsEnviadosState ?? [];
+
   const statsEnviadas = useMemo(() => ({
-    total: EXEMPLOS_ENVIADAS.length,
-    aguardando: EXEMPLOS_ENVIADAS.filter((r) => r.status === 'nova' || r.status === 'andamento').length,
-    respondida: EXEMPLOS_ENVIADAS.filter((r) => r.status === 'respondida').length,
-    parceiros: new Set(EXEMPLOS_ENVIADAS.map((r) => r.destinatario)).size,
-  }), []);
+    total: rowsEnviadosData.length,
+    aguardando: rowsEnviadosData.filter((r) => r.status === 'nova' || r.status === 'andamento').length,
+    respondida: rowsEnviadosData.filter((r) => r.status === 'respondida').length,
+    parceiros: new Set(rowsEnviadosData.map((r) => r.prestador)).size,
+  }), [rowsEnviadosData]);
 
   const rowsEnviadas = useMemo(() =>
-    EXEMPLOS_ENVIADAS.filter((r) => {
+    rowsEnviadosData.filter((r) => {
       if (statusEnv && r.status !== statusEnv) return false;
       if (qEnv.trim()) {
-        const h = (r.destinatario + ' ' + r.servico + ' ' + r.id).toLowerCase();
+        const h = (r.prestador + ' ' + r.resumo + ' ' + r.id).toLowerCase();
         if (!h.includes(qEnv.toLowerCase())) return false;
       }
       return true;
     }),
-    [qEnv, statusEnv]
+    [qEnv, statusEnv, rowsEnviadosData]
   );
 
   return (
@@ -189,10 +195,10 @@ export default function PortalPage() {
               )}
             </div>
 
-            {loading ? (
+            {loadingRecebidas ? (
               <Loading label="Carregando solicitações…" />
-            ) : error ? (
-              <LoadError message={error} />
+            ) : errorRecebidas ? (
+              <LoadError message={errorRecebidas} />
             ) : (
               <div className="table-wrap">
                 <table className="req-table">
@@ -356,12 +362,11 @@ export default function PortalPage() {
                       >
                         <td><span className="col-id">{r.id}</span></td>
                         <td className="td-name">
-                          <div className="cell-strong">{r.destinatario}</div>
+                          <div className="cell-strong">{r.prestador}</div>
                         </td>
-                        <td className="cell-muted">{segmentLabel(r.segmento)}</td>
                         <td><TypePill tipo={r.tipo} /></td>
                         <td><StatusPill status={r.status} /></td>
-                        <td>{r.servico}</td>
+                        <td className="cell-muted">{r.resumo}</td>
                         <td className="cell-sub">{r.quando}</td>
                         <td>
                           <button className="row-toggle" aria-label="Detalhes">

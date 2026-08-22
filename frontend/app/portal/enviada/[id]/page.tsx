@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '../../../../lib/store';
-import { typeLabel, segmentLabel } from '../../../../data/reference';
-import { EXEMPLOS_ENVIADAS } from '../../../../data/exemplos-portal-enviadas';
-import type { RequestStatus } from '../../../../data/types';
+import { typeLabel } from '../../../../data/reference';
+import { getRequest } from '../../../../lib/services';
+import { useAsync } from '../../../../lib/useAsync';
+import type { RequestStatus, SolicitacaoRequest } from '../../../../data/types';
 import { Icon } from '../../../../lib/icons';
 import { PortalNav } from '../../../../components/PortalNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
@@ -30,11 +31,22 @@ export default function EnviadaDetalhe() {
     if (hydrated && !authEmail) router.replace('/entrar');
   }, [hydrated, authEmail, router]);
 
-  const original = EXEMPLOS_ENVIADAS.find((r) => r.id === id) ?? null;
-  const [sol, setSol] = useState(original);
+  const { data: sol, loading, error } = useAsync(() => getRequest(id), [id]);
   const [cancelando, setCancelando] = useState(false);
 
-  if (!sol) return (
+  if (loading) return (
+    <div className="portal-screen">
+      <PortalNav />
+      <div className="portal-body">
+        <div className="empty">
+          <Icon name="signal" size={32} />
+          <h3>Carregando…</h3>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error || !sol) return (
     <div className="portal-screen">
       <PortalNav />
       <div className="portal-body">
@@ -55,8 +67,8 @@ export default function EnviadaDetalhe() {
 
   const cancelar = () => {
     setCancelando(true);
+    // TODO: implementar chamada de API para cancelar
     setTimeout(() => {
-      setSol((prev) => prev ? { ...prev, status: 'cancelada' } : prev);
       setCancelando(false);
     }, 600);
   };
@@ -77,11 +89,11 @@ export default function EnviadaDetalhe() {
               <TypePill tipo={sol.tipo} />
               <StatusPill status={sol.status} />
             </div>
-            <h1>{typeLabel(sol.tipo)} — {sol.servico}</h1>
-            <p className="muted">Enviada {sol.quando} · {segmentLabel(sol.segmento)}</p>
+            <h1>{typeLabel(sol.tipo)}</h1>
+            <p className="muted">Enviada {sol.quando}</p>
           </div>
           {sol.status === 'respondida' && (
-            <a className="btn-primary sm" href={'mailto:' + sol.destinatarioEmail}>
+            <a className="btn-primary sm" href={'mailto:' + sol.email}>
               <Icon name="mail" size={14} /> Responder proposta
             </a>
           )}
@@ -129,19 +141,9 @@ export default function EnviadaDetalhe() {
               </h3>
               <div className="sol-info-grid">
                 <div className="sol-info-item">
-                  <span className="sol-info-label">Serviço solicitado</span>
-                  <span className="sol-info-val">{sol.servico}</span>
-                </div>
-                <div className="sol-info-item">
                   <span className="sol-info-label">Tipo</span>
                   <span className="sol-info-val">{typeLabel(sol.tipo)}</span>
                 </div>
-                {sol.prazo && (
-                  <div className="sol-info-item">
-                    <span className="sol-info-label">Prazo desejado</span>
-                    <span className="sol-info-val">{sol.prazo}</span>
-                  </div>
-                )}
                 <div className="sol-info-item">
                   <span className="sol-info-label">Enviada</span>
                   <span className="sol-info-val">{sol.quando}</span>
@@ -155,27 +157,19 @@ export default function EnviadaDetalhe() {
 
             <div className="sol-card">
               <h3 className="sol-card-title">
-                <Icon name="users" size={16} /> Parceiro / Destinatário
+                <Icon name="users" size={16} /> Contato
               </h3>
               <div className="sol-info-grid">
                 <div className="sol-info-item">
-                  <span className="sol-info-label">Empresa</span>
-                  <span className="sol-info-val">{sol.destinatario}</span>
-                </div>
-                <div className="sol-info-item">
-                  <span className="sol-info-label">Segmento</span>
-                  <span className="sol-info-val">{segmentLabel(sol.segmento)}</span>
-                </div>
-                <div className="sol-info-item">
-                  <span className="sol-info-label">Telefone</span>
-                  <a className="sol-info-val link" href={'tel:' + sol.destinatarioContato.replace(/\D/g, '')}>
-                    {sol.destinatarioContato}
+                  <span className="sol-info-label">E-mail</span>
+                  <a className="sol-info-val link" href={'mailto:' + sol.email}>
+                    {sol.email}
                   </a>
                 </div>
                 <div className="sol-info-item">
-                  <span className="sol-info-label">E-mail</span>
-                  <a className="sol-info-val link" href={'mailto:' + sol.destinatarioEmail}>
-                    {sol.destinatarioEmail}
+                  <span className="sol-info-label">Telefone</span>
+                  <a className="sol-info-val link" href={'tel:' + sol.phone.replace(/\D/g, '')}>
+                    {sol.phone}
                   </a>
                 </div>
               </div>
@@ -218,7 +212,7 @@ export default function EnviadaDetalhe() {
                 <button className="sol-status-btn" onClick={() => router.push('/buscar')}>
                   <Icon name="search" size={14} /> Buscar parceiros similares
                 </button>
-                <a className="sol-status-btn" href={'mailto:' + sol.destinatarioEmail}>
+                <a className="sol-status-btn" href={'mailto:' + sol.email}>
                   <Icon name="mail" size={14} /> Enviar e-mail ao parceiro
                 </a>
               </div>

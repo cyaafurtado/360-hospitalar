@@ -53,6 +53,11 @@ export const SolicitacoesRepo = {
       : null;
   },
 
+  async getById(id: string): Promise<SolicitacaoRequest | null> {
+    const { rows } = await query('SELECT * FROM solicitacoes WHERE id = $1', [id]);
+    return rows[0] ? rowToReq(rows[0]) : null;
+  },
+
   async create(s: {
     id: string;
     solicitante: string;

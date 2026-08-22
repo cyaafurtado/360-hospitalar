@@ -74,6 +74,35 @@ export type DocumentoVerificacao = {
   arquivos?: string[]; // nomes dos arquivos anexados
 };
 
+export type CredentialStatus = 'valida' | 'vigente' | 'vencida';
+
+export type Review = {
+  author: string;
+  stars: number;
+  viaPlatform?: boolean;
+  text: string;
+};
+
+export type Supplier = {
+  id: string;
+  name: string;
+  category: string;
+  city: string;
+  verified: boolean;
+  marketSince: number;
+  platformSince: string;
+  rating: number;
+  reviewsCount: number;
+  avgResponseHours: number;
+  contractsCompleted: number;
+  institutionsServed: number;
+  onTimeRate: number;
+  specialties?: string[];
+  credentials?: Array<{ name: string; detail: string; status: CredentialStatus }>;
+  portfolio?: Array<{ title: string; description: string; imageUrl?: string }>;
+  reviews?: Review[];
+};
+
 export type SupplierProfileData = {
   name: string;
   tagline: string;

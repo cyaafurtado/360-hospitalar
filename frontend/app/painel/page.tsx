@@ -6,9 +6,11 @@ import { Icon } from '../../lib/icons';
 import { PainelNav } from '../../components/PainelNav';
 import { StatusPill, TypePill } from '../../components/Pills';
 import { segmentLabel, REQUEST_STATUS, REQUEST_TYPES } from '../../data/reference';
-import { EXEMPLOS_PAINEL } from '../../data/exemplos-painel';
-import type { RequestStatus, RequestType } from '../../data/types';
+import { getRequests } from '../../lib/services';
+import { useAsync } from '../../lib/useAsync';
+import type { RequestStatus, RequestType, SolicitacaoRequest } from '../../data/types';
 import { gerarPdfSolicitacao } from '../../lib/pdf';
+import { Loading, LoadError } from '../../components/AsyncState';
 
 export default function PainelPage() {
   const router = useRouter();
@@ -24,54 +26,73 @@ export default function PainelPage() {
     if (hydrated && !authEmail) router.replace('/entrar');
   }, [hydrated, authEmail, router]);
 
-  const baixarPdf = async (r: (typeof EXEMPLOS_PAINEL)[0]) => {
+  const { data, loading, error } = useAsync(() => getRequests('recebidas'), []);
+  const [rowsState, setRowsState] = useState<SolicitacaoRequest[] | null>(null);
+  useEffect(() => { if (data) setRowsState(data); }, [data]);
+
+  const baixarPdf = async (r: SolicitacaoRequest) => {
     setPdfLoading(r.id);
     try {
       await gerarPdfSolicitacao({
         id: r.id,
-        solicitante: 'Unidade de Saúde',
-        cargo: '',
-        organizacao: authEmail ?? '',
+        solicitante: r.solicitante,
+        cargo: r.cargo,
+        organizacao: r.organizacao,
         tipo: r.tipo,
         status: r.status,
         prestador: r.prestador,
-        uf: '',
-        cidade: '',
-        email: r.prestadorEmail,
-        phone: r.prestadorContato,
+        uf: r.uf,
+        cidade: r.cidade,
+        email: r.email,
+        phone: r.phone,
         quando: r.quando,
         resumo: r.resumo,
-        servico: r.servico,
-        prazo: r.prazo,
       });
     } finally {
       setPdfLoading(null);
     }
   };
 
+  const dados = rowsState ?? [];
+
   const rows = useMemo(
     () =>
-      EXEMPLOS_PAINEL.filter((r) => {
+      dados.filter((r) => {
         if (filtroStatus && r.status !== filtroStatus) return false;
         if (filtroTipo && r.tipo !== filtroTipo) return false;
         if (q.trim()) {
-          const h = (r.prestador + ' ' + r.servico + ' ' + r.id).toLowerCase();
+          const h = (r.solicitante + ' ' + r.resumo + ' ' + r.id).toLowerCase();
           if (!h.includes(q.toLowerCase())) return false;
         }
         return true;
       }),
-    [filtroStatus, filtroTipo, q]
+    [filtroStatus, filtroTipo, q, dados]
   );
 
   const stats = useMemo(
     () => ({
-      total: EXEMPLOS_PAINEL.length,
-      aguardando: EXEMPLOS_PAINEL.filter((r) => r.status === 'nova' || r.status === 'andamento').length,
-      respondidas: EXEMPLOS_PAINEL.filter((r) => r.status === 'respondida').length,
-      fornecedores: new Set(EXEMPLOS_PAINEL.map((r) => r.prestador)).size,
+      total: dados.length,
+      aguardando: dados.filter((r) => r.status === 'nova' || r.status === 'andamento').length,
+      respondidas: dados.filter((r) => r.status === 'respondida').length,
+      fornecedores: new Set(dados.map((r) => r.solicitante)).size,
     }),
-    []
+    [dados]
   );
+
+  if (loading || error) {
+    return (
+      <div className="portal-screen">
+        <PainelNav />
+        <div className="portal-body">
+          {loading ? (
+            <Loading label="Carregando solicitações…" />
+          ) : (
+            <LoadError message={error} />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="portal-screen">
@@ -163,12 +184,12 @@ export default function PainelPage() {
                   >
                     <td><span className="col-id">{r.id}</span></td>
                     <td className="td-name">
-                      <div className="cell-strong">{r.prestador}</div>
+                      <div className="cell-strong">{r.solicitante}</div>
+                      <div className="cell-muted">{r.organizacao}</div>
                     </td>
-                    <td className="cell-muted">{segmentLabel(r.segmento)}</td>
                     <td><TypePill tipo={r.tipo} /></td>
                     <td><StatusPill status={r.status} /></td>
-                    <td>{r.servico}</td>
+                    <td className="cell-muted">{r.resumo}</td>
                     <td className="cell-sub">{r.quando}</td>
                     <td>
                       <button className="row-toggle" aria-label="Detalhes">
