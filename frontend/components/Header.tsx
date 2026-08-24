@@ -19,7 +19,7 @@ export function Header() {
     <header className="site-header">
       <div className="header-inner">
         <Link className="brand" href="/">
-          <BrandLogo height={52} />
+          <BrandLogo height={64} />
         </Link>
         <nav className="nav">
           <a onClick={() => router.push('/')}>Segmentos</a>
