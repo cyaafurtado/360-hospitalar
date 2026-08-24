@@ -32,10 +32,10 @@ export function BrandLogo({
 
   return (
     <Image
-      src="/logo-360h.png"
+      src="/logo-360h.jpg"
       alt="360 Hospitalar — Plataforma de Prestadores de Serviços"
-      width={200}
-      height={260}
+      width={1408}
+      height={768}
       // A altura vira variavel CSS para o header poder encolher a marca no
       // celular: estilo inline ganha da folha de estilo, entao sem isto nao ha
       // como reduzir por media query.
