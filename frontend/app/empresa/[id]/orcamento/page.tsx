@@ -1,7 +1,7 @@
 'use client';
 import { useState, type FormEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCompanies, createQuote } from '../../../../lib/services';
+import { getCompanies, createQuote, getMyProfile, mensagemDeErro } from '../../../../lib/services';
 import { useAsync } from '../../../../lib/useAsync';
 import { segmentLabel, STATES, typeLabel } from '../../../../data/reference';
 import { maskPhone } from '../../../../lib/masks';
@@ -25,14 +25,26 @@ export default function OrcamentoPage() {
   const id = params?.id;
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const usuario = useAppStore((s) => s.usuario);
   const { data: companies, loading, error } = useAsync(() => getCompanies(), []);
   const c = companies?.find((x) => x.id === id);
+
+  // Fornecedor com cadastro pendente não pode solicitar orçamento — mesma
+  // trava de "cadastro completo" aplicada em /empresa/[id]. Instituição
+  // segue liberada só com login (ainda sem cadastro de instituição no backend).
+  const souFornecedor = usuario?.tipo === 'fornecedor';
+  const { data: meuPerfil, loading: carregandoPerfil } = useAsync(
+    () => (souFornecedor ? getMyProfile() : Promise.resolve(null)),
+    [souFornecedor]
+  );
+  const cadastroPendente = souFornecedor && meuPerfil?.status !== 'completo';
 
   const [tipo, setTipo] = useState('cotacao');
   const [prazo, setPrazo] = useState('Até 30 dias');
   const [done, setDone] = useState(false);
   const [proto, setProto] = useState('');
   const [sending, setSending] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState('');
   const [f, setF] = useState({
     nome: '',
     organizacao: '',
@@ -46,10 +58,10 @@ export default function OrcamentoPage() {
   });
   const set = (k: keyof typeof f, v: string) => setF((s) => ({ ...s, [k]: v }));
 
-  if (loading || error) {
+  if (loading || error || (authEmail && souFornecedor && carregandoPerfil)) {
     return (
       <div className="screen register">
-        {loading ? <Loading /> : <LoadError message={error} />}
+        {error ? <LoadError message={error} /> : <Loading />}
       </div>
     );
   }
@@ -109,6 +121,34 @@ export default function OrcamentoPage() {
     );
   }
 
+  if (cadastroPendente) {
+    return (
+      <div className="screen register">
+        <button className="back-link" onClick={() => router.push(`/empresa/${c.id}`)}>
+          <Icon name="back" size={16} /> Voltar ao fornecedor
+        </button>
+        <div className="reg-success">
+          <div className="success-mark" style={{ background: 'var(--primary)' }}>
+            <Icon name="shield2" size={34} stroke={2} />
+          </div>
+          <h1>Finalize seu cadastro para continuar</h1>
+          <p>
+            Para solicitar orçamento a <strong>{c.name}</strong>, sua empresa precisa ter o cadastro
+            completo na 360 Hospitalar. Falta pouco — termine o perfil da sua empresa e volte aqui.
+          </p>
+          <div className="success-actions">
+            <button className="btn-primary" onClick={() => router.push('/portal/perfil')}>
+              Completar cadastro
+            </button>
+            <button className="btn-ghost" onClick={() => router.push(`/empresa/${c.id}`)}>
+              Voltar ao fornecedor
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // defaults dependentes do fornecedor
   const ufVal = f.uf || c.uf;
   const servicoVal = f.servico || c.services[0] || '';
@@ -124,6 +164,7 @@ export default function OrcamentoPage() {
     e.preventDefault();
     if (!valid || sending) return;
     setSending(true);
+    setErroEnvio('');
     try {
       const r = await createQuote({
         prestadorId: c.id,
@@ -139,13 +180,15 @@ export default function OrcamentoPage() {
         servico: servicoVal,
         detalhes: f.detalhes,
       });
-      setProto(r.id || 'SOL-' + Math.floor(2050 + Math.random() * 900));
-    } catch {
-      setProto('SOL-' + Math.floor(2050 + Math.random() * 900));
-    } finally {
-      setSending(false);
+      setProto(r.id);
       setDone(true);
       window.scrollTo({ top: 0 });
+    } catch (err) {
+      // Antes isto virava tela de "solicitação enviada" com protocolo falso
+      // mesmo quando a API recusava o pedido.
+      setErroEnvio(mensagemDeErro(err, 'Não foi possível enviar a solicitação agora. Tente novamente.'));
+    } finally {
+      setSending(false);
     }
   };
 
@@ -308,6 +351,12 @@ export default function OrcamentoPage() {
                 />
               </Field>
             </div>
+
+            {erroEnvio && (
+              <div className="login-error" style={{ marginBottom: 16 }}>
+                <Icon name="close" size={14} stroke={2.4} /> {erroEnvio}
+              </div>
+            )}
 
             <div className="reg-nav">
               <button type="button" className="btn-ghost" onClick={() => router.push(`/empresa/${c.id}`)}>

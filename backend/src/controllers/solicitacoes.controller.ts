@@ -60,6 +60,16 @@ export class SolicitacoesController {
       res.status(401).json({ error: 'Entre na sua conta para pedir orçamento.' });
       return;
     }
+    // Conta de fornecedor só solicita orçamento (a outros fornecedores) com a
+    // própria empresa finalizada. Instituição segue liberada só com login —
+    // ainda não existe cadastro de instituição no backend pra checar.
+    if (req.user.tipo === 'fornecedor') {
+      const minhaEmpresa = await CompaniesRepo.getByUsuario(req.user.sub);
+      if (!minhaEmpresa || minhaEmpresa.status !== 'completo') {
+        res.status(403).json({ error: 'Finalize o cadastro da sua empresa para solicitar orçamentos.' });
+        return;
+      }
+    }
     const b = req.body ?? {};
     if (!b.solicitante || !b.organizacao || !b.email || !b.detalhes) {
       res.status(400).json({ error: 'Campos obrigatórios: solicitante, organizacao, email, detalhes' });
