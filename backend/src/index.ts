@@ -14,6 +14,7 @@ import cnpjRoutes from './routes/cnpj.routes';
 import companiesRoutes from './routes/companies.routes';
 import solicitacoesRoutes from './routes/solicitacoes.routes';
 import profileRoutes from './routes/profile.routes';
+import adminRoutes from './routes/admin.routes';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/cnpj', cnpjRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/requests', solicitacoesRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler);
 

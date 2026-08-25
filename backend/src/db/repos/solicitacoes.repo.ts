@@ -95,6 +95,13 @@ export const SolicitacoesRepo = {
     return rows[0] ? rowToReq(rows[0]) : null;
   },
 
+  // Painel de admin: todas as solicitações da plataforma (cotações, contatos,
+  // parcerias e os contratos firmados dentro delas), sem filtrar por dono.
+  async adminList(): Promise<SolicitacaoRequest[]> {
+    const { rows } = await query('SELECT * FROM solicitacoes ORDER BY created_at DESC');
+    return rows.map(rowToReq);
+  },
+
   async updateContract(id: string, contrato: ContratoInfo): Promise<SolicitacaoRequest | null> {
     const { rows } = await query(
       'UPDATE solicitacoes SET contrato = $2::jsonb WHERE id = $1 RETURNING *',

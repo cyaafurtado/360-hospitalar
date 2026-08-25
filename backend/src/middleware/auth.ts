@@ -35,10 +35,23 @@ export function requireTipo(...tipos: Array<'fornecedor' | 'contratante'>) {
       res.status(401).json({ error: 'Sessão expirada ou inválida. Entre novamente.' });
       return;
     }
-    if (!tipos.includes(req.user.tipo)) {
+    if (!tipos.includes(req.user.tipo as 'fornecedor' | 'contratante')) {
       res.status(403).json({ error: 'Sua conta não tem acesso a esta área.' });
       return;
     }
     next();
   };
+}
+
+// Painel de administração: só a conta tipo 'admin' entra.
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (!req.user) {
+    res.status(401).json({ error: 'Sessão expirada ou inválida. Entre novamente.' });
+    return;
+  }
+  if (req.user.tipo !== 'admin') {
+    res.status(403).json({ error: 'Sua conta não tem acesso a esta área.' });
+    return;
+  }
+  next();
 }

@@ -131,7 +131,7 @@ export type SupplierProfileData = {
 
 /* ---------- Sessão (auth real) ---------- */
 
-export type UsuarioTipo = 'fornecedor' | 'contratante';
+export type UsuarioTipo = 'fornecedor' | 'contratante' | 'admin';
 
 export type Usuario = {
   id: string;
@@ -141,6 +141,29 @@ export type Usuario = {
   companyId: string | null;
   organizacao: string;
   telefone: string;
+};
+
+/* ---------- Painel de administração ---------- */
+
+export type AdminFornecedor = Company & {
+  plano: Plan;
+  usuarioId: string | null;
+  donoNome: string | null;
+  donoEmail: string | null;
+  createdAt: string;
+};
+
+export type AdminUsuario = {
+  id: string;
+  nome: string;
+  email: string;
+  tipo: UsuarioTipo;
+  companyId: string | null;
+  organizacao: string;
+  telefone: string;
+  ativo: boolean;
+  ultimoLogin: string | null;
+  createdAt: string;
 };
 
 /* ---------- Consulta de CNPJ ---------- */

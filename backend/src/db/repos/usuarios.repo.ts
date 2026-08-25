@@ -58,7 +58,57 @@ export const UsuariosRepo = {
   async touchLogin(usuarioId: string): Promise<void> {
     await query('UPDATE usuarios SET ultimo_login = NOW() WHERE id = $1', [usuarioId]);
   },
+
+  // Painel de admin: toda conta da plataforma, sem o hash da senha.
+  async listAll(): Promise<AdminUsuario[]> {
+    const { rows } = await query(
+      `SELECT id, nome, email, tipo, company_id, organizacao, telefone, ativo, ultimo_login, created_at
+         FROM usuarios ORDER BY created_at DESC`
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      nome: r.nome,
+      email: r.email,
+      tipo: r.tipo as UsuarioTipo,
+      companyId: r.company_id ?? null,
+      organizacao: r.organizacao,
+      telefone: r.telefone,
+      ativo: r.ativo,
+      ultimoLogin: r.ultimo_login,
+      createdAt: r.created_at,
+    }));
+  },
+
+  // Gera uma senha nova para a conta (usada pelo reset do admin). Devolve
+  // false se a conta não existe — quem chama decide o hash antes de vir aqui.
+  async setSenhaHash(usuarioId: string, senhaHash: string): Promise<boolean> {
+    const { rowCount } = await query('UPDATE usuarios SET senha_hash = $2 WHERE id = $1', [usuarioId, senhaHash]);
+    return !!rowCount;
+  },
+
+  async setAtivo(usuarioId: string, ativo: boolean): Promise<boolean> {
+    const { rowCount } = await query('UPDATE usuarios SET ativo = $2 WHERE id = $1', [usuarioId, ativo]);
+    return !!rowCount;
+  },
+
+  async remove(usuarioId: string): Promise<boolean> {
+    const { rowCount } = await query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+    return !!rowCount;
+  },
 };
+
+export interface AdminUsuario {
+  id: string;
+  nome: string;
+  email: string;
+  tipo: UsuarioTipo;
+  companyId: string | null;
+  organizacao: string;
+  telefone: string;
+  ativo: boolean;
+  ultimoLogin: Date | null;
+  createdAt: Date;
+}
 
 // Por que o token morreu. Só 'rotacao' admite reapresentação na janela de tolerância:
 // logout e revogação por segurança valem na hora.

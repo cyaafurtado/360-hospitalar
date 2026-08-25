@@ -40,6 +40,8 @@ export const ICON_PATHS: Record<string, string> = {
   armchair: 'M5 11V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5M5 11a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5zM7 17v2M17 17v2',
   clipboard: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2M9 12l2 2 4-4',
   mortarboard: 'M12 3L2 9l10 6 10-6-10-6zM2 9v6M6 11.5v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5',
+  key: 'M15 7a4 4 0 1 1-4 4M11 11L3 19v2h2l1-1h2v-2h2l2-2',
+  trash: 'M4 7h16M9 7V4h6v3M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6',
 };
 
 type IconProps = {

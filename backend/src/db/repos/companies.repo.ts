@@ -1,5 +1,5 @@
 import { getClient, query } from '../connection';
-import { Company } from '../../models/types';
+import { Company, PlanoEmpresa } from '../../models/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function rowToCompany(r: any): Company {
@@ -23,6 +23,25 @@ function rowToCompany(r: any): Company {
     email: r.email ?? null,
     atendeUfs: r.atende_ufs ?? [],
     status: r.status,
+    plano: r.plano,
+  };
+}
+
+// Visão do painel de admin: toda empresa (qualquer status), com quem administra.
+export interface AdminCompany extends Company {
+  usuarioId: string | null;
+  donoNome: string | null;
+  donoEmail: string | null;
+  createdAt: string;
+}
+
+function rowToAdminCompany(r: any): AdminCompany {
+  return {
+    ...rowToCompany(r),
+    usuarioId: r.usuario_id ?? null,
+    donoNome: r.dono_nome ?? null,
+    donoEmail: r.dono_email ?? null,
+    createdAt: r.created_at,
   };
 }
 
@@ -131,15 +150,64 @@ export const CompaniesRepo = {
       uf: string;
       atendeUfs: string[];
       badges: string[];
+      plano?: PlanoEmpresa;
     }
   ): Promise<Company | null> {
     const { rows } = await query(
       `UPDATE companies SET
          name=$2, tagline=$3, about=$4, site=$5, employees=$6,
-         email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11, badges=$12, status='completo'
+         email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11, badges=$12, status='completo',
+         plano=COALESCE($13, plano)
        WHERE id=$1 RETURNING *`,
-      [id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone, p.city, p.uf, p.atendeUfs, p.badges]
+      [
+        id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone,
+        p.city, p.uf, p.atendeUfs, p.badges, p.plano ?? null,
+      ]
     );
     return rows[0] ? rowToCompany(rows[0]) : null;
+  },
+
+  // Painel de admin: todas as empresas (independente de status), com o dono.
+  async adminList(): Promise<AdminCompany[]> {
+    const { rows } = await query(
+      `SELECT c.*, u.nome AS dono_nome, u.email AS dono_email
+         FROM companies c
+         LEFT JOIN usuarios u ON u.id = c.usuario_id
+        ORDER BY c.created_at DESC`
+    );
+    return rows.map(rowToAdminCompany);
+  },
+
+  // Admin edita selo e plano manualmente (não há cobrança automática ainda).
+  async updateAdmin(id: string, p: { verified?: boolean; plano?: PlanoEmpresa }): Promise<Company | null> {
+    const { rows } = await query(
+      `UPDATE companies SET
+         verified = COALESCE($2, verified),
+         plano = COALESCE($3, plano)
+       WHERE id = $1 RETURNING *`,
+      [id, p.verified ?? null, p.plano ?? null]
+    );
+    return rows[0] ? rowToCompany(rows[0]) : null;
+  },
+
+  // Remove a empresa e tudo que só existe em função dela: solicitações
+  // recebidas por ela e o vínculo da conta que a administrava.
+  async remove(id: string): Promise<boolean> {
+    const client = await getClient();
+    try {
+      await client.query('BEGIN');
+      const { rowCount } = await client.query('DELETE FROM companies WHERE id = $1', [id]);
+      if (rowCount) {
+        await client.query('DELETE FROM solicitacoes WHERE prestador_id = $1', [id]);
+        await client.query('UPDATE usuarios SET company_id = NULL WHERE company_id = $1', [id]);
+      }
+      await client.query('COMMIT');
+      return !!rowCount;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   },
 };

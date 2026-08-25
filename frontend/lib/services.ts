@@ -8,6 +8,9 @@ import type {
   SupplierProfileData,
   Usuario,
   UsuarioTipo,
+  AdminFornecedor,
+  AdminUsuario,
+  Plan,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -151,5 +154,48 @@ export function mensagemDeErro(err: unknown, padrao: string): string {
 
 export async function renovarSessao(): Promise<RespostaSessao> {
   const { data } = await api.post<RespostaSessao>('/auth/refresh');
+  return data;
+}
+
+/* ---------- Painel de administração ---------- */
+
+export async function adminListFornecedores(): Promise<AdminFornecedor[]> {
+  const { data } = await api.get<AdminFornecedor[]>('/admin/fornecedores');
+  return data;
+}
+
+export async function adminUpdateFornecedor(
+  id: string,
+  patch: { verified?: boolean; plano?: Plan }
+): Promise<AdminFornecedor> {
+  const { data } = await api.patch<AdminFornecedor>(`/admin/fornecedores/${id}`, patch);
+  return data;
+}
+
+export async function adminDeleteFornecedor(id: string): Promise<void> {
+  await api.delete(`/admin/fornecedores/${id}`);
+}
+
+export async function adminListUsuarios(): Promise<AdminUsuario[]> {
+  const { data } = await api.get<AdminUsuario[]>('/admin/usuarios');
+  return data;
+}
+
+// Devolve a senha nova em texto puro — só aparece nesta resposta, uma vez.
+export async function adminResetarSenha(id: string): Promise<string> {
+  const { data } = await api.post<{ senha: string }>(`/admin/usuarios/${id}/resetar-senha`);
+  return data.senha;
+}
+
+export async function adminSetAtivo(id: string, ativo: boolean): Promise<void> {
+  await api.patch(`/admin/usuarios/${id}/ativo`, { ativo });
+}
+
+export async function adminDeleteUsuario(id: string): Promise<void> {
+  await api.delete(`/admin/usuarios/${id}`);
+}
+
+export async function adminListSolicitacoes(): Promise<SolicitacaoRequest[]> {
+  const { data } = await api.get<SolicitacaoRequest[]>('/admin/solicitacoes');
   return data;
 }

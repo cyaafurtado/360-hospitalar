@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
-import { Company } from '../models/types';
+import { Company, PlanoEmpresa } from '../models/types';
 
 const SEM_EMPRESA = {
   error: 'Sua conta ainda não tem empresa cadastrada.',
@@ -32,8 +32,14 @@ function paraPerfil(c: Company) {
     reviews: c.reviews,
     verified: c.verified,
     status: c.status,
+    plan: c.plano,
   };
 }
+
+// Autosserviço nunca chega a 'premium': a tela de perfil ainda simula o
+// checkout (sem gateway de pagamento real por trás), então quem paga de
+// verdade só pode ser promovido pelo admin, no painel de gestão.
+const PLANOS_AUTOSSERVICO: PlanoEmpresa[] = ['free', 'verified'];
 
 function slugify(name: string): string {
   return name
@@ -126,6 +132,7 @@ export class CompaniesController {
       uf: b.uf ?? '',
       atendeUfs: Array.isArray(b.atendeUfs) ? b.atendeUfs : [],
       badges: Array.isArray(b.badges) ? b.badges : [],
+      plano: PLANOS_AUTOSSERVICO.includes(b.plan) ? (b.plan as PlanoEmpresa) : undefined,
     });
     if (!c) {
       res.status(404).json(SEM_EMPRESA);

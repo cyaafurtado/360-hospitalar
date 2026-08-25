@@ -67,7 +67,12 @@ export const useAppStore = create<AppState>()(
       signIn: (token, usuario) => {
         setToken(token);
         // Quem se cadastrou como instituição já entra no perfil dela; fornecedor idem.
-        set({ usuario, authEmail: usuario.email, profileRole: usuario.tipo });
+        // Admin não tem "perfil" de fornecedor/contratante — não usa essa noção.
+        set({
+          usuario,
+          authEmail: usuario.email,
+          profileRole: usuario.tipo === 'admin' ? null : usuario.tipo,
+        });
       },
 
       setProfileRole: (profileRole) => set({ profileRole }),

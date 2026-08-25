@@ -58,7 +58,9 @@ function EntrarForm() {
       // ou no cadastro anterior) — perguntar de novo em /escolher-perfil seria
       // repetir a mesma pergunta. Só passa por lá quem pedir manualmente
       // ("Trocar perfil"), não no fluxo automático de login/criação de conta.
-      router.push(from || (usuario.tipo === 'contratante' ? '/painel' : '/portal'));
+      router.push(
+        usuario.tipo === 'admin' ? '/admin' : from || (usuario.tipo === 'contratante' ? '/painel' : '/portal')
+      );
     } catch (err) {
       setError(
         mensagemDeErro(

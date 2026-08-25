@@ -178,7 +178,7 @@ export default function CadastrarPage() {
           name: form.name, segment: form.segment, tagline: form.tagline, city: form.city, uf: form.uf,
           atendeUfs: form.atendeUfs, employees: form.employees, badges: form.badges, about: form.about,
           phone: form.phone, site: form.site, email: form.email,
-          rating: 0, reviews: 0, verified: false,
+          rating: 0, reviews: 0, verified: false, plan: form.plan,
         });
       }
       // instituição: endpoint será adicionado na Parte B

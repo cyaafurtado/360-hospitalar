@@ -1,4 +1,5 @@
 export type CompanyStatus = 'pre_cadastro' | 'completo';
+export type PlanoEmpresa = 'free' | 'verified' | 'premium';
 
 export interface Company {
   id: string;
@@ -20,6 +21,7 @@ export interface Company {
   email: string | null;
   atendeUfs: string[];
   status: CompanyStatus;
+  plano: PlanoEmpresa;
 }
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
@@ -75,7 +77,7 @@ export interface SupplierProfile {
 
 /* ---------- Auth (usuários e sessões) ---------- */
 
-export type UsuarioTipo = 'fornecedor' | 'contratante';
+export type UsuarioTipo = 'fornecedor' | 'contratante' | 'admin';
 
 // Usuário como o front enxerga — nunca inclui senha_hash
 export interface Usuario {

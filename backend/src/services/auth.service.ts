@@ -54,3 +54,15 @@ export function expiracaoRefresh(): Date {
 export function novoId(prefixo: string): string {
   return `${prefixo}_${crypto.randomBytes(9).toString('hex')}`;
 }
+
+// Sem caracteres ambíguos (0/O, 1/l/I) — é pra alguém digitar à mão.
+const ALFABETO_SENHA = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+
+// Usada só pelo reset de senha do admin: gera uma senha nova para repassar ao
+// dono da conta. Nunca fica salva em lugar nenhum além do hash no banco.
+export function gerarSenhaTemporaria(tamanho = 14): string {
+  const bytes = crypto.randomBytes(tamanho);
+  let senha = '';
+  for (let i = 0; i < tamanho; i++) senha += ALFABETO_SENHA[bytes[i] % ALFABETO_SENHA.length];
+  return senha;
+}
