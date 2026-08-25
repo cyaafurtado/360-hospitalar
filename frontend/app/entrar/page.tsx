@@ -54,7 +54,11 @@ function EntrarForm() {
         ? await registrar({ nome: nome.trim(), email, senha: pass, tipo })
         : await loginApi({ email, senha: pass });
       signIn(token, usuario);
-      router.push(from || '/escolher-perfil');
+      // A conta já diz se é fornecedor ou instituição (escolhido aqui em cima,
+      // ou no cadastro anterior) — perguntar de novo em /escolher-perfil seria
+      // repetir a mesma pergunta. Só passa por lá quem pedir manualmente
+      // ("Trocar perfil"), não no fluxo automático de login/criação de conta.
+      router.push(from || (usuario.tipo === 'contratante' ? '/painel' : '/portal'));
     } catch (err) {
       setError(
         mensagemDeErro(

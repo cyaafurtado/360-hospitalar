@@ -57,6 +57,7 @@ export default function CadastrarPage() {
   const ultimoCnpjBuscado = useRef('');
   const authEmail = useAppStore((s) => s.authEmail);
   const hydrated = useAppStore((s) => s.hydrated);
+  const usuario = useAppStore((s) => s.usuario);
 
   // A empresa fica amarrada a uma conta, então o cadastro exige estar logado.
   useEffect(() => {
@@ -64,6 +65,21 @@ export default function CadastrarPage() {
   }, [hydrated, authEmail, router]);
   const [instExpanded, setInstExpanded] = useState(false);
   const [form, setForm] = useState<RegisterForm>({ ...INITIAL });
+
+  // A conta já disse se é fornecedor ou instituição na tela de login/criação —
+  // perguntar de novo aqui seria redundante. Fornecedor pula direto pro
+  // pré-cadastro; instituição só falta escolher o subtipo (clínica, hospital…).
+  const tipoJaEscolhido = useRef(false);
+  useEffect(() => {
+    if (tipoJaEscolhido.current || !usuario) return;
+    tipoJaEscolhido.current = true;
+    if (usuario.tipo === 'fornecedor') {
+      setForm((f) => ({ ...f, tipoConta: 'empresa' }));
+      setStep(1);
+    } else if (usuario.tipo === 'contratante') {
+      setInstExpanded(true);
+    }
+  }, [usuario]);
 
   const set = <K extends keyof RegisterForm>(k: K, v: RegisterForm[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -347,43 +363,51 @@ export default function CadastrarPage() {
             {/* ── Step 0: Tipo de conta ── */}
             {currentKey === 'tipo' && (
               <div className="reg-grid">
-                <p className="reg-type-hint">Selecione como deseja usar a plataforma:</p>
+                {usuario?.tipo === 'contratante' ? (
+                  <p className="reg-type-hint">
+                    Sua conta é de <strong>Unidade de Saúde</strong> — escolha o tipo de instituição:
+                  </p>
+                ) : (
+                  <p className="reg-type-hint">Selecione como deseja usar a plataforma:</p>
+                )}
 
-                <div className="type-grid">
-                  {/* Fornecedor */}
-                  <button
-                    type="button"
-                    className={'type-card' + (form.tipoConta === 'empresa' ? ' on' : '')}
-                    onClick={() => { set('tipoConta', 'empresa'); setInstExpanded(false); }}
-                  >
-                    <span className="type-card-ico"><Icon name="shield2" size={28} /></span>
-                    <span className="type-card-title">Fornecedor</span>
-                    <span className="type-card-desc">
-                      Empresa que oferece produtos ou serviços ao setor de saúde. Liste sua empresa,
-                      receba pedidos de orçamento e gerencie contratos.
-                    </span>
-                    {form.tipoConta === 'empresa' && (
-                      <span className="type-card-check"><Icon name="check" size={13} stroke={3} /></span>
-                    )}
-                  </button>
+                {usuario?.tipo !== 'contratante' && (
+                  <div className="type-grid">
+                    {/* Fornecedor */}
+                    <button
+                      type="button"
+                      className={'type-card' + (form.tipoConta === 'empresa' ? ' on' : '')}
+                      onClick={() => { set('tipoConta', 'empresa'); setInstExpanded(false); }}
+                    >
+                      <span className="type-card-ico"><Icon name="shield2" size={28} /></span>
+                      <span className="type-card-title">Fornecedor</span>
+                      <span className="type-card-desc">
+                        Empresa que oferece produtos ou serviços ao setor de saúde. Liste sua empresa,
+                        receba pedidos de orçamento e gerencie contratos.
+                      </span>
+                      {form.tipoConta === 'empresa' && (
+                        <span className="type-card-check"><Icon name="check" size={13} stroke={3} /></span>
+                      )}
+                    </button>
 
-                  {/* Instituição */}
-                  <button
-                    type="button"
-                    className={'type-card' + (inst ? ' on' : '')}
-                    onClick={() => { setInstExpanded(true); if (form.tipoConta === 'empresa') set('tipoConta', ''); }}
-                  >
-                    <span className="type-card-ico"><Icon name="users" size={28} /></span>
-                    <span className="type-card-title">Instituição</span>
-                    <span className="type-card-desc">
-                      Hospital, clínica, órgão público ou privado que busca fornecedores. Acesse o
-                      diretório e envie pedidos de orçamento gratuitamente.
-                    </span>
-                    {inst && (
-                      <span className="type-card-check"><Icon name="check" size={13} stroke={3} /></span>
-                    )}
-                  </button>
-                </div>
+                    {/* Instituição */}
+                    <button
+                      type="button"
+                      className={'type-card' + (inst ? ' on' : '')}
+                      onClick={() => { setInstExpanded(true); if (form.tipoConta === 'empresa') set('tipoConta', ''); }}
+                    >
+                      <span className="type-card-ico"><Icon name="users" size={28} /></span>
+                      <span className="type-card-title">Instituição</span>
+                      <span className="type-card-desc">
+                        Hospital, clínica, órgão público ou privado que busca fornecedores. Acesse o
+                        diretório e envie pedidos de orçamento gratuitamente.
+                      </span>
+                      {inst && (
+                        <span className="type-card-check"><Icon name="check" size={13} stroke={3} /></span>
+                      )}
+                    </button>
+                  </div>
+                )}
 
                 {/* Sub-tipos de instituição */}
                 {instExpanded && (
