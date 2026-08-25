@@ -285,7 +285,15 @@ export default function CadastrarPage() {
           )}
 
           <div className="success-actions">
-            <button className="btn-primary" onClick={() => router.push(inst ? '/buscar' : '/')}>
+            {!inst && (form.plan === 'verified' || form.plan === 'premium') && (
+              <button className="btn-primary" onClick={() => router.push('/portal/perfil')}>
+                Acompanhe seu processo <Icon name="arrow" size={15} />
+              </button>
+            )}
+            <button
+              className={!inst && (form.plan === 'verified' || form.plan === 'premium') ? 'btn-ghost' : 'btn-primary'}
+              onClick={() => router.push(inst ? '/buscar' : '/')}
+            >
               {inst ? 'Buscar fornecedores' : 'Voltar ao início'}
             </button>
             <button
