@@ -27,9 +27,11 @@ function paraPerfil(c: Company) {
     site: c.site,
     employees: c.employees,
     atendeUfs: c.atendeUfs,
+    badges: c.badges,
     rating: c.rating,
     reviews: c.reviews,
     verified: c.verified,
+    status: c.status,
   };
 }
 
@@ -123,6 +125,7 @@ export class CompaniesController {
       city: b.city ?? '',
       uf: b.uf ?? '',
       atendeUfs: Array.isArray(b.atendeUfs) ? b.atendeUfs : [],
+      badges: Array.isArray(b.badges) ? b.badges : [],
     });
     if (!c) {
       res.status(404).json(SEM_EMPRESA);

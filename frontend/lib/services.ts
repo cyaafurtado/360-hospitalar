@@ -60,23 +60,19 @@ export async function updateMyProfile(profile: SupplierProfileData): Promise<Sup
   return data;
 }
 
-export type NewCompanyInput = {
+// Pré-cadastro: cria a empresa só com o essencial (etapa 1 do assistente).
+// O restante do perfil é preenchido depois via updateMyProfile, que é o que
+// promove a empresa para status 'completo' e a torna elegível a orçamento.
+export type PreCadastroInput = {
   name: string;
   segment: string;
-  tagline: string;
   city: string;
   uf: string;
-  atendeUfs: string[];
-  employees: string;
-  badges: string[];
-  about: string;
-  phone: string;
-  site: string;
-  email: string;
 };
 
-export async function createCompany(input: NewCompanyInput): Promise<void> {
-  await api.post('/companies', input);
+export async function preCadastrarEmpresa(input: PreCadastroInput): Promise<Company> {
+  const { data } = await api.post<Company>('/companies', input);
+  return data;
 }
 
 export type NewQuoteInput = {

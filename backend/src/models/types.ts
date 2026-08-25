@@ -1,3 +1,5 @@
+export type CompanyStatus = 'pre_cadastro' | 'completo';
+
 export interface Company {
   id: string;
   name: string;
@@ -17,6 +19,7 @@ export interface Company {
   site: string;
   email: string | null;
   atendeUfs: string[];
+  status: CompanyStatus;
 }
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
@@ -63,9 +66,11 @@ export interface SupplierProfile {
   site: string;
   employees: string;
   atendeUfs: string[];
+  badges: string[];
   rating: number;
   reviews: number;
   verified: boolean;
+  status: CompanyStatus;
 }
 
 /* ---------- Auth (usuários e sessões) ---------- */

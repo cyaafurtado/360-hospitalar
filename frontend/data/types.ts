@@ -20,6 +20,7 @@ export type Company = {
   site: string;
   email?: string | null;
   atendeUfs?: string[];
+  status?: CompanyStatus;
 };
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
@@ -103,6 +104,8 @@ export type Supplier = {
   reviews?: Review[];
 };
 
+export type CompanyStatus = 'pre_cadastro' | 'completo';
+
 export type SupplierProfileData = {
   name: string;
   tagline: string;
@@ -115,9 +118,11 @@ export type SupplierProfileData = {
   site: string;
   employees: string;
   atendeUfs: string[];
+  badges?: string[];
   rating: number;
   reviews: number;
   verified: boolean;
+  status?: CompanyStatus;
   plan?: Plan;
   documentos?: DocumentoVerificacao[];
   fotos?: string[];

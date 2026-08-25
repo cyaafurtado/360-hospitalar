@@ -7,7 +7,7 @@ import { Icon } from '../../lib/icons';
 import { maskCNPJ, maskCNES, maskCard, maskExp } from '../../lib/masks';
 import { Field } from '../../components/Field';
 import { PreviewCard } from '../../components/PreviewCard';
-import { createCompany, mensagemDeErro } from '../../lib/services';
+import { preCadastrarEmpresa, updateMyProfile, mensagemDeErro } from '../../lib/services';
 import { useAppStore } from '../../lib/store';
 import { consultarCnpj, cnpjValido, apenasDigitos, CnpjErro } from '../../lib/cnpj';
 
@@ -49,6 +49,8 @@ export default function CadastrarPage() {
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [erroEnvio, setErroEnvio] = useState('');
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [criandoPreCadastro, setCriandoPreCadastro] = useState(false);
   const [buscandoCnpj, setBuscandoCnpj] = useState(false);
   const [avisoCnpj, setAvisoCnpj] = useState('');
   const [empresaEncontrada, setEmpresaEncontrada] = useState('');
@@ -154,10 +156,13 @@ export default function CadastrarPage() {
     setErroEnvio('');
     try {
       if (form.tipoConta === 'empresa') {
-        await createCompany({
+        // Promove a empresa de 'pre_cadastro' pra 'completo' — só a partir
+        // daqui ela aparece no diretório e pode receber pedido de orçamento.
+        await updateMyProfile({
           name: form.name, segment: form.segment, tagline: form.tagline, city: form.city, uf: form.uf,
           atendeUfs: form.atendeUfs, employees: form.employees, badges: form.badges, about: form.about,
           phone: form.phone, site: form.site, email: form.email,
+          rating: 0, reviews: 0, verified: false,
         });
       }
       // instituição: endpoint será adicionado na Parte B
@@ -171,7 +176,24 @@ export default function CadastrarPage() {
     }
   };
 
-  const next = () => {
+  const next = async () => {
+    // Sai do pré-cadastro: já grava a empresa no banco (status 'pre_cadastro').
+    // O resto do assistente só preenche o perfil; quem "finaliza" é o submit().
+    if (form.tipoConta === 'empresa' && currentKey === 'precadastro' && !empresaId) {
+      setCriandoPreCadastro(true);
+      setErroEnvio('');
+      try {
+        const empresa = await preCadastrarEmpresa({
+          name: form.name, segment: form.segment, city: form.city, uf: form.uf,
+        });
+        setEmpresaId(empresa.id);
+      } catch (e) {
+        setErroEnvio(mensagemDeErro(e, 'Não foi possível salvar o pré-cadastro. Tente novamente.'));
+        setCriandoPreCadastro(false);
+        return;
+      }
+      setCriandoPreCadastro(false);
+    }
     if (step < REG_STEPS.length - 1) {
       setStep(step + 1);
       window.scrollTo({ top: 0 });
@@ -268,7 +290,7 @@ export default function CadastrarPage() {
             </button>
             <button
               className="btn-ghost"
-              onClick={() => { setDone(false); setStep(0); setInstExpanded(false); setForm({ ...INITIAL }); }}
+              onClick={() => { setDone(false); setStep(0); setInstExpanded(false); setForm({ ...INITIAL }); setEmpresaId(null); }}
             >
               {inst ? 'Cadastrar outra instituição' : 'Cadastrar outra empresa'}
             </button>
@@ -662,9 +684,9 @@ export default function CadastrarPage() {
                   <Icon name="back" size={15} /> Voltar
                 </button>
               ) : <span />}
-              <button className="btn-primary" disabled={!stepValid() || submitting} onClick={next}>
+              <button className="btn-primary" disabled={!stepValid() || submitting || criandoPreCadastro} onClick={next}>
                 {step < REG_STEPS.length - 1 ? (
-                  <>Continuar <Icon name="arrow" size={15} /></>
+                  criandoPreCadastro ? 'Salvando…' : <>Continuar <Icon name="arrow" size={15} /></>
                 ) : submitting ? 'Enviando…'
                   : (!inst && form.plan === 'premium') ? (
                     <>Pagar R$ 19,90 e enviar <Icon name="check" size={15} stroke={2.5} /></>

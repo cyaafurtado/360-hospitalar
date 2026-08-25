@@ -68,8 +68,14 @@ export class SolicitacoesController {
     let prestadorNome = b.prestador ?? '';
     let prestadorId: string | null = b.prestadorId ?? null;
     if (prestadorId) {
+      // getById só enxerga empresa com cadastro completo — pré-cadastro não
+      // pode receber pedido de orçamento.
       const c = await CompaniesRepo.getById(prestadorId);
-      if (c) prestadorNome = c.name;
+      if (!c) {
+        res.status(400).json({ error: 'Este fornecedor ainda não finalizou o cadastro na plataforma.' });
+        return;
+      }
+      prestadorNome = c.name;
     }
     const id = 'SOL-' + Math.floor(2050 + Math.random() * 900);
     const resumo = b.servico ? `${b.servico} — ${b.detalhes}` : b.detalhes;

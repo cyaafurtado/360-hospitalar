@@ -22,6 +22,7 @@ function rowToCompany(r: any): Company {
     site: r.site,
     email: r.email ?? null,
     atendeUfs: r.atende_ufs ?? [],
+    status: r.status,
   };
 }
 
@@ -44,13 +45,15 @@ export interface NovaEmpresa {
 }
 
 export const CompaniesRepo = {
+  // Diretório público: só empresa com cadastro completo aparece pra quem busca
+  // ou pede orçamento. Pré-cadastro é visível só pra própria conta (getByUsuario).
   async list(): Promise<Company[]> {
-    const { rows } = await query('SELECT * FROM companies ORDER BY rating DESC');
+    const { rows } = await query("SELECT * FROM companies WHERE status = 'completo' ORDER BY rating DESC");
     return rows.map(rowToCompany);
   },
 
   async getById(id: string): Promise<Company | null> {
-    const { rows } = await query('SELECT * FROM companies WHERE id = $1', [id]);
+    const { rows } = await query("SELECT * FROM companies WHERE id = $1 AND status = 'completo'", [id]);
     return rows[0] ? rowToCompany(rows[0]) : null;
   },
 
@@ -78,7 +81,8 @@ export const CompaniesRepo = {
   },
 
   // Cria a empresa e amarra na conta no mesmo commit: nunca sobra empresa sem
-  // dono nem conta apontando para empresa que não existe.
+  // dono nem conta apontando para empresa que não existe. Toda empresa nasce
+  // em pré-cadastro; updateProfile() é quem promove pra 'completo'.
   async createParaUsuario(c: NovaEmpresa, usuarioId: string): Promise<Company> {
     const client = await getClient();
     try {
@@ -86,8 +90,8 @@ export const CompaniesRepo = {
       const { rows } = await client.query(
         `INSERT INTO companies
           (id, name, segment, tagline, city, uf, rating, reviews, verified,
-           founded, employees, services, badges, about, phone, site, email, atende_ufs, usuario_id)
-         VALUES ($1,$2,$3,$4,$5,$6,0,0,FALSE,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+           founded, employees, services, badges, about, phone, site, email, atende_ufs, usuario_id, status)
+         VALUES ($1,$2,$3,$4,$5,$6,0,0,FALSE,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'pre_cadastro')
          RETURNING *`,
         [
           c.id, c.name, c.segment, c.tagline, c.city, c.uf,
@@ -111,6 +115,8 @@ export const CompaniesRepo = {
     return rows.length > 0;
   },
 
+  // Qualquer salvamento de perfil bem-sucedido conta como cadastro finalizado
+  // — é o gatilho que promove a empresa de 'pre_cadastro' pra 'completo'.
   async updateProfile(
     id: string,
     p: {
@@ -124,14 +130,15 @@ export const CompaniesRepo = {
       city: string;
       uf: string;
       atendeUfs: string[];
+      badges: string[];
     }
   ): Promise<Company | null> {
     const { rows } = await query(
       `UPDATE companies SET
          name=$2, tagline=$3, about=$4, site=$5, employees=$6,
-         email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11
+         email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11, badges=$12, status='completo'
        WHERE id=$1 RETURNING *`,
-      [id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone, p.city, p.uf, p.atendeUfs]
+      [id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone, p.city, p.uf, p.atendeUfs, p.badges]
     );
     return rows[0] ? rowToCompany(rows[0]) : null;
   },
