@@ -82,7 +82,7 @@ export default function CadastrarPage() {
         tipoStep,
         { key: 'precadastro', label: 'Pré-cadastro',      fields: ['cnpj', 'name', 'segment', 'uf', 'city'] as (keyof RegisterForm)[] },
         { key: 'atuacao',     label: 'Área de atuação',   fields: ['tagline'] as (keyof RegisterForm)[] },
-        { key: 'contato',     label: 'Contato & selos',   fields: ['email', 'phone', 'site'] as (keyof RegisterForm)[] },
+        { key: 'contato',     label: 'Contato & selos',   fields: ['email', 'phone'] as (keyof RegisterForm)[] },
         { key: 'plano',       label: 'Plano & verificação', fields: [] as (keyof RegisterForm)[] },
       ];
     }
