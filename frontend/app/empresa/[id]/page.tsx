@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import { getCompanies } from '../../../lib/services';
+import { getCompanies, getMyProfile } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { segmentLabel } from '../../../data/reference';
 import { Icon } from '../../../lib/icons';
@@ -18,7 +18,19 @@ export default function EmpresaPage() {
   const id = params?.id;
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const usuario = useAppStore((s) => s.usuario);
   const { data: companies, loading, error } = useAsync(() => getCompanies(), []);
+
+  // Instituição vê o contato só de estar logada. Fornecedor precisa ter
+  // finalizado o próprio cadastro (status 'completo') — senão fica embaçado
+  // igual pra quem não fez login.
+  const souFornecedor = usuario?.tipo === 'fornecedor';
+  const { data: meuPerfil } = useAsync(
+    () => (souFornecedor ? getMyProfile() : Promise.resolve(null)),
+    [souFornecedor]
+  );
+  const cadastroPendente = souFornecedor && meuPerfil?.status !== 'completo';
+  const podeVerContato = !!authEmail && !cadastroPendente;
 
   if (loading || error) {
     return (
@@ -88,13 +100,17 @@ export default function EmpresaPage() {
           <button className="btn-primary dh-cta" onClick={orcamento}>
             <Icon name="phone" size={15} /> Solicitar contato
           </button>
-          {authEmail ? (
+          {podeVerContato ? (
             <a className="btn-ghost dh-cta2" href={`https://${c.site}`} target="_blank" rel="noreferrer">
               <Icon name="globe" size={15} /> {c.site}
             </a>
-          ) : (
+          ) : !authEmail ? (
             <button className="btn-ghost dh-cta2 dh-cta2-locked" onClick={() => router.push(loginFrom)}>
               <Icon name="shield2" size={15} /> Ver site (faça login)
+            </button>
+          ) : (
+            <button className="btn-ghost dh-cta2 dh-cta2-locked" onClick={() => router.push('/portal/perfil')}>
+              <Icon name="shield2" size={15} /> Ver site (finalize seu cadastro)
             </button>
           )}
         </div>
@@ -177,7 +193,7 @@ export default function EmpresaPage() {
           </div>
           <div className="side-card">
             <h3>Contato</h3>
-            {authEmail ? (
+            {podeVerContato ? (
               <>
                 <div className="contact-row">
                   <Icon name="phone" size={15} /> {c.phone}
@@ -199,10 +215,17 @@ export default function EmpresaPage() {
                 <div className="contact-gate">
                   <div className="contact-gate-row">
                     <Icon name="shield2" size={14} />
-                    <span>Faça login para ver os dados de contato</span>
+                    <span>
+                      {!authEmail
+                        ? 'Faça login para ver os dados de contato'
+                        : 'Finalize o cadastro da sua empresa para ver os dados de contato'}
+                    </span>
                   </div>
-                  <button className="btn-link" onClick={() => router.push(loginFrom)}>
-                    Entrar na minha conta
+                  <button
+                    className="btn-link"
+                    onClick={() => router.push(!authEmail ? loginFrom : '/portal/perfil')}
+                  >
+                    {!authEmail ? 'Entrar na minha conta' : 'Completar cadastro'}
                   </button>
                 </div>
               </>
