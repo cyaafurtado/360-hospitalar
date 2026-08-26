@@ -54,7 +54,7 @@ export async function getMyProfile(): Promise<SupplierProfileData | null> {
   }
 }
 
-function codigoDoErro(err: unknown): string | undefined {
+export function codigoDoErro(err: unknown): string | undefined {
   return (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
 }
 
@@ -122,15 +122,26 @@ export type NovaContaInput = {
 };
 
 type RespostaSessao = { token: string; usuario: Usuario };
+type RespostaCadastro = { pendingVerification: true; email: string };
 
 export async function login(cred: CredenciaisLogin): Promise<RespostaSessao> {
   const { data } = await api.post<RespostaSessao>('/auth/login', cred);
   return data;
 }
 
-export async function registrar(input: NovaContaInput): Promise<RespostaSessao> {
-  const { data } = await api.post<RespostaSessao>('/auth/register', input);
+// Não faz login: a conta só é liberada depois de confirmar o e-mail.
+export async function registrar(input: NovaContaInput): Promise<RespostaCadastro> {
+  const { data } = await api.post<RespostaCadastro>('/auth/register', input);
   return data;
+}
+
+export async function confirmarEmail(token: string): Promise<RespostaSessao> {
+  const { data } = await api.post<RespostaSessao>('/auth/verify-email', { token });
+  return data;
+}
+
+export async function reenviarConfirmacao(email: string): Promise<void> {
+  await api.post('/auth/resend-verification', { email });
 }
 
 export async function getUsuarioLogado(): Promise<Usuario> {

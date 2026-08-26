@@ -14,4 +14,9 @@ export const config = {
   corsOrigins: (process.env.CORS_ORIGIN || 'http://localhost:3000')
     .split(',')
     .map((s) => s.trim()),
+  // Envio de e-mail transacional (confirmação de cadastro) via Resend.
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  emailFrom: process.env.EMAIL_FROM || '360 Hospitalar <nao-responda@360hospitalar.com.br>',
+  // Base do front, usada para montar o link de confirmação de e-mail.
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 };

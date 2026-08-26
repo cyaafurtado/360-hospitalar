@@ -18,13 +18,19 @@ function rowToUsuario(r: any): Usuario {
 export interface UsuarioComHash extends Usuario {
   senhaHash: string;
   ativo: boolean;
+  emailVerificado: boolean;
 }
 
 export const UsuariosRepo = {
   async findByEmail(email: string): Promise<UsuarioComHash | null> {
     const { rows } = await query('SELECT * FROM usuarios WHERE LOWER(email) = LOWER($1)', [email]);
     if (!rows[0]) return null;
-    return { ...rowToUsuario(rows[0]), senhaHash: rows[0].senha_hash, ativo: rows[0].ativo };
+    return {
+      ...rowToUsuario(rows[0]),
+      senhaHash: rows[0].senha_hash,
+      ativo: rows[0].ativo,
+      emailVerificado: rows[0].email_verificado,
+    };
   },
 
   async findById(id: string): Promise<Usuario | null> {
@@ -43,12 +49,37 @@ export const UsuariosRepo = {
     companyId: string | null;
   }): Promise<Usuario> {
     const { rows } = await query(
-      `INSERT INTO usuarios (id, nome, email, senha_hash, tipo, organizacao, telefone, company_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      `INSERT INTO usuarios (id, nome, email, senha_hash, tipo, organizacao, telefone, company_id, email_verificado)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,FALSE)
        RETURNING *`,
       [u.id, u.nome, u.email, u.senhaHash, u.tipo, u.organizacao, u.telefone, u.companyId]
     );
     return rowToUsuario(rows[0]);
+  },
+
+  async setVerificacaoToken(usuarioId: string, tokenHash: string, expiraEm: Date): Promise<void> {
+    await query(
+      'UPDATE usuarios SET verificacao_token_hash = $2, verificacao_expira_em = $3 WHERE id = $1',
+      [usuarioId, tokenHash, expiraEm]
+    );
+  },
+
+  // Só devolve o id se o token bater e ainda estiver dentro da validade.
+  async idPorTokenVerificacao(tokenHash: string): Promise<string | null> {
+    const { rows } = await query(
+      `SELECT id FROM usuarios
+        WHERE verificacao_token_hash = $1 AND verificacao_expira_em > NOW()`,
+      [tokenHash]
+    );
+    return rows[0]?.id ?? null;
+  },
+
+  async marcarEmailVerificado(usuarioId: string): Promise<void> {
+    await query(
+      `UPDATE usuarios SET email_verificado = TRUE, verificacao_token_hash = NULL, verificacao_expira_em = NULL
+        WHERE id = $1`,
+      [usuarioId]
+    );
   },
 
   async setCompany(usuarioId: string, companyId: string): Promise<void> {

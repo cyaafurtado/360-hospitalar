@@ -10,7 +10,7 @@ import { TweaksPanel } from './TweaksPanel';
 import { WhatsAppFloat } from './WhatsAppFloat';
 
 // Rotas com layout próprio (sem rodapé do site)
-const NO_FOOTER = ['/entrar', '/portal', '/admin'];
+const NO_FOOTER = ['/entrar', '/confirmar-email', '/portal', '/admin'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';

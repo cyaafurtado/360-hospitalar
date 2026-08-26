@@ -51,6 +51,22 @@ export function expiracaoRefresh(): Date {
   return new Date(Date.now() + REFRESH_TTL_DIAS * 24 * 60 * 60 * 1000);
 }
 
+// Token de confirmação de e-mail: mesma ideia do refresh — opaco, só o hash
+// SHA-256 fica salvo, e expira rápido (o link é de uso único e imediato).
+const VERIFICACAO_TTL_HORAS = 48;
+
+export function gerarTokenVerificacao(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function hashTokenVerificacao(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+export function expiracaoVerificacao(): Date {
+  return new Date(Date.now() + VERIFICACAO_TTL_HORAS * 60 * 60 * 1000);
+}
+
 export function novoId(prefixo: string): string {
   return `${prefixo}_${crypto.randomBytes(9).toString('hex')}`;
 }

@@ -6,12 +6,16 @@ import {
   assinarAccessToken,
   conferirSenha,
   expiracaoRefresh,
+  expiracaoVerificacao,
   gerarRefreshToken,
+  gerarTokenVerificacao,
   hashRefreshToken,
   hashSenha,
+  hashTokenVerificacao,
   novoId,
   REFRESH_TTL_DIAS,
 } from '../services/auth.service';
+import { enviarEmailConfirmacao } from '../services/email.service';
 
 const COOKIE = 'rt';
 const TIPOS: UsuarioTipo[] = ['fornecedor', 'contratante'];
@@ -50,6 +54,14 @@ async function abrirSessao(req: Request, res: Response, usuario: Usuario, status
   res.status(status).json({ token, usuario });
 }
 
+// Gera um token novo, salva o hash com validade e dispara o e-mail. Usado no
+// cadastro e no reenvio — nunca deixa o e-mail de confirmação sem token salvo.
+async function dispararConfirmacao(usuario: Usuario): Promise<void> {
+  const token = gerarTokenVerificacao();
+  await UsuariosRepo.setVerificacaoToken(usuario.id, hashTokenVerificacao(token), expiracaoVerificacao());
+  await enviarEmailConfirmacao(usuario.email, usuario.nome, token);
+}
+
 export class AuthController {
   static async register(req: Request, res: Response): Promise<void> {
     const b = req.body ?? {};
@@ -86,7 +98,61 @@ export class AuthController {
       companyId: b.companyId ? String(b.companyId) : null,
     });
 
-    await abrirSessao(req, res, usuario, 201);
+    // Conta fica criada mas não abre sessão: só entra depois de confirmar o
+    // link recebido por e-mail (verifyEmail é quem chama abrirSessao).
+    try {
+      await dispararConfirmacao(usuario);
+    } catch (err) {
+      // Não falha o cadastro por causa disso — a pessoa ainda pode pedir
+      // reenvio depois. Mas precisa aparecer no log do Railway.
+      console.error('[auth] Falha ao enviar e-mail de confirmação no cadastro:', err);
+    }
+
+    res.status(201).json({ pendingVerification: true, email: usuario.email });
+  }
+
+  static async verifyEmail(req: Request, res: Response): Promise<void> {
+    const token = String(req.body?.token ?? '').trim();
+    if (!token) {
+      res.status(400).json({ error: 'Link de confirmação inválido.' });
+      return;
+    }
+
+    const usuarioId = await UsuariosRepo.idPorTokenVerificacao(hashTokenVerificacao(token));
+    if (!usuarioId) {
+      res.status(400).json({ error: 'Link de confirmação inválido ou expirado. Peça um novo e-mail de confirmação.' });
+      return;
+    }
+
+    await UsuariosRepo.marcarEmailVerificado(usuarioId);
+    const usuario = await UsuariosRepo.findById(usuarioId);
+    if (!usuario) {
+      res.status(404).json({ error: 'Conta indisponível.' });
+      return;
+    }
+
+    await abrirSessao(req, res, usuario);
+  }
+
+  static async resendVerification(req: Request, res: Response): Promise<void> {
+    const email = String(req.body?.email ?? '').trim();
+    if (!email) {
+      res.status(400).json({ error: 'Informe o e-mail da conta.' });
+      return;
+    }
+
+    const encontrado = await UsuariosRepo.findByEmail(email);
+    // Resposta igual, exista a conta ou não, e já esteja verificada ou não:
+    // não é este endpoint que revela quem tem cadastro na plataforma.
+    if (encontrado && encontrado.ativo && !encontrado.emailVerificado) {
+      try {
+        await dispararConfirmacao(encontrado);
+      } catch (err) {
+        console.error('[auth] Falha ao reenviar e-mail de confirmação:', err);
+      }
+    }
+
+    res.json({ ok: true });
   }
 
   static async login(req: Request, res: Response): Promise<void> {
@@ -106,9 +172,16 @@ export class AuthController {
       res.status(401).json({ error: 'E-mail ou senha incorretos.' });
       return;
     }
+    if (!encontrado.emailVerificado) {
+      res.status(403).json({
+        error: 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.',
+        code: 'EMAIL_NAO_VERIFICADO',
+      });
+      return;
+    }
 
     await UsuariosRepo.touchLogin(encontrado.id);
-    const { senhaHash: _s, ativo: _a, ...usuario } = encontrado;
+    const { senhaHash: _s, ativo: _a, emailVerificado: _e, ...usuario } = encontrado;
     await abrirSessao(req, res, usuario);
   }
 
