@@ -17,7 +17,7 @@ type RegisterForm = {
   tipoConta: TipoConta;
   name: string; cnpj: string; cnes: string; site: string; about: string;
   segment: string; uf: string; city: string; tagline: string; atendeUfs: string[];
-  email: string; phone: string; employees: string; badges: string[]; terms: boolean;
+  email: string; emailConfirm: string; phone: string; employees: string; badges: string[]; terms: boolean;
   conselho: string; conselhoNum: string; plan: Plan;
   card?: string; cardName?: string; cardExp?: string; cardCvv?: string;
 };
@@ -37,7 +37,7 @@ const CONSELHOS = ['CRM', 'COREN', 'CRF', 'CRO', 'CRBM', 'CRN', 'CRP', 'CREFITO'
 
 const INITIAL: RegisterForm = {
   tipoConta: '', name: '', cnpj: '', cnes: '', site: '', about: '', segment: '', uf: '', city: '',
-  tagline: '', atendeUfs: [], email: '', phone: '', employees: '', badges: [], terms: false,
+  tagline: '', atendeUfs: [], email: '', emailConfirm: '', phone: '', employees: '', badges: [], terms: false,
   conselho: '', conselhoNum: '', plan: 'free',
 };
 
@@ -98,7 +98,7 @@ export default function CadastrarPage() {
         tipoStep,
         { key: 'precadastro', label: 'Pré-cadastro',      fields: ['cnpj', 'name', 'segment', 'uf', 'city'] as (keyof RegisterForm)[] },
         { key: 'atuacao',     label: 'Área de atuação',   fields: ['tagline'] as (keyof RegisterForm)[] },
-        { key: 'contato',     label: 'Contato & selos',   fields: ['email', 'phone'] as (keyof RegisterForm)[] },
+        { key: 'contato',     label: 'Contato & selos',   fields: ['email', 'emailConfirm', 'phone'] as (keyof RegisterForm)[] },
         { key: 'plano',       label: 'Plano & verificação', fields: [] as (keyof RegisterForm)[] },
       ];
     }
@@ -107,7 +107,7 @@ export default function CadastrarPage() {
       { key: 'dados',   label: 'Dados da instituição', fields: [
         'name', 'cnpj', ...(CNES_TYPES.includes(form.tipoConta) ? ['cnes'] as const : []), 'uf', 'city', 'about',
       ] as (keyof RegisterForm)[] },
-      { key: 'contato', label: 'Contato',               fields: ['email', 'phone'] as (keyof RegisterForm)[] },
+      { key: 'contato', label: 'Contato',               fields: ['email', 'emailConfirm', 'phone'] as (keyof RegisterForm)[] },
     ];
   }, [form.tipoConta]);
 
@@ -117,7 +117,10 @@ export default function CadastrarPage() {
     const req = REG_STEPS[step]?.fields ?? [];
     if (!req.every((k) => String(form[k] ?? '').trim())) return false;
     if (currentKey === 'atuacao' && form.atendeUfs.length === 0) return false;
-    if (currentKey === 'contato' && !form.terms) return false;
+    if (currentKey === 'contato') {
+      if (!form.terms) return false;
+      if (form.email.trim().toLowerCase() !== form.emailConfirm.trim().toLowerCase()) return false;
+    }
     if (currentKey === 'plano' && form.plan === 'premium') {
       const c: (keyof RegisterForm)[] = ['card', 'cardName', 'cardExp', 'cardCvv'];
       if (!c.every((k) => String(form[k] ?? '').trim())) return false;
@@ -576,12 +579,34 @@ export default function CadastrarPage() {
               <div className="reg-grid">
                 <div className="reg-row2">
                   <Field label="E-mail de contato" required>
-                    <input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="contato@suaorganizacao.com.br" />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => set('email', e.target.value)}
+                      placeholder="contato@suaorganizacao.com.br"
+                    />
                   </Field>
-                  <Field label="Telefone" required>
-                    <input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(00) 0000-0000" />
+                  <Field
+                    label="Confirmar e-mail"
+                    required
+                    hint={
+                      form.emailConfirm && form.email.trim().toLowerCase() !== form.emailConfirm.trim().toLowerCase()
+                        ? 'Os e-mails não coincidem.'
+                        : 'Digite novamente para confirmar — evita erro de digitação.'
+                    }
+                  >
+                    <input
+                      type="email"
+                      value={form.emailConfirm}
+                      onChange={(e) => set('emailConfirm', e.target.value)}
+                      onPaste={(e) => e.preventDefault()}
+                      placeholder="contato@suaorganizacao.com.br"
+                    />
                   </Field>
                 </div>
+                <Field label="Telefone" required>
+                  <input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(00) 0000-0000" />
+                </Field>
                 <Field label="Site">
                   <input value={form.site} onChange={(e) => set('site', e.target.value)} placeholder="suaorganizacao.com.br" />
                 </Field>

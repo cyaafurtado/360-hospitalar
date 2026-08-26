@@ -11,8 +11,6 @@ import { CompanyCard } from '../../../components/CompanyCard';
 import { Loading, LoadError } from '../../../components/AsyncState';
 import { useAppStore } from '../../../lib/store';
 
-const DIST: Record<number, number> = { 5: 0.62, 4: 0.26, 3: 0.08, 2: 0.03, 1: 0.01 };
-
 export default function EmpresaPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
@@ -137,6 +135,39 @@ export default function EmpresaPage() {
             </div>
           </section>
 
+          {c.catalogo && c.catalogo.length > 0 && (
+            <section className="d-block">
+              <h2>Catálogo de produtos e serviços</h2>
+              <div className="catalogo-grid">
+                {c.catalogo.map((s) => (
+                  <div key={s.id} className={'catalogo-card' + (s.destaque ? ' destaque' : '')}>
+                    {s.destaque && (
+                      <span className="catalogo-badge">
+                        <Icon name="star" size={11} /> Destaque
+                      </span>
+                    )}
+                    <div className="catalogo-nome">{s.nome}</div>
+                    <p className="catalogo-desc">{s.descricao}</p>
+                    {(s.preco || s.prazo) && (
+                      <div className="catalogo-meta">
+                        {s.preco && (
+                          <span className="catalogo-meta-item">
+                            <Icon name="file" size={13} /> {s.preco}
+                          </span>
+                        )}
+                        {s.prazo && (
+                          <span className="catalogo-meta-item">
+                            <Icon name="clock" size={13} /> {s.prazo}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="d-block">
             <h2>Avaliações dos compradores</h2>
             <div className="rev-summary">
@@ -145,38 +176,14 @@ export default function EmpresaPage() {
                 <Stars value={c.rating} size={18} />
                 <div className="muted">{c.reviews} avaliações</div>
               </div>
-              <div className="rev-bars">
-                {[5, 4, 3, 2, 1].map((n) => (
-                  <div key={n} className="rev-bar-row">
-                    <span className="rev-bar-n">
-                      {n} <Icon name="star" size={11} />
-                    </span>
-                    <div className="rev-bar">
-                      <div className="rev-bar-fill" style={{ width: `${DIST[n] * 100}%` }} />
-                    </div>
-                    <span className="rev-bar-pct">{Math.round(DIST[n] * 100)}%</span>
-                  </div>
-                ))}
+            </div>
+            {c.reviews === 0 && (
+              <div className="empty">
+                <Icon name="star" size={28} />
+                <h3>Ainda sem avaliações</h3>
+                <p>Esta empresa ainda não recebeu avaliações de compradores.</p>
               </div>
-            </div>
-            <div className="rev-list">
-              <article className="rev-item">
-                <div className="rev-head">
-                  <strong>Hospital Santa Lúcia</strong>
-                  <Stars value={5} size={13} />
-                </div>
-                <p>Atendimento técnico ágil e equipe muito bem treinada. Renovamos o contrato sem hesitar.</p>
-                <span className="rev-when">há 2 semanas · compra verificada</span>
-              </article>
-              <article className="rev-item">
-                <div className="rev-head">
-                  <strong>Clínica Vida Plena</strong>
-                  <Stars value={4} size={13} />
-                </div>
-                <p>Boa relação custo-benefício. Logística pontual; documentação de conformidade impecável.</p>
-                <span className="rev-when">há 1 mês · compra verificada</span>
-              </article>
-            </div>
+            )}
           </section>
         </main>
 

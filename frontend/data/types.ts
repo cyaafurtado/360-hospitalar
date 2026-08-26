@@ -21,6 +21,7 @@ export type Company = {
   email?: string | null;
   atendeUfs?: string[];
   status?: CompanyStatus;
+  catalogo?: CatalogoServico[];
 };
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';

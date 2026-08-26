@@ -1,6 +1,15 @@
 export type CompanyStatus = 'pre_cadastro' | 'completo';
 export type PlanoEmpresa = 'free' | 'verified' | 'premium';
 
+export interface CatalogoServico {
+  id: string;
+  nome: string;
+  descricao: string;
+  preco?: string;
+  prazo?: string;
+  destaque: boolean;
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -22,6 +31,7 @@ export interface Company {
   atendeUfs: string[];
   status: CompanyStatus;
   plano: PlanoEmpresa;
+  catalogo: CatalogoServico[];
 }
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';

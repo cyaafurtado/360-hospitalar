@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
-import { Company, PlanoEmpresa } from '../models/types';
+import { CatalogoServico, Company, PlanoEmpresa } from '../models/types';
 
 const SEM_EMPRESA = {
   error: 'Sua conta ainda não tem empresa cadastrada.',
@@ -33,7 +33,22 @@ function paraPerfil(c: Company) {
     verified: c.verified,
     status: c.status,
     plan: c.plano,
+    catalogo: c.catalogo,
   };
+}
+
+// Sem isso, um `descricao` poderia chegar como número ou objeto e quebrar a
+// tela pública da empresa mais tarde — sanitiza aqui, na borda da API.
+function sanitizarCatalogo(v: unknown): CatalogoServico[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  return v.map((item) => ({
+    id: String(item?.id ?? '').trim() || String(Math.random()).slice(2),
+    nome: String(item?.nome ?? '').trim(),
+    descricao: String(item?.descricao ?? '').trim(),
+    preco: item?.preco ? String(item.preco).trim() : undefined,
+    prazo: item?.prazo ? String(item.prazo).trim() : undefined,
+    destaque: !!item?.destaque,
+  })).filter((item) => item.nome || item.descricao);
 }
 
 // Autosserviço nunca chega a 'premium': a tela de perfil ainda simula o
@@ -133,6 +148,7 @@ export class CompaniesController {
       atendeUfs: Array.isArray(b.atendeUfs) ? b.atendeUfs : [],
       badges: Array.isArray(b.badges) ? b.badges : [],
       plano: PLANOS_AUTOSSERVICO.includes(b.plan) ? (b.plan as PlanoEmpresa) : undefined,
+      catalogo: sanitizarCatalogo(b.catalogo),
     });
     if (!c) {
       res.status(404).json(SEM_EMPRESA);

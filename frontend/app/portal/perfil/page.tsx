@@ -173,47 +173,10 @@ export default function PerfilPage() {
   };
 
   // ── Catálogo de serviços ─────────────────────────────────────────
-  const MOCK_CATALOGO: Record<string, Omit<CatalogoServico, 'id'>[]> = {
-    esteril: [
-      { nome: 'Esterilização em autoclave a vapor', descricao: 'Processamento de artigos críticos e semicríticos conforme RDC 15/2012. Coleta e entrega incluídas.', preco: 'R$ 4,50 / artigo', prazo: '24h', destaque: true },
-      { nome: 'Esterilização por óxido de etileno', descricao: 'Para artigos sensíveis ao calor. Validação documentada e rastreabilidade por lote.', preco: 'R$ 12,00 / artigo', prazo: '72h', destaque: false },
-      { nome: 'Auditoria e consultoria de CME', descricao: 'Avaliação do processo de esterilização da central de materiais e elaboração de plano de adequação.', preco: 'Sob consulta', prazo: '5 dias úteis', destaque: false },
-    ],
-    equip: [
-      { nome: 'Fornecimento de equipamentos médicos', descricao: 'Venda e locação de equipamentos hospitalares com garantia estendida e suporte técnico.', preco: 'A partir de R$ 800/mês', prazo: 'Imediato', destaque: true },
-      { nome: 'Manutenção preventiva', descricao: 'Plano anual de manutenção preventiva com cronograma e relatórios mensais.', preco: 'A partir de R$ 350/mês', prazo: 'Agendado', destaque: true },
-      { nome: 'Calibração e qualificação', descricao: 'Calibração de equipamentos com emissão de certificado rastreável ao INMETRO.', preco: 'R$ 180 / equipamento', prazo: '3 dias úteis', destaque: false },
-    ],
-    ti: [
-      { nome: 'Prontuário eletrônico do paciente (PEP)', descricao: 'Sistema completo com agendamento, prescrição digital e integração TISS/TUSS.', preco: 'A partir de R$ 290/mês', prazo: 'Implantação em 30 dias', destaque: true },
-      { nome: 'Business intelligence hospitalar', descricao: 'Dashboards de desempenho clínico e operacional com integração a sistemas legados.', preco: 'Sob consulta', prazo: 'Projeto personalizado', destaque: false },
-      { nome: 'Suporte técnico e treinamento', descricao: 'Suporte 8×5 com SLA garantido e treinamento presencial ou remoto para equipes.', preco: 'Incluso no plano', prazo: 'Resposta em até 4h', destaque: false },
-    ],
-    lab: [
-      { nome: 'Exames laboratoriais de rotina', descricao: 'Hemograma, bioquímica, hormônios e coagulação com laudos em até 6 horas.', preco: 'Tabela CBHPM', prazo: '6h', destaque: true },
-      { nome: 'Análise microbiológica', descricao: 'Culturas, antibiograma e identificação de microrganismos com relatório detalhado.', preco: 'R$ 85,00 / análise', prazo: '48–72h', destaque: false },
-    ],
-    gases: [
-      { nome: 'Fornecimento de O₂ medicinal', descricao: 'Cilindros e concentradores de oxigênio para UTI e enfermaria com monitoramento remoto.', preco: 'R$ 3,20 / m³', prazo: 'Entrega em 24h', destaque: true },
-      { nome: 'Gases especiais para anestesia', descricao: 'N₂O, ar comprimido medicinal e mistura de gases para centro cirúrgico.', preco: 'Sob consulta', prazo: '48h', destaque: false },
-      { nome: 'Instalação de rede de gases', descricao: 'Projeto e instalação de centrais de gases com válvulas reguladoras e alarmes.', preco: 'Orçamento por m²', prazo: 'Projeto personalizado', destaque: false },
-    ],
-  };
-
-  const DEFAULT_MOCK: Omit<CatalogoServico, 'id'>[] = [
-    { nome: 'Serviço principal', descricao: 'Descreva aqui o seu serviço mais importante com todos os detalhes que o comprador precisa saber.', preco: 'Sob consulta', prazo: 'A combinar', destaque: true },
-    { nome: 'Pacote completo', descricao: 'Solução integrada que cobre todas as etapas do processo, da contratação ao suporte pós-venda.', preco: 'Sob consulta', prazo: 'A combinar', destaque: false },
-  ];
-
-  const seedCatalogo = (segment: string): CatalogoServico[] =>
-    (MOCK_CATALOGO[segment] ?? DEFAULT_MOCK).map((s) => ({ ...s, id: crypto.randomUUID() }));
-
   const [catalogo, setCatalogo] = useState<CatalogoServico[]>([]);
 
   useEffect(() => {
-    if (initial) {
-      setCatalogo(initial.catalogo?.length ? initial.catalogo : seedCatalogo(initial.segment));
-    }
+    if (initial) setCatalogo(initial.catalogo ?? []);
   }, [initial]);
 
   const addServico = () =>

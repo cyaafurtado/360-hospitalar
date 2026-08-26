@@ -5,6 +5,7 @@ import type { Segment, State } from './types';
 export const SEGMENTS: Segment[] = [
   { id: 'lab', label: 'Diagnóstico & Laboratório', icon: 'flask' },
   { id: 'equip', label: 'Equipamentos Médicos', icon: 'pulse' },
+  { id: 'locacao-equip', label: 'Locação de Equipamentos Médicos', icon: 'clock' },
   { id: 'limpeza', label: 'Higiene & Limpeza Hospitalar', icon: 'spray' },
   { id: 'residuos', label: 'Gestão de Resíduos', icon: 'leaf' },
   { id: 'esteril', label: 'Esterilização', icon: 'shield' },

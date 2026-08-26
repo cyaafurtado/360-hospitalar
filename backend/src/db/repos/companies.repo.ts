@@ -1,5 +1,5 @@
 import { getClient, query } from '../connection';
-import { Company, PlanoEmpresa } from '../../models/types';
+import { CatalogoServico, Company, PlanoEmpresa } from '../../models/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function rowToCompany(r: any): Company {
@@ -24,6 +24,7 @@ function rowToCompany(r: any): Company {
     atendeUfs: r.atende_ufs ?? [],
     status: r.status,
     plano: r.plano,
+    catalogo: r.catalogo ?? [],
   };
 }
 
@@ -151,17 +152,20 @@ export const CompaniesRepo = {
       atendeUfs: string[];
       badges: string[];
       plano?: PlanoEmpresa;
+      catalogo?: CatalogoServico[];
     }
   ): Promise<Company | null> {
     const { rows } = await query(
       `UPDATE companies SET
          name=$2, tagline=$3, about=$4, site=$5, employees=$6,
          email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11, badges=$12, status='completo',
-         plano=COALESCE($13, plano)
+         plano=COALESCE($13, plano),
+         catalogo=COALESCE($14, catalogo)
        WHERE id=$1 RETURNING *`,
       [
         id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone,
         p.city, p.uf, p.atendeUfs, p.badges, p.plano ?? null,
+        p.catalogo ? JSON.stringify(p.catalogo) : null,
       ]
     );
     return rows[0] ? rowToCompany(rows[0]) : null;
