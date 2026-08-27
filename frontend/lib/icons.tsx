@@ -42,6 +42,9 @@ export const ICON_PATHS: Record<string, string> = {
   mortarboard: 'M12 3L2 9l10 6 10-6-10-6zM2 9v6M6 11.5v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5',
   key: 'M15 7a4 4 0 1 1-4 4M11 11L3 19v2h2l1-1h2v-2h2l2-2',
   trash: 'M4 7h16M9 7V4h6v3M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6',
+  cross: 'M12 4v16M4 12h16',
+  heart: 'M12 21s-7.4-4.6-9.9-9.2A5.4 5.4 0 0 1 12 6a5.4 5.4 0 0 1 9.9 5.8C19.4 16.4 12 21 12 21z',
+  stethoscope: 'M6 3v6a4 4 0 0 0 8 0V3M6 3H4.5M14 3h1.5M10 13v2.5a5.5 5.5 0 0 0 11 0V13M20.5 15a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
 };
 
 type IconProps = {

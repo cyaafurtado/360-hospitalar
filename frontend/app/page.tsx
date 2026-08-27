@@ -109,19 +109,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ticker de organizações */}
-      <section className="ticker-band" aria-label="Organizações parceiras">
-        <div className="ticker-track" aria-hidden="true">
-          {[...Array(2)].flatMap(() => [
-            'Hospital Israelita Albert Einstein',
-            'Santa Casa de Misericórdia de São Paulo',
-            'Hospital Sírio-Libanês',
-            'AACD — Assistência à Criança Deficiente',
-            'Hospital das Clínicas FMUSP',
-          ]).map((name, i) => (
-            <span key={i} className="ticker-item">
-              <span className="ticker-dot" aria-hidden="true" />
-              {name}
+      {/* Faixa de símbolos da área da saúde */}
+      <section className="icon-band" aria-label="Áreas de atuação da saúde">
+        <div className="icon-band-track">
+          {[
+            'cross',
+            'stethoscope',
+            'heart',
+            'pulse',
+            'flask',
+            'pill',
+            'shield2',
+            'drop',
+          ].map((ic, i) => (
+            <span key={i} className="icon-band-item">
+              <Icon name={ic} size={22} stroke={1.6} />
             </span>
           ))}
         </div>

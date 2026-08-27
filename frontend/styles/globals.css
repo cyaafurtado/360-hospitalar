@@ -574,12 +574,9 @@ em { font-style: italic; }
 }
 
 /* ============ TICKER ============ */
-@keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.ticker-band { margin-top: var(--section-gap); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); overflow: hidden; padding: 14px 0; }
-.ticker-track { display: flex; width: max-content; animation: ticker-scroll 22s linear infinite; white-space: nowrap; }
-.ticker-track:hover { animation-play-state: paused; }
-.ticker-item { display: inline-flex; align-items: center; gap: 14px; padding: 0 28px; font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); flex: none; opacity: .6; }
+.icon-band { margin-top: var(--section-gap); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); padding: 22px 0; }
+.icon-band-track { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 36px; }
+.icon-band-item { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: color-mix(in oklch, var(--primary), transparent 90%); color: var(--primary); flex: none; }
 
 /* ============ POLÍTICA DE PRIVACIDADE ============ */
 .policy-toc { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 56px; }
