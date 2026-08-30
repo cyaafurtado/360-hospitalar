@@ -771,7 +771,7 @@ export default function CadastrarPage() {
             </>
           ) : (
             <div className="reg-aside-block benefits">
-              <div className="bnf"><Icon name="search" size={20} /><div><strong>Diretório completo</strong><span>2.400+ fornecedores verificados em 12 segmentos.</span></div></div>
+              <div className="bnf"><Icon name="search" size={20} /><div><strong>Diretório completo</strong><span>Fornecedores verificados em {SEGMENTS.length} segmentos.</span></div></div>
               <div className="bnf"><Icon name="shield2" size={20} /><div><strong>Fornecedores verificados</strong><span>Documentos e certificações auditados.</span></div></div>
               <div className="bnf"><Icon name="phone" size={20} /><div><strong>Orçamento sem custo</strong><span>Envie pedidos diretamente, sem intermediários.</span></div></div>
             </div>

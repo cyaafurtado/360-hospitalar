@@ -9,6 +9,7 @@ import { SearchBar } from '../components/SearchBar';
 import { SegmentChips } from '../components/SegmentChips';
 import { CompanyCard } from '../components/CompanyCard';
 import { Loading, LoadError } from '../components/AsyncState';
+import { SEGMENTS } from '../data/reference';
 
 // ── Camada de conteúdo/CMS ─────────────────────────────────────────
 // Trocar por variáveis de ambiente ou fetch de CMS em produção.
@@ -92,7 +93,7 @@ export default function HomePage() {
 
           <div className="hero-stats">
             <div>
-              <strong>12</strong>
+              <strong>{SEGMENTS.length}</strong>
               <span>segmentos de saúde</span>
             </div>
             <div className="div" />
