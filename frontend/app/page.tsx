@@ -92,11 +92,6 @@ export default function HomePage() {
 
           <div className="hero-stats">
             <div>
-              <strong>2.400+</strong>
-              <span>fornecedores cadastrados</span>
-            </div>
-            <div className="div" />
-            <div>
               <strong>12</strong>
               <span>segmentos de saúde</span>
             </div>
