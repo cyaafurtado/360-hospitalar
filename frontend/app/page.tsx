@@ -9,26 +9,11 @@ import { SearchBar } from '../components/SearchBar';
 import { SegmentChips } from '../components/SegmentChips';
 import { CompanyCard } from '../components/CompanyCard';
 import { Loading, LoadError } from '../components/AsyncState';
-import { SEGMENTS } from '../data/reference';
+import { SEGMENTS, STATES } from '../data/reference';
 
 // ── Camada de conteúdo/CMS ─────────────────────────────────────────
 // Trocar por variáveis de ambiente ou fetch de CMS em produção.
-const HERO_IMAGE  = '/images/hero-saude.jpg';
 const ABOUT_IMAGE = '/images/about-saude.jpg';
-
-function HeroImg() {
-  const [err, setErr] = useState(false);
-  if (err) return null;
-  return (
-    <img
-      src={HERO_IMAGE}
-      alt="Equipe clínica em ambiente hospitalar"
-      className="hero-photo-img"
-      onError={() => setErr(true)}
-      aria-hidden="true"
-    />
-  );
-}
 
 function AboutImg() {
   const [err, setErr] = useState(false);
@@ -56,27 +41,26 @@ export default function HomePage() {
   const runSearch = () => { applySearchUf(); router.push('/buscar'); };
   const onSegment = (segId: string) => { pickSegment(segId); router.push('/buscar'); };
 
+  // Números só saem do banco ou de fato estrutural — nada de estatística
+  // inventada em tela que cliente real vê.
+  const verificados = useMemo(() => (companies ?? []).filter((c) => c.verified).length, [companies]);
+  const totalEmpresas = companies?.length ?? 0;
+
   return (
     <div className="screen home">
 
-      {/* 2. HERO FOTOGRÁFICO full-bleed */}
-      <section className="hero-photo" aria-label="360 Hospitalar — busca de fornecedores">
-        <HeroImg />
-        <div className="hero-photo-scrim" aria-hidden="true" />
+      {/* HERO — cartão navy (direção Orbit) */}
+      <section className="hero-orbit" aria-label="360 Hospitalar — busca de fornecedores">
+        <div className="hero-orbit-inner">
+          <span className="hero-badge">Diretório B2B do setor de saúde</span>
 
-        <div className="hero-photo-inner">
-          <div className="hero-eyebrow">Diretório B2B do setor de saúde</div>
-
-          <h1 className="hero-title">
-            Encontre fornecedores e parceiros
-            <br />
-            <em>confiáveis</em> para sua operação de saúde.
+          <h1>
+            Toda a cadeia de fornecimento em saúde, <em>verificada.</em>
           </h1>
 
-          <p className="hero-sub">
-            Clínicas, hospitais e prestadores privados conectam-se a fornecedores
-            verificados — de laboratórios e equipamentos a esterilização e gestão
-            de resíduos.
+          <p className="hero-orbit-sub">
+            Busque, compare e cote com fornecedores auditados em {SEGMENTS.length} segmentos
+            e {STATES.length} estados — do laboratório à esterilização, sem intermediários.
           </p>
 
           <div className="hero-search">
@@ -91,37 +75,33 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="hero-stats">
-            <div>
-              <strong>{SEGMENTS.length}</strong>
-              <span>segmentos de saúde</span>
-            </div>
-            <div className="div" />
-            <div>
-              <strong>98%</strong>
-              <span>verificados e auditados</span>
-            </div>
+          <div className="hero-cta-row">
+            <button className="btn-lime" onClick={() => router.push('/buscar')}>
+              Explorar fornecedores <Icon name="arrow" size={16} />
+            </button>
+            <button className="btn-on-dark" onClick={() => router.push('/como-verificamos')}>
+              Como verificamos
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Faixa de símbolos da área da saúde */}
-      <section className="icon-band" aria-label="Áreas de atuação da saúde">
-        <div className="icon-band-track">
-          {[
-            'cross',
-            'stethoscope',
-            'heart',
-            'pulse',
-            'flask',
-            'pill',
-            'shield2',
-            'drop',
-          ].map((ic, i) => (
-            <span key={i} className="icon-band-item">
-              <Icon name={ic} size={22} stroke={1.6} />
-            </span>
-          ))}
+      <section className="stat-strip" aria-label="Cobertura da plataforma">
+        <div className="stat-strip-item">
+          <div className="stat-strip-num">{SEGMENTS.length}</div>
+          <div className="stat-strip-lbl">segmentos cobertos, do laboratório à construção hospitalar</div>
+        </div>
+        <div className="stat-strip-item">
+          <div className="stat-strip-num">{STATES.length}</div>
+          <div className="stat-strip-lbl">estados atendidos — busca filtrada por UF</div>
+        </div>
+        <div className="stat-strip-item">
+          <div className="stat-strip-num">{totalEmpresas > 0 ? verificados : '—'}</div>
+          <div className="stat-strip-lbl">
+            {totalEmpresas > 0
+              ? `fornecedores com documentação auditada, de ${totalEmpresas} cadastrados`
+              : 'verificação documental antes de aparecer na busca'}
+          </div>
         </div>
       </section>
 
@@ -164,14 +144,14 @@ export default function HomePage() {
           <AboutImg />
 
           <div className="feature-split-body">
-            <div className="hero-eyebrow">Por que a 360 Hospitalar</div>
+            <div className="hero-eyebrow">Como funciona a verificação</div>
             <h2>
-              Cada fornecedor passa por verificação antes de aparecer na busca.
+              O fornecedor só entra na busca depois que os documentos são conferidos.
             </h2>
             <p>
-              Garantimos que hospitais, clínicas e gestores de saúde encontrem
-              apenas parceiros com documentação em dia e histórico avaliado por
-              pares do setor.
+              Consultamos o CNPJ direto na Receita Federal e conferimos licenças e
+              certificações antes de liberar o perfil. Quem está com documentação
+              vencida ou situação cadastral irregular não recebe o selo.
             </p>
 
             <div className="feature-pillars">
@@ -180,26 +160,26 @@ export default function HomePage() {
                   <Icon name="shield2" size={22} />
                 </div>
                 <div>
-                  <strong>Verificação documental</strong>
-                  <span>CNPJ, licenças sanitárias e certificações auditadas antes da aprovação.</span>
+                  <strong>CNPJ conferido na Receita</strong>
+                  <span>Razão social, situação cadastral e data de abertura vêm da base oficial, não do formulário.</span>
                 </div>
               </div>
               <div className="feature-pillar">
                 <div className="feature-pillar-ico">
-                  <Icon name="star" size={22} />
+                  <Icon name="file" size={22} />
                 </div>
                 <div>
-                  <strong>Avaliações reais</strong>
-                  <span>Notas e comentários de compradores verificados do setor de saúde.</span>
+                  <strong>Licenças com validade</strong>
+                  <span>ANVISA, ISO, licença sanitária e registro do responsável técnico, cada uma com data de vencimento.</span>
                 </div>
               </div>
               <div className="feature-pillar">
                 <div className="feature-pillar-ico">
-                  <Icon name="users" size={22} />
+                  <Icon name="phone" size={22} />
                 </div>
                 <div>
-                  <strong>Contato direto</strong>
-                  <span>Fale com o fornecedor sem intermediários — cotação em minutos.</span>
+                  <strong>Cotação direta</strong>
+                  <span>Você fala com o fornecedor pela plataforma. Sem intermediário e sem comissão sobre a compra.</span>
                 </div>
               </div>
             </div>

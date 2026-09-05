@@ -131,6 +131,48 @@ img, video, table { max-width: 100%; height: auto; }
   --hero-em: normal;
 }
 
+/* ============ TEMA: Orbit (navy profundo + lima) — tema base ============
+   Direção visual do modelo 3 (Claude Design): fundo creme, hero em navy
+   quase-preto e o lima como única cor de destaque. O contraste alto entre
+   navy e lima é o que dá identidade — usar lima com parcimônia, só em CTA
+   e no termo que a frase quer destacar. */
+.app[data-theme="orbit"] {
+  --bg: oklch(0.972 0.006 95);
+  --surface: #fff;
+  --surface-2: oklch(0.958 0.008 95);
+  --text: oklch(0.32 0.03 285);
+  --text-strong: oklch(0.22 0.05 287);
+  --muted: oklch(0.53 0.025 287);
+  --border: oklch(0.90 0.012 287);
+  --border-strong: oklch(0.82 0.022 287);
+  --primary: oklch(0.30 0.10 287);
+  --primary-tint: color-mix(in oklch, var(--primary), white 92%);
+  --primary-tint-2: color-mix(in oklch, var(--primary), white 84%);
+  --accent: oklch(0.90 0.19 118);
+  --accent-ink: oklch(0.26 0.07 287);
+  --ink: oklch(0.21 0.06 287);
+  --header-bg: #fff;
+  --header-text: var(--text-strong);
+  --star: oklch(0.74 0.15 78);
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-sm: 10px;
+  --logo-radius: 14px;
+  --logo-radius-lg: 22px;
+  --shadow-card: 0 1px 2px rgba(25,20,60,0.04), 0 8px 24px -14px rgba(25,20,60,0.20);
+  --shadow-hover: 0 2px 5px rgba(25,20,60,0.07), 0 20px 40px -20px rgba(25,20,60,0.30);
+  --card-pad: 24px;
+  --section-gap: 72px;
+  --grid-gap: 18px;
+  --h1: 58px;
+  --h1-weight: 800;
+  --h1-spacing: -0.032em;
+  --h2: 28px;
+  --hero-em: normal;
+}
+.app[data-theme="orbit"] .brand-name span { color: var(--primary); }
+.app[data-theme="orbit"] .hero-title em { font-style: normal; color: var(--accent); }
+
 /* ============ DENSIDADE ============ */
 .app[data-density="compact"] { --card-pad: 16px; --section-gap: 46px; --grid-gap: 13px; }
 .app[data-density="comfy"]   { --card-pad: 28px; --section-gap: 88px; --grid-gap: 26px; }
@@ -281,6 +323,77 @@ em { font-style: italic; }
   box-shadow: 0 8px 36px rgba(0,0,0,0.26), 0 2px 8px rgba(0,0,0,0.14);
 }
 
+/* ============ HERO ORBIT (cartão navy — modelo 3) ============ */
+.hero-orbit {
+  margin-top: 26px;
+  background: var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 72px 64px 64px;
+  position: relative;
+  overflow: hidden;
+}
+/* Halo lima discreto no canto — dá profundidade sem virar gradiente pesado. */
+.hero-orbit::after {
+  content: ''; position: absolute; top: -180px; right: -120px;
+  width: 460px; height: 460px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklch, var(--accent), transparent 88%) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-orbit-inner { position: relative; z-index: 1; max-width: 780px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--accent); background: color-mix(in oklch, var(--accent), transparent 90%);
+  border: 1px solid color-mix(in oklch, var(--accent), transparent 74%);
+  padding: 7px 15px; border-radius: var(--pill); margin-bottom: 26px;
+}
+.hero-orbit h1 {
+  font-size: var(--h1); font-weight: var(--h1-weight); line-height: 1.03;
+  letter-spacing: var(--h1-spacing); color: oklch(0.97 0.01 95);
+}
+.hero-orbit h1 em { font-style: normal; color: var(--accent); }
+.hero-orbit-sub {
+  margin-top: 22px; font-size: 17.5px; line-height: 1.6;
+  color: color-mix(in oklch, oklch(0.97 0.01 95), transparent 26%);
+  max-width: 620px; text-wrap: pretty;
+}
+.hero-orbit .hero-search { margin-top: 34px; max-width: 680px; }
+.hero-orbit .searchbar.big {
+  background: rgba(255,255,255,0.97); border-color: transparent;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.30);
+}
+.hero-cta-row { margin-top: 26px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn-lime {
+  font-family: var(--font); font-weight: 700; font-size: 15px;
+  background: var(--accent); color: var(--accent-ink);
+  border: none; border-radius: var(--radius-sm); padding: 13px 22px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  transition: filter .15s, transform .12s; white-space: nowrap;
+}
+.btn-lime:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.btn-on-dark {
+  font-family: var(--font); font-weight: 650; font-size: 15px;
+  background: transparent; color: oklch(0.95 0.01 95);
+  border: 1px solid color-mix(in oklch, oklch(0.97 0.01 95), transparent 72%);
+  border-radius: var(--radius-sm); padding: 12px 20px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; transition: all .15s;
+}
+.btn-on-dark:hover { background: color-mix(in oklch, oklch(0.97 0.01 95), transparent 90%); border-color: color-mix(in oklch, oklch(0.97 0.01 95), transparent 50%); }
+
+/* Faixa de números — só entra dado que sai do banco ou é fato estrutural. */
+.stat-strip {
+  margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid-gap);
+}
+.stat-strip-item {
+  background: var(--surface); border: var(--card-border); border-radius: var(--radius);
+  padding: 22px 24px;
+}
+.stat-strip-num {
+  font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1;
+  color: var(--text-strong);
+}
+.stat-strip-lbl { margin-top: 7px; font-size: 13.5px; color: var(--muted); font-weight: 550; }
+
 /* ============ FEATURE SPLIT "Por que a 360 Hospitalar" ============ */
 .feature-split {
   display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center;
@@ -405,6 +518,24 @@ em { font-style: italic; }
 .company-card.list .cc-meta { margin-top: 10px; }
 .cc-aside { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
 .cc-cta { white-space: nowrap; }
+
+/* Sinais de procurement — o que o comprador B2B usa pra decidir, no lugar
+   da estrela vazia: certificações auditadas, cobertura e tempo de casa. */
+.cc-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.cc-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 650; letter-spacing: 0.01em;
+  color: var(--text-strong); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: var(--pill);
+  padding: 4px 10px; white-space: nowrap;
+}
+.cc-chip.more { color: var(--muted); font-weight: 600; }
+.cc-facts { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cc-fact {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; color: var(--muted); font-weight: 550;
+}
+.cc-fact strong { color: var(--text-strong); font-weight: 700; }
 
 /* rating line */
 .rating-line { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--muted); }
@@ -1377,6 +1508,7 @@ em { font-style: italic; }
   .qtype-grid { grid-template-columns: 1fr; }
   .seg-chips { grid-template-columns: repeat(2, 1fr); }
   .trust-band { grid-template-columns: 1fr; }
+  .hero-orbit { padding: 52px 36px 48px; }
 }
 @media (max-width: 680px) {
   .screen { padding: 0 18px 70px; }
@@ -1405,6 +1537,15 @@ em { font-style: italic; }
   .hero-bg { display: none; }
   .hero-stats { gap: 18px; }
   .hero-stats .div { display: none; }
+  /* hero orbit mobile */
+  .hero-orbit { padding: 40px 22px 36px; border-radius: var(--radius); margin-top: 16px; }
+  .hero-orbit h1 { font-size: 33px; }
+  .hero-orbit-sub { font-size: 15.5px; margin-top: 16px; }
+  .hero-cta-row { gap: 9px; }
+  .btn-lime, .btn-on-dark { width: 100%; justify-content: center; }
+  .stat-strip { grid-template-columns: 1fr; }
+  .stat-strip-item { padding: 16px 18px; }
+  .stat-strip-num { font-size: 28px; }
   /* photo hero mobile */
   .hero-photo { min-height: unset; }
   .hero-photo-inner { padding: 80px 20px 60px; }

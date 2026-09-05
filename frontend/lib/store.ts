@@ -4,7 +4,7 @@ import type { Usuario } from '../data/types';
 import { clearToken, setToken } from './token';
 import { logoutApi } from './services';
 
-export type ThemeName = 'trust' | 'clinic' | 'editorial';
+export type ThemeName = 'orbit' | 'trust' | 'clinic' | 'editorial';
 export type Density = 'compact' | 'regular' | 'comfy';
 export type Sort = 'rating' | 'reviews' | 'az';
 export type Layout = 'grid' | 'list';
@@ -12,7 +12,9 @@ export type Layout = 'grid' | 'list';
 export type Filters = { segments: string[]; uf: string; minRating: number; onlyVerified: boolean };
 export const EMPTY_FILTERS: Filters = { segments: [], uf: '', minRating: 0, onlyVerified: false };
 
-export const DEFAULT_ACCENT = 'oklch(0.56 0.16 248)';
+// O AppShell injeta este valor como --primary inline, o que vence o bloco do
+// tema — então o accent padrão precisa acompanhar o tema base (orbit = navy).
+export const DEFAULT_ACCENT = 'oklch(0.30 0.10 287)';
 
 type AppState = {
   // tema
@@ -51,7 +53,7 @@ type AppState = {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      theme: 'trust',
+      theme: 'orbit',
       density: 'regular',
       accent: DEFAULT_ACCENT,
       setTheme: (theme) => set({ theme }),

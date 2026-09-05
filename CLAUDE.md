@@ -79,15 +79,32 @@ stroke-width=5 transform="rotate(-30 50 50)"/>`; "+" esmeralda `<rect x=44.5 y=3
 Wordmark "360" (ink) + "Hospitalar" (azul). Tagline "REDE DE PRESTADORES".
 Fontes: Bricolage Grotesque 800 (wordmark), Nunito Sans 700 (tagline), Hanken Grotesk (UI).
 
-## 4. Design tokens (3 temas + densidade)
-Tema base `trust`. `data-theme` (`trust`|`clinic`|`editorial`), `data-density`
-(`compact`|`regular`|`comfy`) e `--primary` inline. Trust: `--primary: oklch(0.56 0.16 248)`,
-`--accent: oklch(0.68 0.15 165)`, `--star: oklch(0.74 0.15 78)`. Valores completos em
-`frontend/styles/globals.css` (portados de `sautek/styles.css`, a fonte da verdade visual).
+## 4. Design tokens (4 temas + densidade)
+**Tema base `orbit`** (navy profundo + lima). `data-theme`
+(`orbit`|`trust`|`clinic`|`editorial`), `data-density` (`compact`|`regular`|`comfy`) e
+`--primary` inline. Orbit: `--primary: oklch(0.30 0.10 287)` (navy),
+`--accent: oklch(0.90 0.19 118)` (lima), `--ink: oklch(0.21 0.06 287)` (fundo do hero).
+Valores completos em `frontend/styles/globals.css`.
+
+> ⚠️ `DEFAULT_ACCENT` em `lib/store.ts` é injetado inline como `--primary` pelo `AppShell` e
+> **vence o bloco do tema**. Ao trocar o tema base, trocar o `DEFAULT_ACCENT` junto.
+
+O lima é a **única** cor de destaque: só em CTA primário sobre navy e na palavra que a frase
+quer enfatizar. Espalhar lima pela tela mata o contraste que dá a identidade.
+Os temas `trust`/`clinic`/`editorial` (derivados de `sautek/styles.css`) seguem disponíveis
+no painel Aparência, mas não são mais a direção padrão.
+
+## 4.1 Honestidade de números (regra dura)
+**Nenhum número em tela pode ser inventado.** Só entra valor que (a) sai do banco, (b) é fato
+estrutural verificável (27 UFs, `SEGMENTS.length`) ou (c) vem de fonte oficial (Receita Federal).
+Nada de "98% auditados", "2.400+ compradores", "+4.000 exames". Quando ainda não há volume,
+mostrar `—` e descrever o critério — nunca preencher com estimativa.
+Vale também para avaliações: sem review real, **não renderizar estrela nem nota**; no lugar,
+sinais de procurement (certificações, UFs atendidas, anos de mercado) — ver `CompanyCard.tsx`.
 
 ## 5. Modelo de dados
 ```ts
-type Segment = { id: string; label: string; icon: string };  // 12 segmentos
+type Segment = { id: string; label: string; icon: string };  // ver SEGMENTS.length
 type State   = { uf: string; name: string };                 // 27 (26 UFs + DF)
 type Company = { id; name; segment; tagline; city; uf; rating; reviews; verified;
   founded; employees; services[]; badges[]; about; phone; site; atendeUfs?[] };
@@ -100,8 +117,11 @@ Helpers: `segmentLabel`, `stateName`, `typeLabel`, `statusLabel`, `monogram`, `t
 `STATES` deve ter os **27 estados** em ordem alfabética por UF.
 
 ## 6. Telas (resumo — detalhes nos `sautek/*.jsx`)
-- **Home**: header sticky, hero + busca grande + stats, chips de segmento, grid de destaque (top 6),
-  trust band, footer.
+- **Home**: header sticky, hero em cartão navy (`.hero-orbit`: badge lima, título com termo
+  destacado em lima, busca grande, CTA lima + ghost claro), faixa de números reais
+  (`.stat-strip`), chips de segmento, grid de destaque (top 6), bloco "Como funciona a
+  verificação", footer. **Sem** faixa decorativa de ícones e **sem** foto de banco no hero —
+  ambas foram removidas por deixarem a tela com cara de template genérico.
 - **Resultados** `/buscar`: FilterRail (segmento c/ contagem, UF, nota mínima) + barra (contagem,
   ordenar, grade/lista) + chips ativos + filtragem client-side.
 - **Detalhe** `/empresa/[id]`: hero (logo 88px, nota, CTAs), Sobre, Serviços (✓), Avaliações

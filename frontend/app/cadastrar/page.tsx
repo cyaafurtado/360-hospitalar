@@ -764,7 +764,7 @@ export default function CadastrarPage() {
                   uf={form.uf} verified={form.plan === 'verified' || form.plan === 'premium'} />
               </div>
               <div className="reg-aside-block benefits">
-                <div className="bnf"><Icon name="users" size={20} /><div><strong>Alcance qualificado</strong><span>2.400+ compradores do setor de saúde.</span></div></div>
+                <div className="bnf"><Icon name="users" size={20} /><div><strong>Alcance qualificado</strong><span>Clínicas, hospitais e órgãos públicos buscando fornecedor.</span></div></div>
                 <div className="bnf"><Icon name="shield2" size={20} /><div><strong>Selo de verificação</strong><span>Mais confiança e mais respostas.</span></div></div>
                 <div className="bnf"><Icon name="phone" size={20} /><div><strong>Contato direto</strong><span>Receba pedidos de orçamento sem intermediários.</span></div></div>
               </div>

@@ -4,15 +4,16 @@ import { Icon } from '../lib/icons';
 import { useAppStore, type Density, type ThemeName } from '../lib/store';
 
 const THEMES: { value: ThemeName; label: string }[] = [
+  { value: 'orbit', label: 'Orbit' },
   { value: 'trust', label: 'Confiança' },
   { value: 'clinic', label: 'Clínico' },
   { value: 'editorial', label: 'Editorial' },
 ];
 const ACCENTS = [
+  'oklch(0.30 0.10 287)',
   'oklch(0.56 0.16 248)',
   'oklch(0.52 0.10 200)',
   'oklch(0.50 0.11 162)',
-  'oklch(0.45 0.14 282)',
 ];
 const DENSITIES: Density[] = ['compact', 'regular', 'comfy'];
 const DENSITY_LABEL: Record<Density, string> = { compact: 'Compacta', regular: 'Regular', comfy: 'Espaçada' };
