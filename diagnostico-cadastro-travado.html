@@ -1,0 +1,456 @@
+<!doctype html>
+<title>Raio-X do Cadastro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --navy:        oklch(0.30 0.10 287);
+    --navy-ink:    oklch(0.21 0.06 287);
+    --lima:        oklch(0.86 0.18 118);
+    --lima-ink:    oklch(0.34 0.09 118);
+    --paper:       oklch(0.974 0.005 287);
+    --card:        oklch(1 0 0);
+    --line:        oklch(0.885 0.012 287);
+    --text:        oklch(0.27 0.03 287);
+    --text-soft:   oklch(0.47 0.02 287);
+    --ok-bg:       oklch(0.95 0.045 155);
+    --ok-line:     oklch(0.66 0.13 155);
+    --ok-ink:      oklch(0.32 0.09 155);
+    --warn-bg:     oklch(0.96 0.045 80);
+    --warn-line:   oklch(0.73 0.13 75);
+    --warn-ink:    oklch(0.4 0.1 60);
+    --bad-bg:      oklch(0.955 0.04 25);
+    --bad-line:    oklch(0.68 0.15 25);
+    --bad-ink:     oklch(0.42 0.15 25);
+    --note-bg:     oklch(0.955 0.02 287);
+    --note-line:   oklch(0.78 0.04 287);
+    --code-bg:     oklch(0.27 0.03 287 / 8%);
+    --radius:      14px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy: oklch(0.74 0.09 128); --navy-ink: oklch(0.95 0.01 287);
+      --lima: oklch(0.86 0.18 118); --lima-ink: oklch(0.23 0.05 118);
+      --paper: oklch(0.18 0.014 287); --card: oklch(0.232 0.016 287);
+      --line: oklch(0.355 0.02 287); --text: oklch(0.93 0.008 287); --text-soft: oklch(0.72 0.014 287);
+      --ok-bg: oklch(0.265 0.045 155); --ok-line: oklch(0.5 0.12 155); --ok-ink: oklch(0.86 0.08 150);
+      --warn-bg: oklch(0.28 0.04 75); --warn-line: oklch(0.55 0.1 70); --warn-ink: oklch(0.87 0.07 78);
+      --bad-bg: oklch(0.29 0.05 25); --bad-line: oklch(0.55 0.15 25); --bad-ink: oklch(0.87 0.08 30);
+      --note-bg: oklch(0.25 0.014 287); --note-line: oklch(0.4 0.02 287);
+      --code-bg: oklch(0.93 0.008 287 / 10%);
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy: oklch(0.74 0.09 128); --navy-ink: oklch(0.95 0.01 287);
+    --lima: oklch(0.86 0.18 118); --lima-ink: oklch(0.23 0.05 118);
+    --paper: oklch(0.18 0.014 287); --card: oklch(0.232 0.016 287);
+    --line: oklch(0.355 0.02 287); --text: oklch(0.93 0.008 287); --text-soft: oklch(0.72 0.014 287);
+    --ok-bg: oklch(0.265 0.045 155); --ok-line: oklch(0.5 0.12 155); --ok-ink: oklch(0.86 0.08 150);
+    --warn-bg: oklch(0.28 0.04 75); --warn-line: oklch(0.55 0.1 70); --warn-ink: oklch(0.87 0.07 78);
+    --bad-bg: oklch(0.29 0.05 25); --bad-line: oklch(0.55 0.15 25); --bad-ink: oklch(0.87 0.08 30);
+    --note-bg: oklch(0.25 0.014 287); --note-line: oklch(0.4 0.02 287);
+    --code-bg: oklch(0.93 0.008 287 / 10%);
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--paper); color:var(--text);
+    font-family:'Hanken Grotesk', system-ui, sans-serif; font-size:16.5px; line-height:1.62;
+    padding-inline:20px; padding-block: max(34px, env(safe-area-inset-top,0px)) 80px;
+  }
+  h1,h2,h3,h4{ font-family:'Bricolage Grotesque', system-ui, sans-serif; text-wrap:balance; color:var(--navy-ink); margin:0; }
+  .wrap{ max-width:760px; margin:0 auto; }
+  code,.mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+  p{ color:var(--text-soft); margin:0 0 1em; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:var(--navy); }
+
+  /* masthead */
+  .masthead{ display:flex; align-items:center; gap:11px; margin-bottom:5px; }
+  .mark{ width:30px; height:30px; flex:none; }
+  .brand{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:1.05rem; color:var(--navy-ink); letter-spacing:-.01em; }
+  .brand .h{ color:var(--lima-ink); }
+  .kicker{ font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--text-soft); margin:0 0 30px 41px; }
+
+  h1.title{ font-size:clamp(1.7rem,4.4vw,2.35rem); font-weight:800; margin:0 0 10px; line-height:1.15; }
+  .subtitle{ color:var(--text-soft); font-size:1.03rem; max-width:58ch; margin:0 0 20px; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:7px 22px; font-size:.82rem; color:var(--text-soft); padding-top:18px; margin-bottom:34px; border-top:1px solid var(--line); }
+  .meta-row b{ color:var(--navy-ink); font-weight:700; }
+
+  .banner{ display:flex; gap:14px; align-items:flex-start; border-radius:var(--radius); padding:19px 21px; margin-bottom:22px; border:1px solid; }
+  .banner.ok{ background:var(--ok-bg); border-color:var(--ok-line); }
+  .banner .ico{ flex:none; width:23px; height:23px; margin-top:2px; }
+  .banner.ok .ico{ color:var(--ok-ink); }
+  .banner .ico svg{ width:100%; height:100%; }
+  .banner h2{ font-size:1.02rem; margin-bottom:5px; }
+  .banner.ok h2{ color:var(--ok-ink); }
+  .banner p{ color:var(--text); margin:0; font-size:.94rem; max-width:60ch; }
+
+  .transparency{ display:flex; gap:13px; align-items:flex-start; background:var(--note-bg); border:1px solid var(--note-line); border-radius:var(--radius); padding:16px 20px; margin-bottom:48px; }
+  .transparency .ico{ flex:none; width:19px; height:19px; margin-top:2px; color:var(--text-soft); }
+  .transparency .ico svg{ width:100%; height:100%; }
+  .transparency p{ font-size:.87rem; margin:0; color:var(--text-soft); }
+  .transparency strong{ color:var(--text); }
+
+  section{ margin-bottom:52px; }
+  .eyebrow{ font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); margin:0 0 8px; display:flex; align-items:center; gap:8px; }
+  .eyebrow::before{ content:''; width:18px; height:2px; background:var(--navy); display:inline-block; border-radius:2px; }
+  section > h2.sec-title{ font-size:1.4rem; margin:0 0 10px; }
+  .sec-intro{ color:var(--text-soft); max-width:60ch; margin:0 0 22px; font-size:.96rem; }
+
+  /* system parts */
+  .cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media (max-width:560px){ .cards{ grid-template-columns:1fr; } }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; }
+  .card .tag{ display:inline-block; font-size:.65rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--navy); background:color-mix(in oklch, var(--navy) 11%, transparent); padding:3px 8px; border-radius:20px; margin-bottom:9px; }
+  .card h3{ font-size:1rem; margin:0 0 5px; }
+  .card p{ margin:0; font-size:.89rem; }
+  .card .route{ display:block; margin-top:9px; color:var(--text-soft); font-size:.74rem; opacity:.75; }
+
+  /* flow */
+  .flow{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:24px 20px; overflow-x:auto; }
+  .flow-row{ display:flex; align-items:stretch; gap:4px; min-width:640px; }
+  .fnode{ flex:1; min-width:0; border-radius:11px; padding:13px 11px; text-align:center; border:1.5px solid var(--line); background:var(--paper); display:flex; flex-direction:column; justify-content:center; }
+  .fnode .t{ font-size:.8rem; font-weight:700; color:var(--text); }
+  .fnode .d{ font-size:.7rem; color:var(--text-soft); margin-top:4px; line-height:1.4; }
+  .fnode.ok{ border-color:var(--ok-line); background:var(--ok-bg); }
+  .fnode.ok .t{ color:var(--ok-ink); }
+  .fnode .was{ text-decoration:line-through; opacity:.5; }
+  .farrow{ flex:none; width:22px; align-self:center; height:2px; background:var(--ok-line); position:relative; }
+  .farrow::after{ content:''; position:absolute; right:-1px; top:50%; translate:0 -50%; width:0; height:0; border-top:4px solid transparent; border-bottom:4px solid transparent; border-left:6px solid var(--ok-line); }
+  .flow-legend{ margin-top:16px; font-size:.78rem; color:var(--text-soft); }
+  .branch-note{ text-align:center; font-size:.8rem; color:var(--text-soft); margin-top:15px; font-style:italic; }
+
+  /* cause */
+  .cause{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .cause-top{ padding:22px 24px 18px; border-bottom:1px solid var(--line); }
+  .cause-top p{ font-size:.95rem; }
+  .evidence{ padding:19px 24px; background:color-mix(in oklch, var(--navy) 4%, var(--card)); }
+  .evidence h5{ font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-soft); font-weight:700; margin:0 0 13px; }
+  .kv{ display:grid; grid-template-columns:auto 1fr; gap:10px 18px; font-size:.87rem; }
+  .kv .k{ color:var(--text-soft); white-space:nowrap; padding-top:2px; }
+  .kv .v{ color:var(--text); }
+  .codepair{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:.83rem; }
+  .pill{ font-family:'IBM Plex Mono'; background:var(--code-bg); border-radius:7px; padding:3px 9px; display:inline-flex; align-items:center; border:1px solid var(--line); }
+  .pill.bad{ background:var(--bad-bg); border-color:var(--bad-line); color:var(--bad-ink); }
+  .pill.good{ background:var(--ok-bg); border-color:var(--ok-line); color:var(--ok-ink); }
+  .pill .gap{ background:var(--bad-bg); outline:1.5px dashed var(--bad-line); border-radius:2px; padding:0 3px; margin:0 1px; }
+
+  /* how-to box */
+  .howto{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .howto ol{ margin:0; padding-left:1.15em; color:var(--text); font-size:.93rem; }
+  .howto li{ margin-bottom:8px; }
+  .howto li:last-child{ margin-bottom:0; }
+  .howto .refids{ margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); font-size:.78rem; color:var(--text-soft); }
+  .howto .refids code{ background:var(--code-bg); padding:1px 6px; border-radius:5px; }
+
+  /* open question */
+  .openq{ display:flex; gap:14px; background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:var(--radius); padding:19px 21px; }
+  .openq .ico{ flex:none; width:21px; height:21px; margin-top:2px; color:var(--warn-ink); }
+  .openq .ico svg{ width:100%; height:100%; }
+  .openq h4{ font-size:.96rem; color:var(--warn-ink); margin-bottom:6px; }
+  .openq p{ font-size:.9rem; margin:0; color:var(--text); }
+
+  /* issues */
+  .issues{ display:flex; flex-direction:column; gap:10px; }
+  .issue{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 17px; display:grid; grid-template-columns:auto 1fr; gap:13px; align-items:start; }
+  .issue .tag{ font-family:'IBM Plex Mono'; font-size:.6rem; font-weight:600; text-transform:uppercase; letter-spacing:.03em; padding:3px 7px; border-radius:6px; white-space:nowrap; margin-top:2px; }
+  .tag.dup{ background:color-mix(in oklch, var(--navy) 13%, transparent); color:var(--navy-ink); }
+  .tag.risk{ background:var(--warn-bg); color:var(--warn-ink); border:1px solid var(--warn-line); }
+  .tag.info{ background:var(--note-bg); color:var(--text-soft); border:1px solid var(--note-line); }
+  .issue h4{ font-size:.92rem; margin:0 0 3px; color:var(--text); }
+  .issue p{ font-size:.87rem; margin:0; }
+
+  /* priority steps */
+  .plist{ display:flex; flex-direction:column; gap:14px; }
+  .prio{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .prio-head{ display:flex; align-items:center; gap:11px; padding:13px 20px; border-bottom:1px solid var(--line); }
+  .prio-num{ font-family:'IBM Plex Mono'; font-weight:700; font-size:.72rem; letter-spacing:.03em; padding:3px 10px; border-radius:20px; }
+  .prio-num.p1{ background:var(--bad-bg); color:var(--bad-ink); border:1px solid var(--bad-line); }
+  .prio-num.p2{ background:var(--warn-bg); color:var(--warn-ink); border:1px solid var(--warn-line); }
+  .prio-num.p3{ background:var(--note-bg); color:var(--text-soft); border:1px solid var(--note-line); }
+  .prio-head h3{ font-size:.98rem; }
+  .prio-head span.when{ margin-left:auto; font-size:.76rem; color:var(--text-soft); }
+  .prio-body{ padding:5px 20px 16px; }
+  .prio-body ul{ margin:0; padding-left:1.1em; }
+  .prio-body li{ font-size:.9rem; color:var(--text); margin:9px 0; }
+  .prio-body li::marker{ color:var(--text-soft); }
+  .prio-body li b{ color:var(--navy-ink); }
+
+  footer.doc{ margin-top:56px; padding-top:18px; border-top:1px solid var(--line); font-size:.78rem; color:var(--text-soft); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="Marca 360 Hospitalar">
+      <ellipse cx="50" cy="50" rx="40" ry="18" fill="none" stroke="var(--navy)" stroke-width="6" transform="rotate(-30 50 50)"/>
+      <rect x="44.5" y="33" width="11" height="34" rx="5.5" fill="var(--lima)"/>
+      <rect x="33" y="44.5" width="34" height="11" rx="5.5" fill="var(--lima)"/>
+    </svg>
+    <span class="brand">360 <span class="h">Hospitalar</span></span>
+  </div>
+  <p class="kicker">Relatório interno · não é uma tela do site</p>
+
+  <h1 class="title">Por que um cadastro ficava travado</h1>
+  <p class="subtitle">O que existe no sistema hoje, como as partes se conectam, a causa exata do
+    travamento no cadastro — e o que fazer a seguir, em ordem de prioridade.</p>
+  <div class="meta-row">
+    <span><b>Data</b> · 17 de setembro de 2026</span>
+    <span><b>Onde foi checado</b> · código, configuração de produção (Railway) e banco de dados real</span>
+    <span><b>Situação</b> · causa corrigida</span>
+  </div>
+
+  <div class="banner ok">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <div>
+      <h2>Causa encontrada e corrigida</h2>
+      <p>O sistema que envia o e-mail de confirmação de cadastro estava configurado com um erro de
+        digitação e nunca enviava nada de verdade — sem avisar ninguém. Já corrigido: cadastros novos
+        a partir de agora recebem o e-mail normalmente.</p>
+    </div>
+  </div>
+
+  <div class="transparency">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r=".4" fill="currentColor" stroke="none"/></svg></span>
+    <p><strong>Nota de transparência.</strong> A correção da configuração e o desbloqueio de duas contas de
+      fornecedor presas foram feitos em produção durante esta investigação, por um assistente automático —
+      inclusive uma consulta direta ao banco de dados sem autorização prévia sua. Você revisou os dois pontos
+      depois de prontos e pediu para mantê-los. Já recomendei trocar a chave secreta do serviço de e-mail por
+      segurança, já que ela apareceu exposta no processo.</p>
+  </div>
+
+  <section id="partes">
+    <p class="eyebrow">Como o sistema é dividido</p>
+    <h2 class="sec-title">As 6 partes do portal</h2>
+    <p class="sec-intro">Uma casa com um saguão aberto ao público, três salas com chave — e a sua sala de controle.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="tag">Público · sem login</span>
+        <h3>Diretório e busca</h3>
+        <p>Qualquer visitante pesquisa fornecedores de saúde, filtra por segmento e estado, abre o perfil de uma empresa.</p>
+        <span class="route">/ · /buscar · /empresa/[id]</span>
+      </div>
+      <div class="card">
+        <span class="tag">Público · sem login</span>
+        <h3>Pedir orçamento</h3>
+        <p>O visitante preenche um formulário pedindo cotação ou contato. Isso vira uma solicitação na caixa do fornecedor.</p>
+        <span class="route">/empresa/[id]/orcamento</span>
+      </div>
+      <div class="card">
+        <span class="tag">Portão de entrada</span>
+        <h3>Cadastrar-se / Entrar</h3>
+        <p>Onde a conta é criada — nome, e-mail, senha, tipo (Fornecedor ou Unidade de saúde). É aqui que morava o travamento.</p>
+        <span class="route">/entrar · /cadastrar</span>
+      </div>
+      <div class="card">
+        <span class="tag">Logado · fornecedor</span>
+        <h3>Portal do fornecedor</h3>
+        <p>A empresa gerencia o próprio perfil público, responde pedidos de orçamento e acompanha cada um.</p>
+        <span class="route">/portal · /portal/perfil</span>
+      </div>
+      <div class="card">
+        <span class="tag">Logado · comprador</span>
+        <h3>Painel da unidade de saúde</h3>
+        <p>Para quem se cadastra como comprador (clínica, hospital): acompanha as solicitações que enviou.</p>
+        <span class="route">/painel</span>
+      </div>
+      <div class="card">
+        <span class="tag">Logado · só você</span>
+        <h3>Painel do administrador</h3>
+        <p>Lista de fornecedores e usuários, selo "Verificada", plano de cada empresa, resetar senha, ativar/desativar conta.</p>
+        <span class="route">/admin</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="mapa">
+    <p class="eyebrow">Como as partes se conectam</p>
+    <h2 class="sec-title">O caminho do cadastro até o portal</h2>
+    <p class="sec-intro">O mapa real do que acontece quando alguém se cadastra. A corrente se rompia no
+      passo 3 — agora ela segue até o fim.</p>
+    <div class="flow">
+      <div class="flow-row">
+        <div class="fnode ok"><div class="t">1 · Cadastro</div><div class="d">preenche dados, cria a conta</div></div>
+        <div class="farrow"></div>
+        <div class="fnode ok"><div class="t">2 · "Verifique seu e-mail"</div><div class="d">tela avisa que o link foi enviado</div></div>
+        <div class="farrow"></div>
+        <div class="fnode ok"><div class="t">3 · E-mail chega</div><div class="d"><span class="was">antes: nunca chegava</span> — corrigido</div></div>
+        <div class="farrow"></div>
+        <div class="fnode ok"><div class="t">4 · Clica no link</div><div class="d">login é liberado</div></div>
+        <div class="farrow"></div>
+        <div class="fnode ok"><div class="t">5 · Portal / Painel</div><div class="d">acesso normal</div></div>
+      </div>
+      <p class="flow-legend">Todo o caminho funciona hoje, incluindo o passo 3, que foi o corrigido.</p>
+    </div>
+    <p class="branch-note">O selo "Verificada" (plano pago, análise de documentos) é uma etapa separada e opcional —
+      nunca foi isso que bloqueava o acesso. O único portão fechado era a confirmação de e-mail.</p>
+  </section>
+
+  <section id="causa">
+    <p class="eyebrow">O que estava causando o travamento</p>
+    <h2 class="sec-title">A causa raiz, em detalhe</h2>
+    <p class="sec-intro">Conferi a configuração real do servidor (Railway) e o banco de dados de produção.
+      Era um erro de digitação, não uma falha de lógica do sistema.</p>
+    <div class="cause">
+      <div class="cause-top">
+        <p>O sistema usa um serviço externo (Resend) para disparar o e-mail de confirmação. Isso exige uma
+          "senha de acesso" desse serviço guardada no servidor, num campo chamado <code>RESEND_API_KEY</code>.
+          Ao cadastrar esse campo no painel do Railway, foi digitado um <strong>espaço em branco extra no
+          final do nome</strong> do campo. Para o sistema, um nome de campo com espaço no final é um campo
+          diferente — na prática, ele lia como se a senha de acesso nunca tivesse sido preenchida.</p>
+        <p>O código já previa esse caso: sem a senha de acesso configurada, ele não trava nem avisa
+          ninguém — só anota o link de confirmação num registro técnico interno que só um desenvolvedor
+          saberia consultar, e segue em frente como se tudo estivesse bem. Por fora, a tela do cliente
+          mostrava normalmente "e-mail enviado". Por isso ninguém tinha percebido antes: o sistema nunca
+          soltou um erro, só ficou quieto.</p>
+      </div>
+      <div class="evidence">
+        <h5>Evidência</h5>
+        <div class="kv">
+          <div class="k">Configuração no servidor</div>
+          <div class="v">
+            <div class="codepair">
+              estava: <span class="pill bad">RESEND_API_KEY<span class="gap">&nbsp;</span></span>
+              → agora: <span class="pill good">RESEND_API_KEY</span>
+            </div>
+          </div>
+          <div class="k">No banco de dados</div>
+          <div class="v">8 contas de fornecedor cadastradas · 2 presas aguardando confirmação · as outras 6 são de antes dessa exigência existir</div>
+          <div class="k">Ação aplicada</div>
+          <div class="v">Nome do campo corrigido no Railway; as 2 contas presas foram marcadas como confirmadas direto no banco (ver nota de transparência acima)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="avisar">
+    <p class="eyebrow">Próximo passo imediato</p>
+    <h2 class="sec-title">Avisar os 2 fornecedores que já podem entrar</h2>
+    <p class="sec-intro">Não extraí o e-mail dessas contas do banco de dados — dado de cliente não deveria
+      sair por um script avulso. Você já tem acesso direto e mais seguro a essa informação:</p>
+    <div class="howto">
+      <ol>
+        <li>Entre no <b>Painel do administrador</b> (<code>/admin/usuarios</code>) com sua conta.</li>
+        <li>No filtro "Tipo", escolha <b>Fornecedor</b>.</li>
+        <li>Ordene ou procure pela coluna <b>Criada em</b> — as duas contas presas foram criadas em
+          <b>26/08/2026</b> e <b>28/08/2026</b>.</li>
+        <li>O nome e o e-mail de cada uma aparecem na própria linha da tabela. É esse e-mail que já pode
+          ser usado pra entrar — o problema técnico foi resolvido, falta só avisar.</li>
+      </ol>
+      <div class="refids">
+        Identificadores internos das 2 contas, só como referência: <code>usr_5ade26a5cc7ef325e4</code> e
+        <code>usr_a5d3446c5e00c97b51</code>.
+      </div>
+    </div>
+  </section>
+
+  <section id="pergunta">
+    <p class="eyebrow">Preciso confirmar com você</p>
+    <h2 class="sec-title">Uma decisão de negócio em aberto</h2>
+    <div class="openq">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17h.01M12 13.5a1.5 1.5 0 1 1 1.5-1.5c0 1-1.5 1.2-1.5 2.5"/><circle cx="12" cy="12" r="9"/></svg></span>
+      <div>
+        <h4>Hoje, qualquer fornecedor entra no diretório público sozinho, sem revisão sua</h4>
+        <p>Assim que a empresa confirma o e-mail e termina o formulário de cadastro (4 etapas), ela já
+          aparece nas buscas do site — automaticamente, sem ninguém do seu lado aprovar antes. Só o selo
+          "Verificada" (que exige análise) depende de você. Isso é o que você quer? Numa plataforma de
+          fornecedores hospitalares, algumas empresas preferem revisar manualmente antes de deixar um
+          fornecedor novo visível ao público. Se for o seu caso, isso pode virar um próximo passo — hoje
+          não existe essa trava no sistema.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="confusoes">
+    <p class="eyebrow">Organização do projeto</p>
+    <h2 class="sec-title">O que está confuso ou duplicado hoje</h2>
+    <p class="sec-intro">Nada disto causou o problema desta vez, mas deixa o projeto mais difícil de manter
+      e favorece que um erro parecido passe despercebido de novo.</p>
+    <div class="issues">
+      <div class="issue">
+        <span class="tag risk">Risco</span>
+        <div><h4>Envio de e-mail que "finge" ter dado certo</h4>
+          <p>Sem alerta visível quando falta a configuração do e-mail. Corrigido o caso de agora, mas o
+            comportamento de ficar em silêncio continua no código — pode acontecer de novo, com outra causa.</p></div>
+      </div>
+      <div class="issue">
+        <span class="tag dup">Duplicado</span>
+        <div><h4>Portal do Fornecedor e Painel da Unidade de Saúde</h4>
+          <p>Estrutura quase idêntica (lista de pedidos, filtros, tela de detalhe), construída em separado.
+            Um ajuste normalmente precisa ser feito duas vezes, em dois lugares.</p></div>
+      </div>
+      <div class="issue">
+        <span class="tag info">Sem uso</span>
+        <div><h4>Tela "Como você quer entrar?" (/escolher-perfil)</h4>
+          <p>Existe pronta, mas o cadastro e o login normais já decidem sozinhos entre fornecedor e
+            unidade de saúde — ninguém chega até essa tela no caminho comum.</p></div>
+      </div>
+      <div class="issue">
+        <span class="tag info">Expectativa x realidade</span>
+        <div><h4>O documento de especificação descreve um painel de administrador bem mais completo</h4>
+          <p>Com vários níveis de permissão e apoio a múltiplas organizações. O que existe rodando hoje é
+            uma versão mais simples (um único nível "administrador"). Vale alinhar qual dos dois é o plano
+            real, pra não gerar expectativa equivocada em quem ler o documento depois.</p></div>
+      </div>
+      <div class="issue">
+        <span class="tag dup">Pode confundir</span>
+        <div><h4>Pastas de telas de exemplo dentro do mesmo projeto</h4>
+          <p>As pastas <code>sautek/</code> e <code>admin/</code> guardam protótipos visuais de referência,
+            mantidos de propósito — mas não são o site real, e podem parecer telas duplicadas.</p></div>
+      </div>
+      <div class="issue">
+        <span class="tag info">Desatualizado</span>
+        <div><h4>Os guias do projeto (README, "como continuar") ainda descrevem uma versão antiga</h4>
+          <p>Dizem que o login é "simulado" (qualquer senha entra) — isso não é mais verdade há várias
+            atualizações. Um guia desatualizado é fonte de confusão em qualquer conversa futura sobre o projeto.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proximos">
+    <p class="eyebrow">Recomendação</p>
+    <h2 class="sec-title">Próximos passos, em ordem de prioridade</h2>
+    <div class="plist">
+      <div class="prio">
+        <div class="prio-head"><span class="prio-num p1">Prioridade 1</span><h3>Fechar o risco de segurança e avisar quem ficou preso</h3><span class="when">esta semana</span></div>
+        <div class="prio-body"><ul>
+          <li><b>Trocar a chave do serviço de e-mail</b> (Resend) — ela apareceu exposta durante esta
+            investigação. Gerar uma nova em resend.com e atualizar no Railway.</li>
+          <li><b>Avisar os 2 fornecedores</b> que já podem entrar (passo a passo na seção acima).</li>
+          <li><b>Fazer o sistema alertar alguém</b> (você, por e-mail, ou um aviso no painel do administrador)
+            sempre que o envio de e-mail falhar de novo — hoje ele só anota isso num lugar que ninguém olha.</li>
+        </ul></div>
+      </div>
+      <div class="prio">
+        <div class="prio-head"><span class="prio-num p2">Prioridade 2</span><h3>Decisões de negócio e organização</h3><span class="when">próximas semanas</span></div>
+        <div class="prio-body"><ul>
+          <li><b>Responder a pergunta em aberto</b> desta página: fornecedor novo deve aparecer no site
+            sozinho, ou precisa da sua revisão antes?</li>
+          <li><b>Unificar Portal do Fornecedor e Painel da Unidade de Saúde</b> numa base de tela só,
+            para não manter dois lugares parecidos separadamente.</li>
+          <li><b>Remover ou aproveitar</b> a tela órfã <code>/escolher-perfil</code>.</li>
+        </ul></div>
+      </div>
+      <div class="prio">
+        <div class="prio-head"><span class="prio-num p3">Prioridade 3</span><h3>Arrumação de fundo</h3><span class="when">quando houver tempo</span></div>
+        <div class="prio-body"><ul>
+          <li><b>Atualizar os guias do projeto</b> (README, "como continuar") para refletir o que existe hoje.</li>
+          <li><b>Definir o escopo real do painel de administrador completo</b> (múltiplos níveis de permissão,
+            várias organizações) descrito no documento de especificação — hoje ele é bem mais simples do que
+            o texto sugere.</li>
+          <li><b>Separar as pastas de protótipo visual</b> do código que roda de verdade, para reduzir a
+            chance de confusão.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc">
+    <span>Diagnóstico por leitura de código, configuração de produção e banco de dados — 17/09/2026.</span>
+    <span>360 Hospitalar</span>
+  </footer>
+
+</div>
