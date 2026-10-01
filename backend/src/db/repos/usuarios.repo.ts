@@ -82,6 +82,25 @@ export const UsuariosRepo = {
     );
   },
 
+  async setRecuperacaoToken(usuarioId: string, tokenHash: string, expiraEm: Date): Promise<void> {
+    await query(
+      'UPDATE usuarios SET recuperacao_token_hash = $2, recuperacao_expira_em = $3 WHERE id = $1',
+      [usuarioId, tokenHash, expiraEm]
+    );
+  },
+
+  // Atômico: só redefine se o token bater e ainda estiver dentro da validade,
+  // e já apaga o token no mesmo UPDATE — não dá pra usar o mesmo link duas vezes.
+  async redefinirSenhaComToken(tokenHash: string, senhaHash: string): Promise<string | null> {
+    const { rows } = await query(
+      `UPDATE usuarios SET senha_hash = $2, recuperacao_token_hash = NULL, recuperacao_expira_em = NULL
+        WHERE recuperacao_token_hash = $1 AND recuperacao_expira_em > NOW()
+        RETURNING id`,
+      [tokenHash, senhaHash]
+    );
+    return rows[0]?.id ?? null;
+  },
+
   async setCompany(usuarioId: string, companyId: string): Promise<void> {
     await query('UPDATE usuarios SET company_id = $1 WHERE id = $2', [companyId, usuarioId]);
   },

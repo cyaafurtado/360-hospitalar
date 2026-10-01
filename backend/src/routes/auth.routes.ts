@@ -19,6 +19,8 @@ router.post('/register', authLimiter, asyncHandler(AuthController.register));
 router.post('/verify-email', authLimiter, asyncHandler(AuthController.verifyEmail));
 router.post('/resend-verification', authLimiter, asyncHandler(AuthController.resendVerification));
 router.post('/login', authLimiter, asyncHandler(AuthController.login));
+router.post('/forgot-password', authLimiter, asyncHandler(AuthController.forgotPassword));
+router.post('/reset-password', authLimiter, asyncHandler(AuthController.resetPassword));
 router.post('/refresh', asyncHandler(AuthController.refresh));
 router.post('/logout', asyncHandler(AuthController.logout));
 router.get('/me', requireAuth, asyncHandler(AuthController.me));

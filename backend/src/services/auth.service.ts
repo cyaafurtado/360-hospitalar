@@ -67,6 +67,22 @@ export function expiracaoVerificacao(): Date {
   return new Date(Date.now() + VERIFICACAO_TTL_HORAS * 60 * 60 * 1000);
 }
 
+// Token de "esqueci a senha": mesma ideia do token de verificação, mas
+// validade bem mais curta — é um link que, se vazar, redefine a senha de outra pessoa.
+const RECUPERACAO_TTL_MIN = 60;
+
+export function gerarTokenRecuperacao(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function hashTokenRecuperacao(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+export function expiracaoRecuperacao(): Date {
+  return new Date(Date.now() + RECUPERACAO_TTL_MIN * 60 * 1000);
+}
+
 export function novoId(prefixo: string): string {
   return `${prefixo}_${crypto.randomBytes(9).toString('hex')}`;
 }

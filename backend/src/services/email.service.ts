@@ -50,3 +50,47 @@ export async function enviarEmailConfirmacao(destino: string, nome: string, toke
     throw new Error('Não foi possível enviar o e-mail de confirmação.');
   }
 }
+
+export async function enviarEmailRecuperacao(destino: string, nome: string, token: string): Promise<void> {
+  const link = `${config.frontendUrl}/redefinir-senha?token=${token}`;
+  const r = resend();
+
+  if (!r) {
+    console.warn(`[email] RESEND_API_KEY não configurada. Link de recuperação para ${destino}: ${link}`);
+    return;
+  }
+
+  const { error } = await r.emails.send({
+    from: config.emailFrom,
+    to: destino,
+    subject: 'Redefinir sua senha — 360 Hospitalar',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
+        <h2 style="color: #1e5fa8;">360 Hospitalar</h2>
+        <p>Olá, ${nome || 'tudo bem'}!</p>
+        <p>Recebemos um pedido para redefinir a senha da sua conta. Clique no botão abaixo para
+          escolher uma senha nova:</p>
+        <p style="text-align: center; margin: 32px 0;">
+          <a href="${link}"
+             style="background: #1e5fa8; color: #fff; padding: 12px 28px; border-radius: 8px;
+                    text-decoration: none; font-weight: bold; display: inline-block;">
+            Redefinir senha
+          </a>
+        </p>
+        <p style="font-size: 13px; color: #666;">
+          Se o botão não funcionar, copie e cole este link no navegador:<br />
+          <a href="${link}">${link}</a>
+        </p>
+        <p style="font-size: 13px; color: #666;">
+          Este link expira em 1 hora. Se você não pediu essa troca, ignore este e-mail — sua senha
+          atual continua funcionando normalmente.
+        </p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error('[email] Falha ao enviar recuperação de senha via Resend:', error);
+    throw new Error('Não foi possível enviar o e-mail de recuperação.');
+  }
+}

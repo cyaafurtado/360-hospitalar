@@ -5,17 +5,20 @@ import { Usuario, UsuarioTipo } from '../models/types';
 import {
   assinarAccessToken,
   conferirSenha,
+  expiracaoRecuperacao,
   expiracaoRefresh,
   expiracaoVerificacao,
   gerarRefreshToken,
+  gerarTokenRecuperacao,
   gerarTokenVerificacao,
   hashRefreshToken,
   hashSenha,
+  hashTokenRecuperacao,
   hashTokenVerificacao,
   novoId,
   REFRESH_TTL_DIAS,
 } from '../services/auth.service';
-import { enviarEmailConfirmacao } from '../services/email.service';
+import { enviarEmailConfirmacao, enviarEmailRecuperacao } from '../services/email.service';
 
 const COOKIE = 'rt';
 const TIPOS: UsuarioTipo[] = ['fornecedor', 'contratante'];
@@ -152,6 +155,55 @@ export class AuthController {
       }
     }
 
+    res.json({ ok: true });
+  }
+
+  // Resposta igual, exista a conta ou não: não é este endpoint que revela
+  // quem tem cadastro na plataforma. Conta inativa também não recebe o e-mail
+  // (não tem sentido redefinir a senha de uma conta que o admin desativou).
+  static async forgotPassword(req: Request, res: Response): Promise<void> {
+    const email = String(req.body?.email ?? '').trim();
+    if (!email) {
+      res.status(400).json({ error: 'Informe o e-mail da conta.' });
+      return;
+    }
+
+    const encontrado = await UsuariosRepo.findByEmail(email);
+    if (encontrado && encontrado.ativo) {
+      const token = gerarTokenRecuperacao();
+      await UsuariosRepo.setRecuperacaoToken(encontrado.id, hashTokenRecuperacao(token), expiracaoRecuperacao());
+      try {
+        await enviarEmailRecuperacao(encontrado.email, encontrado.nome, token);
+      } catch (err) {
+        console.error('[auth] Falha ao enviar e-mail de recuperação de senha:', err);
+      }
+    }
+
+    res.json({ ok: true });
+  }
+
+  static async resetPassword(req: Request, res: Response): Promise<void> {
+    const token = String(req.body?.token ?? '').trim();
+    const novaSenha = String(req.body?.novaSenha ?? '');
+
+    if (!token) {
+      res.status(400).json({ error: 'Link de recuperação inválido.' });
+      return;
+    }
+    if (novaSenha.length < 8) {
+      res.status(400).json({ error: 'A senha precisa ter pelo menos 8 caracteres.' });
+      return;
+    }
+
+    const usuarioId = await UsuariosRepo.redefinirSenhaComToken(hashTokenRecuperacao(token), await hashSenha(novaSenha));
+    if (!usuarioId) {
+      res.status(400).json({ error: 'Link de recuperação inválido ou expirado. Peça um novo.' });
+      return;
+    }
+
+    // Senha trocada: qualquer sessão aberta antes (inclusive de quem roubou a
+    // senha antiga) deixa de valer. A pessoa entra de novo com a senha nova.
+    await RefreshTokensRepo.revogarTodosDoUsuario(usuarioId, 'seguranca');
     res.json({ ok: true });
   }
 

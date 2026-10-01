@@ -144,6 +144,14 @@ export async function reenviarConfirmacao(email: string): Promise<void> {
   await api.post('/auth/resend-verification', { email });
 }
 
+export async function esqueciSenha(email: string): Promise<void> {
+  await api.post('/auth/forgot-password', { email });
+}
+
+export async function redefinirSenha(token: string, novaSenha: string): Promise<void> {
+  await api.post('/auth/reset-password', { token, novaSenha });
+}
+
 export async function getUsuarioLogado(): Promise<Usuario> {
   const { data } = await api.get<{ usuario: Usuario }>('/auth/me');
   return data.usuario;

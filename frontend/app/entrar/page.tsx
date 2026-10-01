@@ -317,7 +317,7 @@ function EntrarForm() {
                 </span>
                 Manter conectado
               </label>
-              <a className="login-link" onClick={(e) => e.preventDefault()}>
+              <a className="login-link" onClick={() => router.push('/recuperar-senha')}>
                 Esqueci a senha
               </a>
             </div>
