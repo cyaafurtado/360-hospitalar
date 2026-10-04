@@ -720,6 +720,7 @@ export default function PerfilPage() {
                   <span>Número / Registro</span>
                   <span>Validade</span>
                   {!edit && <span>Situação</span>}
+                  <span>Situação do documento</span>
                   <span>Anexos</span>
                   {edit && <span />}
                 </div>
@@ -732,23 +733,12 @@ export default function PerfilPage() {
                   const enviandoParaAnalise = enviandoAnalise === doc.id;
 
                   const verifBadge = (
-                    <>
-                      {doc.status === 'em_analise' && (
-                        <span className="doc-verif-badge em_analise">
-                          <Icon name="signal" size={11} stroke={2.4} /> Em análise
-                        </span>
-                      )}
-                      {doc.status === 'aprovado' && (
-                        <span className="doc-verif-badge aprovado">
-                          <Icon name="check" size={11} stroke={3} /> Verificado
-                        </span>
-                      )}
-                      {doc.status === 'rejeitado' && (
-                        <span className="doc-verif-badge rejeitado" title={doc.motivoRejeicao || undefined}>
-                          <Icon name="close" size={11} stroke={2.6} /> Rejeitado{doc.motivoRejeicao ? `: ${doc.motivoRejeicao}` : ''}
-                        </span>
-                      )}
-                    </>
+                    <span className={'doc-verif-badge ' + doc.status} title={doc.status === 'rejeitado' ? doc.motivoRejeicao : undefined}>
+                      {doc.status === 'rascunho' && 'Não enviado'}
+                      {doc.status === 'em_analise' && (<><Icon name="signal" size={11} stroke={2.4} /> Pendente</>)}
+                      {doc.status === 'aprovado' && (<><Icon name="check" size={11} stroke={3} /> Aprovado</>)}
+                      {doc.status === 'rejeitado' && (<><Icon name="close" size={11} stroke={2.6} /> Recusado</>)}
+                    </span>
                   );
 
                   return (
@@ -774,7 +764,31 @@ export default function PerfilPage() {
                           <input className="doc-input" type="date" disabled={bloqueado}
                             value={doc.validade} onChange={(e) => { setDoc(doc.id, 'validade', e.target.value); persistDoc(doc.id); }} />
 
-                          {/* coluna Anexos — chips, anexar e envio pra verificação */}
+                          {/* coluna Situação do documento — badge + ação de enviar/cancelar */}
+                          <div className="doc-verif-cell">
+                            {verifBadge}
+                            {doc.status === 'rejeitado' && doc.motivoRejeicao && (
+                              <span className="doc-verif-reason">{doc.motivoRejeicao}</span>
+                            )}
+                            {(doc.status === 'rascunho' || doc.status === 'rejeitado') && (
+                              <button
+                                type="button"
+                                className="doc-verif-send"
+                                disabled={atts.length === 0 || enviandoParaAnalise}
+                                title={atts.length === 0 ? 'Anexe um arquivo antes de enviar' : 'Enviar para verificação da equipe 360H'}
+                                onClick={() => enviarAnalise(doc.id)}
+                              >
+                                <Icon name="shield2" size={12} /> {enviandoParaAnalise ? 'Enviando…' : 'Enviar para verificação'}
+                              </button>
+                            )}
+                            {doc.status === 'em_analise' && (
+                              <button type="button" className="doc-verif-cancel" onClick={() => cancelarAnalise(doc.id)}>
+                                Cancelar envio
+                              </button>
+                            )}
+                          </div>
+
+                          {/* coluna Anexos — chips e anexar */}
                           <div className="doc-file-list">
                             {atts.map((att) => (
                               <span key={att.id} className="doc-file-chip">
@@ -807,25 +821,6 @@ export default function PerfilPage() {
                                 {enviando ? 'Enviando…' : '+ Anexar'}
                               </label>
                             )}
-
-                            {/* Envio pra verificação — ao lado do Anexar */}
-                            {(doc.status === 'rascunho' || doc.status === 'rejeitado') && (
-                              <button
-                                type="button"
-                                className="doc-verif-send"
-                                disabled={atts.length === 0 || enviandoParaAnalise}
-                                title={atts.length === 0 ? 'Anexe um arquivo antes de enviar' : 'Enviar para verificação da equipe 360H'}
-                                onClick={() => enviarAnalise(doc.id)}
-                              >
-                                <Icon name="shield2" size={12} /> {enviandoParaAnalise ? 'Enviando…' : 'Enviar para verificação'}
-                              </button>
-                            )}
-                            {doc.status === 'em_analise' && (
-                              <button type="button" className="doc-verif-cancel" onClick={() => cancelarAnalise(doc.id)}>
-                                Cancelar envio
-                              </button>
-                            )}
-                            {verifBadge}
                           </div>
 
                           <button type="button" className="doc-remove" onClick={() => removeDoc(doc.id)} title="Remover documento">
@@ -844,6 +839,9 @@ export default function PerfilPage() {
                             {st === 'none' && '—'}
                           </span>
 
+                          {/* coluna Situação do documento */}
+                          <div className="doc-verif-cell">{verifBadge}</div>
+
                           {/* coluna Anexos em modo visualização */}
                           <div className="doc-file-list view">
                             {atts.length === 0 ? (
@@ -860,7 +858,6 @@ export default function PerfilPage() {
                                 <span className="doc-file-name">{att.nome}</span>
                               </button>
                             ))}
-                            {verifBadge}
                           </div>
                         </>
                       )}

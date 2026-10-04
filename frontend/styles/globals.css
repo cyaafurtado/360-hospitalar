@@ -1239,9 +1239,9 @@ em { font-style: italic; }
 .prof-doc-add svg { flex: none; }
 .doc-table { display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 /* visualização: tipo | numero | validade | situação | anexos */
-.doc-row { display: grid; grid-template-columns: 2fr 1.2fr 115px 105px 1.4fr; align-items: start; gap: 0; }
+.doc-row { display: grid; grid-template-columns: 1.7fr 1fr 95px 90px 150px 1.2fr; align-items: start; gap: 0; }
 /* edição: tipo | numero | date | anexos | remover */
-.doc-row.editing { grid-template-columns: 2fr 1.2fr 130px 1.4fr 44px; }
+.doc-row.editing { grid-template-columns: 1.7fr 1fr 115px 170px 1.2fr 40px; }
 .doc-row.header { background: var(--surface-2); border-bottom: 1.5px solid var(--border); align-items: center; }
 .doc-row.header span { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; padding: 9px 13px; }
 .doc-row:not(.header) { border-bottom: 1px solid var(--border); }
@@ -1277,10 +1277,13 @@ em { font-style: italic; }
 .doc-verif-send:disabled { opacity: .5; cursor: default; }
 .doc-verif-cancel { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; padding: 4px 2px; }
 .doc-verif-cancel:hover { color: var(--text-strong); }
-.doc-verif-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 650; padding: 4px 9px; border-radius: var(--pill); }
+.doc-verif-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 650; padding: 4px 9px; border-radius: var(--pill); white-space: nowrap; }
+.doc-verif-badge.rascunho { color: var(--muted); background: var(--surface-2); }
 .doc-verif-badge.em_analise { color: oklch(0.60 0.14 60); background: oklch(0.96 0.045 80); }
 .doc-verif-badge.aprovado { color: oklch(0.52 0.15 155); background: oklch(0.95 0.045 155); }
-.doc-verif-badge.rejeitado { color: oklch(0.52 0.18 25); background: oklch(0.955 0.04 25); cursor: help; }
+.doc-verif-badge.rejeitado { color: oklch(0.52 0.18 25); background: oklch(0.955 0.04 25); }
+.doc-verif-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; padding: 12px 13px; }
+.doc-verif-reason { font-size: 11.5px; color: oklch(0.52 0.18 25); line-height: 1.35; }
 .doc-attach-empty { font-size: 13.5px; color: var(--muted); }
 .doc-empty-hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 
