@@ -53,10 +53,17 @@ export default function OrcamentoPage() {
     telefone: '',
     uf: '',
     cidade: '',
-    servico: '',
     detalhes: '',
   });
   const set = (k: keyof typeof f, v: string) => setF((s) => ({ ...s, [k]: v }));
+
+  // Lista de serviços de interesse — pode marcar mais de um do catálogo do
+  // fornecedor, mais um item livre pro que não estiver listado.
+  const [servicos, setServicos] = useState<string[]>([]);
+  const [outro, setOutro] = useState(false);
+  const [outroTexto, setOutroTexto] = useState('');
+  const toggleServico = (s: string) =>
+    setServicos((lista) => (lista.includes(s) ? lista.filter((x) => x !== s) : [...lista, s]));
 
   if (loading || error || (authEmail && souFornecedor && carregandoPerfil)) {
     return (
@@ -151,7 +158,7 @@ export default function OrcamentoPage() {
 
   // defaults dependentes do fornecedor
   const ufVal = f.uf || c.uf;
-  const servicoVal = f.servico || c.services[0] || '';
+  const servicoVal = [...servicos, ...(outro && outroTexto.trim() ? [outroTexto.trim()] : [])].join(', ');
 
   const valid =
     f.nome.trim() &&
@@ -215,8 +222,8 @@ export default function OrcamentoPage() {
               <strong>{typeLabel(tipo)}</strong>
             </div>
             <div className="qr-row">
-              <span>Serviço</span>
-              <strong>{servicoVal}</strong>
+              <span>Serviços de interesse</span>
+              <strong>{servicoVal || '—'}</strong>
             </div>
             <div className="qr-row">
               <span>Prazo desejado</span>
@@ -314,30 +321,40 @@ export default function OrcamentoPage() {
               <Icon name="list" size={16} /> Sobre o que você precisa
             </h3>
             <div className="reg-grid">
-              <div className="reg-row2">
-                <Field label="Serviço de interesse">
-                  <div className="reg-select">
-                    <Icon name="check" size={16} />
-                    <select value={servicoVal} onChange={(e) => set('servico', e.target.value)}>
-                      {c.services.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                      <option value="Outro">Outro / não listado</option>
-                    </select>
-                  </div>
-                </Field>
-                <Field label="Prazo desejado">
-                  <div className="qprazo">
-                    {Q_PRAZOS.map((p) => (
-                      <button type="button" key={p} className={'reg-pick' + (prazo === p ? ' on' : '')} onClick={() => setPrazo(p)}>
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-              </div>
+              <Field label="Serviços de interesse" hint="Selecione um ou mais serviços deste fornecedor.">
+                <div className="qprazo">
+                  {c.services.map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      className={'reg-pick' + (servicos.includes(s) ? ' on' : '')}
+                      onClick={() => toggleServico(s)}
+                    >
+                      {servicos.includes(s) && <Icon name="check" size={12} stroke={3} />} {s}
+                    </button>
+                  ))}
+                  <button type="button" className={'reg-pick' + (outro ? ' on' : '')} onClick={() => setOutro((v) => !v)}>
+                    {outro && <Icon name="check" size={12} stroke={3} />} Outro / não listado
+                  </button>
+                </div>
+                {outro && (
+                  <input
+                    value={outroTexto}
+                    onChange={(e) => setOutroTexto(e.target.value)}
+                    placeholder="Descreva o serviço que você procura"
+                    style={{ marginTop: 10 }}
+                  />
+                )}
+              </Field>
+              <Field label="Prazo desejado">
+                <div className="qprazo">
+                  {Q_PRAZOS.map((p) => (
+                    <button type="button" key={p} className={'reg-pick' + (prazo === p ? ' on' : '')} onClick={() => setPrazo(p)}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </Field>
               <Field
                 label="Detalhes da solicitação"
                 required
