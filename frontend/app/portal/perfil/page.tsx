@@ -56,6 +56,14 @@ export default function PerfilPage() {
   const set = <K extends keyof SupplierProfileData>(k: K, v: SupplierProfileData[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
+  // Lista simples de serviços (checklist que aparece na página pública,
+  // abaixo de "Sobre a empresa" — diferente do catálogo, que tem descrição/preço/prazo).
+  const addServiceItem = () => setForm((f) => (f ? { ...f, services: [...f.services, ''] } : f));
+  const setServiceItem = (i: number, v: string) =>
+    setForm((f) => (f ? { ...f, services: f.services.map((s, idx) => (idx === i ? v : s)) } : f));
+  const removeServiceItem = (i: number) =>
+    setForm((f) => (f ? { ...f, services: f.services.filter((_, idx) => idx !== i) } : f));
+
   const toggleUf = (u: string) =>
     setForm((f) =>
       f
@@ -298,7 +306,7 @@ export default function PerfilPage() {
             <h3>Dados da empresa</h3>
             {renderRow('Nome', form.name, 'name')}
             {renderRow('Frase de destaque', form.tagline, 'tagline')}
-            {renderRow('Sobre', form.about, 'about', 'area')}
+            {renderRow('Sobre a empresa', form.about, 'about', 'area')}
             {renderRow('Site', form.site, 'site')}
             {renderRow('Porte', form.employees + ' func.', 'employees')}
           </section>
@@ -322,6 +330,56 @@ export default function PerfilPage() {
                 <span className="prof-value">{form.city} · {form.uf}</span>
               )}
             </div>
+          </section>
+
+          {/* ── Serviços e soluções: lista simples que aparece na página pública,
+              logo abaixo de "Sobre a empresa" (diferente do catálogo, mais abaixo) ── */}
+          <section className="prof-card span-2">
+            <div className="prof-doc-head">
+              <div>
+                <h3>Serviços e soluções</h3>
+                <p className="prof-card-sub">Lista rápida que aparece na sua página pública, logo abaixo de &ldquo;Sobre a empresa&rdquo;.</p>
+              </div>
+              {edit && (
+                <button type="button" className="prof-doc-add" onClick={addServiceItem}>
+                  <Icon name="check" size={13} stroke={3} /> Adicionar item
+                </button>
+              )}
+            </div>
+
+            {form.services.length === 0 && !edit && (
+              <p className="doc-empty-hint">Nenhum serviço cadastrado. Edite o perfil para listar o que sua empresa oferece.</p>
+            )}
+
+            {edit ? (
+              <div className="svc-edit-list">
+                {form.services.map((s, i) => (
+                  <div key={i} className="svc-edit-row">
+                    <input
+                      className="prof-input"
+                      placeholder="Ex: Manutenção preventiva, Locação de equipamentos…"
+                      value={s}
+                      onChange={(e) => setServiceItem(i, e.target.value)}
+                    />
+                    <button type="button" className="doc-remove" onClick={() => removeServiceItem(i)} title="Remover item">
+                      <Icon name="close" size={14} stroke={2.4} />
+                    </button>
+                  </div>
+                ))}
+                {form.services.length === 0 && (
+                  <p className="doc-empty-hint">Clique em &ldquo;Adicionar item&rdquo; para listar o primeiro serviço.</p>
+                )}
+              </div>
+            ) : form.services.length > 0 && (
+              <div className="svc-grid">
+                {form.services.map((s, i) => (
+                  <div key={i} className="svc-item">
+                    <span className="svc-dot"><Icon name="check" size={13} stroke={3} /></span>
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* ── Plano ── */}

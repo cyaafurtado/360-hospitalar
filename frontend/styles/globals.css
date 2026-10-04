@@ -626,6 +626,9 @@ em { font-style: italic; }
 .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .svc-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text); font-weight: 500; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
 .svc-dot { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in oklch, var(--accent), white 84%); color: var(--accent); display: grid; place-items: center; flex: none; }
+.svc-edit-list { display: flex; flex-direction: column; gap: 8px; }
+.svc-edit-row { display: flex; align-items: center; gap: 8px; }
+.svc-edit-row .prof-input { flex: 1; }
 
 .rev-summary { display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: center; background: var(--surface); border: var(--card-border); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow-card); }
 .rev-big { text-align: center; }

@@ -111,6 +111,7 @@ export type SupplierProfileData = {
   name: string;
   tagline: string;
   about: string;
+  services: string[];
   segment: string;
   uf: string;
   city: string;

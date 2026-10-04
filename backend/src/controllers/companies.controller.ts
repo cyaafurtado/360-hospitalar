@@ -19,6 +19,7 @@ function paraPerfil(c: Company) {
     name: c.name,
     tagline: c.tagline,
     about: c.about,
+    services: c.services,
     segment: c.segment,
     uf: c.uf,
     city: c.city,
@@ -35,6 +36,13 @@ function paraPerfil(c: Company) {
     plan: c.plano,
     catalogo: c.catalogo,
   };
+}
+
+// Lista simples de serviços (checklist da página pública). Trim + remove
+// vazio aqui, na borda da API, pra não salvar item em branco no catálogo.
+function sanitizarServices(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  return v.map((item) => String(item ?? '').trim()).filter(Boolean);
 }
 
 // Sem isso, um `descricao` poderia chegar como número ou objeto e quebrar a
@@ -139,6 +147,7 @@ export class CompaniesController {
       name: b.name ?? '',
       tagline: b.tagline ?? '',
       about: b.about ?? '',
+      services: sanitizarServices(b.services) ?? [],
       site: b.site ?? '',
       employees: b.employees ?? '',
       email: b.email ?? '',

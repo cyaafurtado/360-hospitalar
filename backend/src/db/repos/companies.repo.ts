@@ -143,6 +143,7 @@ export const CompaniesRepo = {
       name: string;
       tagline: string;
       about: string;
+      services: string[];
       site: string;
       employees: string;
       email: string;
@@ -157,13 +158,13 @@ export const CompaniesRepo = {
   ): Promise<Company | null> {
     const { rows } = await query(
       `UPDATE companies SET
-         name=$2, tagline=$3, about=$4, site=$5, employees=$6,
-         email=$7, phone=$8, city=$9, uf=$10, atende_ufs=$11, badges=$12, status='completo',
-         plano=COALESCE($13, plano),
-         catalogo=COALESCE($14, catalogo)
+         name=$2, tagline=$3, about=$4, services=$5, site=$6, employees=$7,
+         email=$8, phone=$9, city=$10, uf=$11, atende_ufs=$12, badges=$13, status='completo',
+         plano=COALESCE($14, plano),
+         catalogo=COALESCE($15, catalogo)
        WHERE id=$1 RETURNING *`,
       [
-        id, p.name, p.tagline, p.about, p.site, p.employees, p.email, p.phone,
+        id, p.name, p.tagline, p.about, p.services, p.site, p.employees, p.email, p.phone,
         p.city, p.uf, p.atendeUfs, p.badges, p.plano ?? null,
         p.catalogo ? JSON.stringify(p.catalogo) : null,
       ]
