@@ -1,7 +1,17 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMyProfile, updateMyProfile } from '../../../lib/services';
+import {
+  getMyProfile,
+  updateMyProfile,
+  criarDocumento,
+  atualizarDocumento,
+  removerDocumento,
+  enviarArquivoDocumento,
+  removerArquivoDocumento,
+  abrirArquivoDocumento,
+  mensagemDeErro,
+} from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { useAppStore } from '../../../lib/store';
 import { STATES, segmentLabel, stateName } from '../../../data/reference';
@@ -71,58 +81,83 @@ export default function PerfilPage() {
         : f
     );
 
-  // attachMap: docId → lista de {name, url?} (url = blob URL para arquivos desta sessão)
-  type Att = { name: string; url?: string };
-  const [attachMap, setAttachMap] = useState<Record<string, Att[]>>({});
+  // Documentação de verificação: cada ação (criar, editar, excluir, anexar
+  // arquivo) salva direto na API — nunca fica só no navegador esperando o
+  // Salvar geral do perfil. Era exatamente isso que fazia o documento "sumir":
+  // a API não conhecia o campo, e a resposta do Salvar geral sobrescrevia o
+  // formulário sem ele.
+  const [docs, setDocs] = useState<DocumentoVerificacao[]>([]);
+  const [docErro, setDocErro] = useState('');
+  const [enviandoArquivo, setEnviandoArquivo] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initial?.documentos) {
-      const init: Record<string, Att[]> = {};
-      for (const doc of initial.documentos) {
-        if (doc.arquivos?.length) init[doc.id] = doc.arquivos.map((name) => ({ name }));
-      }
-      setAttachMap(init);
-    }
+    if (initial?.documentos) setDocs(initial.documentos);
   }, [initial]);
 
-  const getAtts = (docId: string): Att[] => attachMap[docId] ?? [];
+  const addDoc = async () => {
+    setDocErro('');
+    try {
+      const novo = await criarDocumento({ tipo: '', numero: '', validade: '' });
+      setDocs((d) => [...d, novo]);
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível adicionar o documento.'));
+    }
+  };
 
-  const docs = form?.documentos ?? [];
-  const addDoc = () =>
-    setForm((f) =>
-      f ? { ...f, documentos: [...(f.documentos ?? []), { id: crypto.randomUUID(), tipo: '', numero: '', validade: '', arquivos: [] }] } : f
-    );
-  const removeDoc = (id: string) => {
-    setAttachMap((p) => { const n = { ...p }; delete n[id]; return n; });
-    setForm((f) => f ? { ...f, documentos: (f.documentos ?? []).filter((d) => d.id !== id) } : f);
+  const removeDoc = async (id: string) => {
+    setDocs((d) => d.filter((x) => x.id !== id));
+    try {
+      await removerDocumento(id);
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível remover o documento.'));
+    }
   };
-  const setDoc = (id: string, k: keyof DocumentoVerificacao, v: string) =>
-    setForm((f) =>
-      f ? { ...f, documentos: (f.documentos ?? []).map((d) => d.id === id ? { ...d, [k]: v } : d) } : f
-    );
-  const addDocFile = (docId: string, file: File) => {
-    const url = URL.createObjectURL(file);
-    setAttachMap((p) => ({ ...p, [docId]: [...(p[docId] ?? []), { name: file.name, url }] }));
-    setForm((f) =>
-      f ? { ...f, documentos: (f.documentos ?? []).map((d) =>
-        d.id === docId ? { ...d, arquivos: [...(d.arquivos ?? []), file.name] } : d
-      )} : f
-    );
+
+  // Atualiza na tela imediatamente; a gravação na API acontece ao saír do
+  // campo (onBlur) — não a cada tecla.
+  const setDoc = (id: string, k: 'tipo' | 'numero' | 'validade', v: string) =>
+    setDocs((d) => d.map((x) => (x.id === id ? { ...x, [k]: v } : x)));
+
+  const persistDoc = async (id: string) => {
+    const doc = docs.find((d) => d.id === id);
+    if (!doc) return;
+    try {
+      await atualizarDocumento(id, { tipo: doc.tipo, numero: doc.numero, validade: doc.validade });
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível salvar o documento.'));
+    }
   };
-  const removeDocFile = (docId: string, idx: number) => {
-    setAttachMap((p) => {
-      const arr = [...(p[docId] ?? [])];
-      arr.splice(idx, 1);
-      return { ...p, [docId]: arr };
-    });
-    setForm((f) =>
-      f ? { ...f, documentos: (f.documentos ?? []).map((d) => {
-        if (d.id !== docId) return d;
-        const arqs = [...(d.arquivos ?? [])];
-        arqs.splice(idx, 1);
-        return { ...d, arquivos: arqs };
-      })} : f
-    );
+
+  const getAtts = (docId: string) => docs.find((d) => d.id === docId)?.arquivos ?? [];
+
+  const addDocFile = async (docId: string, file: File) => {
+    setDocErro('');
+    setEnviandoArquivo(docId);
+    try {
+      const arquivo = await enviarArquivoDocumento(docId, file);
+      setDocs((d) => d.map((x) => (x.id === docId ? { ...x, arquivos: [...x.arquivos, arquivo] } : x)));
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível enviar o arquivo.'));
+    } finally {
+      setEnviandoArquivo(null);
+    }
+  };
+
+  const removeDocFile = async (docId: string, arquivoId: string) => {
+    setDocs((d) => d.map((x) => (x.id === docId ? { ...x, arquivos: x.arquivos.filter((a) => a.id !== arquivoId) } : x)));
+    try {
+      await removerArquivoDocumento(docId, arquivoId);
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível remover o arquivo.'));
+    }
+  };
+
+  const verArquivo = async (docId: string, arquivoId: string) => {
+    try {
+      await abrirArquivoDocumento(docId, arquivoId);
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível abrir o arquivo.'));
+    }
   };
 
   // fotos da empresa
@@ -625,13 +660,22 @@ export default function PerfilPage() {
 
           <section className="prof-card span-2">
             <div className="prof-doc-head">
-              <h3>Documentação para verificação</h3>
+              <div>
+                <h3>Documentação para verificação</h3>
+                <p className="prof-card-sub">Cada alteração aqui salva na hora — não depende do Salvar geral do perfil.</p>
+              </div>
               {edit && (
                 <button type="button" className="prof-doc-add" onClick={addDoc}>
                   <Icon name="check" size={13} stroke={3} /> Adicionar documento
                 </button>
               )}
             </div>
+
+            {docErro && (
+              <div className="login-error" style={{ marginBottom: 14 }}>
+                <Icon name="close" size={14} stroke={2.4} /> {docErro}
+              </div>
+            )}
 
             {docs.length === 0 && !edit && (
               <span className="muted" style={{ fontSize: 14 }}>Nenhum documento cadastrado.</span>
@@ -652,6 +696,7 @@ export default function PerfilPage() {
                 {docs.map((doc) => {
                   const st = docStatus(doc.validade);
                   const atts = getAtts(doc.id);
+                  const enviando = enviandoArquivo === doc.id;
                   return (
                     <div key={doc.id} className={'doc-row' + (edit ? ' editing' : '')}>
                       {edit ? (
@@ -662,42 +707,45 @@ export default function PerfilPage() {
                             placeholder="Ex: ANVISA, ISO 9001…"
                             value={doc.tipo}
                             onChange={(e) => setDoc(doc.id, 'tipo', e.target.value)}
+                            onBlur={() => persistDoc(doc.id)}
                           />
                           <datalist id={'doc-presets-' + doc.id}>
                             {DOC_PRESETS.map((p) => <option key={p} value={p} />)}
                           </datalist>
                           <input className="doc-input" placeholder="Ex: 10.000/2023"
-                            value={doc.numero} onChange={(e) => setDoc(doc.id, 'numero', e.target.value)} />
+                            value={doc.numero} onChange={(e) => setDoc(doc.id, 'numero', e.target.value)}
+                            onBlur={() => persistDoc(doc.id)} />
                           <input className="doc-input" type="date"
-                            value={doc.validade} onChange={(e) => setDoc(doc.id, 'validade', e.target.value)} />
+                            value={doc.validade} onChange={(e) => { setDoc(doc.id, 'validade', e.target.value); persistDoc(doc.id); }} />
 
                           {/* coluna Anexos — chips + botão + */}
                           <div className="doc-file-list">
-                            {atts.map((att, i) => (
-                              <span key={i} className="doc-file-chip">
+                            {atts.map((att) => (
+                              <span key={att.id} className="doc-file-chip">
                                 <Icon name="file" size={12} />
-                                <span className="doc-file-name">{att.name}</span>
+                                <span className="doc-file-name">{att.nome}</span>
                                 <button
                                   type="button"
                                   className="doc-file-remove"
-                                  onClick={() => removeDocFile(doc.id, i)}
+                                  onClick={() => removeDocFile(doc.id, att.id)}
                                   title="Remover arquivo"
                                 >
                                   <Icon name="close" size={11} stroke={2.5} />
                                 </button>
                               </span>
                             ))}
-                            <label className="doc-file-add">
+                            <label className={'doc-file-add' + (enviando ? ' disabled' : '')}>
                               <input
                                 type="file"
                                 hidden
+                                disabled={enviando}
                                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                                 onChange={(e) => {
                                   const f = e.target.files?.[0];
-                                  if (f) { addDocFile(doc.id, f); e.target.value = ''; }
+                                  if (f) { void addDocFile(doc.id, f); e.target.value = ''; }
                                 }}
                               />
-                              + Anexar
+                              {enviando ? 'Enviando…' : '+ Anexar'}
                             </label>
                           </div>
 
@@ -721,19 +769,18 @@ export default function PerfilPage() {
                           <div className="doc-file-list view">
                             {atts.length === 0 ? (
                               <span className="doc-attach-empty">—</span>
-                            ) : atts.map((att, i) =>
-                              att.url ? (
-                                <a key={i} className="doc-file-chip link" href={att.url} target="_blank" rel="noreferrer" title="Abrir arquivo">
-                                  <Icon name="file" size={12} />
-                                  <span className="doc-file-name">{att.name}</span>
-                                </a>
-                              ) : (
-                                <span key={i} className="doc-file-chip">
-                                  <Icon name="file" size={12} />
-                                  <span className="doc-file-name">{att.name}</span>
-                                </span>
-                              )
-                            )}
+                            ) : atts.map((att) => (
+                              <button
+                                key={att.id}
+                                type="button"
+                                className="doc-file-chip link"
+                                onClick={() => verArquivo(doc.id, att.id)}
+                                title="Abrir arquivo"
+                              >
+                                <Icon name="file" size={12} />
+                                <span className="doc-file-name">{att.nome}</span>
+                              </button>
+                            ))}
                           </div>
                         </>
                       )}

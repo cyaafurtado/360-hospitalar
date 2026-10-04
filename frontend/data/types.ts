@@ -68,12 +68,14 @@ export type CatalogoServico = {
   destaque: boolean;
 };
 
+export type ArquivoDocumento = { id: string; nome: string };
+
 export type DocumentoVerificacao = {
   id: string;
   tipo: string;
   numero: string;
   validade: string; // YYYY-MM-DD
-  arquivos?: string[]; // nomes dos arquivos anexados
+  arquivos: ArquivoDocumento[];
 };
 
 export type CredentialStatus = 'valida' | 'vigente' | 'vencida';

@@ -1279,7 +1279,7 @@ em { font-style: italic; }
 /* múltiplos anexos por documento */
 .doc-file-list { display: flex; flex-direction: column; gap: 5px; padding: 8px 10px; align-items: flex-start; }
 .doc-file-list.view { padding: 10px 12px; }
-.doc-file-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-strong); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--pill); padding: 4px 8px 4px 10px; max-width: 100%; text-decoration: none; }
+.doc-file-chip { display: inline-flex; align-items: center; gap: 6px; font: inherit; appearance: none; font-size: 12px; font-weight: 600; color: var(--text-strong); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--pill); padding: 4px 8px 4px 10px; max-width: 100%; text-decoration: none; }
 .doc-file-chip svg { color: var(--primary); flex: none; }
 .doc-file-chip.link { color: var(--primary); cursor: pointer; }
 .doc-file-chip.link:hover { background: var(--primary-tint); border-color: color-mix(in oklch, var(--primary), white 60%); text-decoration: underline; }
@@ -1288,6 +1288,7 @@ em { font-style: italic; }
 .doc-file-remove:hover { color: oklch(0.52 0.18 25); background: oklch(0.96 0.02 25); }
 .doc-file-add { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 4px 10px; border: 1.5px dashed color-mix(in oklch, var(--primary), white 50%); border-radius: var(--pill); transition: background .12s, border-color .12s; white-space: nowrap; }
 .doc-file-add:hover { background: var(--primary-tint); border-color: var(--primary); }
+.doc-file-add.disabled { opacity: .6; cursor: default; pointer-events: none; }
 .doc-attach-empty { font-size: 13.5px; color: var(--muted); }
 .doc-empty-hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 

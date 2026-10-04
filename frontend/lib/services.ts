@@ -11,6 +11,8 @@ import type {
   AdminFornecedor,
   AdminUsuario,
   Plan,
+  DocumentoVerificacao,
+  ArquivoDocumento,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -61,6 +63,49 @@ export function codigoDoErro(err: unknown): string | undefined {
 export async function updateMyProfile(profile: SupplierProfileData): Promise<SupplierProfileData> {
   const { data } = await api.put<SupplierProfileData>('/profile', profile);
   return data;
+}
+
+/* ---------- Documentação de verificação ---------- */
+/* Cada ação salva na hora — arquivo não dá pra deixar "pendente" só no
+   navegador esperando o botão Salvar geral do perfil. */
+
+export type DocumentoInput = { tipo: string; numero: string; validade: string };
+
+export async function criarDocumento(input: DocumentoInput): Promise<DocumentoVerificacao> {
+  const { data } = await api.post<DocumentoVerificacao>('/profile/documentos', input);
+  return data;
+}
+
+export async function atualizarDocumento(id: string, input: DocumentoInput): Promise<void> {
+  await api.put(`/profile/documentos/${id}`, input);
+}
+
+export async function removerDocumento(id: string): Promise<void> {
+  await api.delete(`/profile/documentos/${id}`);
+}
+
+export async function enviarArquivoDocumento(documentoId: string, file: File): Promise<ArquivoDocumento> {
+  const formData = new FormData();
+  formData.append('arquivo', file);
+  const { data } = await api.post<ArquivoDocumento>(`/profile/documentos/${documentoId}/arquivos`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function removerArquivoDocumento(documentoId: string, arquivoId: string): Promise<void> {
+  await api.delete(`/profile/documentos/${documentoId}/arquivos/${arquivoId}`);
+}
+
+// O link precisa do token de autenticação (a rota é privada), então não dá
+// pra usar um <a href> direto — busca o arquivo autenticado e abre localmente.
+export async function abrirArquivoDocumento(documentoId: string, arquivoId: string): Promise<void> {
+  const { data } = await api.get(`/profile/documentos/${documentoId}/arquivos/${arquivoId}`, {
+    responseType: 'blob',
+  });
+  const url = URL.createObjectURL(data as Blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 // Pré-cadastro: cria a empresa só com o essencial (etapa 1 do assistente).

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
+import { DocumentosRepo } from '../db/repos/documentos.repo';
 import { CatalogoServico, Company, PlanoEmpresa } from '../models/types';
 
 const SEM_EMPRESA = {
@@ -133,7 +134,8 @@ export class CompaniesController {
       res.status(404).json(SEM_EMPRESA);
       return;
     }
-    res.json(paraPerfil(empresa));
+    const documentos = await DocumentosRepo.listByCompany(empresa.id);
+    res.json({ ...paraPerfil(empresa), documentos });
   }
 
   static async updateProfile(req: Request, res: Response): Promise<void> {
