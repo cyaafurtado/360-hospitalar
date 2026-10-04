@@ -35,9 +35,6 @@ export function PortalNav() {
           <span className="portal-role-badge">
             <Icon name="clipboard" size={13} stroke={2} /> Fornecedor
           </span>
-          <button className="portal-switch" onClick={() => router.push('/escolher-perfil')}>
-            <Icon name="sliders" size={14} /> Trocar perfil
-          </button>
           <button className="portal-exit" onClick={exit}>
             <Icon name="back" size={15} /> Sair
           </button>

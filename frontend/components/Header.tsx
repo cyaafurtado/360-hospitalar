@@ -8,11 +8,14 @@ export function Header() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
   const profileRole = useAppStore((s) => s.profileRole);
+  const usuario = useAppStore((s) => s.usuario);
 
+  // Cada conta tem um único tipo fixo (fornecedor ou instituição) — sem
+  // profileRole só sobra o admin, que vai pro próprio painel.
   const irParaMeuPortal = () => {
     if (profileRole === 'contratante') router.push('/painel');
     else if (profileRole === 'fornecedor') router.push('/portal');
-    else router.push('/escolher-perfil');
+    else if (usuario?.tipo === 'admin') router.push('/admin');
   };
 
   return (

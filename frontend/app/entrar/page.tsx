@@ -81,10 +81,8 @@ function EntrarForm() {
       }
       const { token, usuario } = await loginApi({ email, senha: pass });
       signIn(token, usuario);
-      // A conta já diz se é fornecedor ou instituição (escolhido aqui em cima,
-      // ou no cadastro anterior) — perguntar de novo em /escolher-perfil seria
-      // repetir a mesma pergunta. Só passa por lá quem pedir manualmente
-      // ("Trocar perfil"), não no fluxo automático de login/criação de conta.
+      // Cada conta tem um único tipo fixo (fornecedor ou instituição), escolhido
+      // aqui em cima ou no cadastro — não existe troca de perfil na mesma conta.
       router.push(
         usuario.tipo === 'admin' ? '/admin' : from || (usuario.tipo === 'contratante' ? '/painel' : '/portal')
       );

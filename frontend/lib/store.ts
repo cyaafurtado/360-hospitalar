@@ -32,7 +32,6 @@ type AppState = {
   authEmail: string | null;
   profileRole: 'fornecedor' | 'contratante' | null;
   signIn: (token: string, usuario: Usuario) => void;
-  setProfileRole: (role: 'fornecedor' | 'contratante') => void;
   logout: () => void;
 
   // busca (compartilhada Home ↔ Resultados)
@@ -76,8 +75,6 @@ export const useAppStore = create<AppState>()(
           profileRole: usuario.tipo === 'admin' ? null : usuario.tipo,
         });
       },
-
-      setProfileRole: (profileRole) => set({ profileRole }),
 
       logout: () => {
         // Revoga o refresh token no servidor; a saída local não espera a rede.
