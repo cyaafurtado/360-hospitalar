@@ -25,3 +25,21 @@ export const uploadDocumento = multer({
     cb(null, true);
   },
 });
+
+export const TAMANHO_MAX_FOTO = 6 * 1024 * 1024; // 6MB cobre uma foto de celular sem compressão.
+
+const MIME_ACEITOS_FOTO = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+export const uploadFoto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: TAMANHO_MAX_FOTO },
+  fileFilter: (_req, file, cb) => {
+    if (!MIME_ACEITOS_FOTO.has(file.mimetype)) {
+      const err = new Error('Formato não aceito. Envie JPG, PNG ou WEBP.');
+      err.name = 'ValidationError';
+      cb(err);
+      return;
+    }
+    cb(null, true);
+  },
+});

@@ -1,5 +1,5 @@
 // Camada de dados isolada: o front fala só com a API (axios). Trocar a base é só env.
-import api from './api';
+import api, { API_URL } from './api';
 import type {
   Company,
   SolicitacaoRequest,
@@ -14,6 +14,7 @@ import type {
   DocumentoVerificacao,
   ArquivoDocumento,
   AdminDocumento,
+  FotoEmpresa,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -64,6 +65,29 @@ export function codigoDoErro(err: unknown): string | undefined {
 export async function updateMyProfile(profile: SupplierProfileData): Promise<SupplierProfileData> {
   const { data } = await api.put<SupplierProfileData>('/profile', profile);
   return data;
+}
+
+/* ---------- Fotos da empresa ---------- */
+/* Sem aprovação — aparecem no site assim que o fornecedor envia. */
+
+export async function enviarFoto(file: File): Promise<FotoEmpresa> {
+  const formData = new FormData();
+  formData.append('foto', file);
+  // Mesmo motivo do upload de documento: deixar o navegador gerar o
+  // Content-Type com boundary em vez do default 'application/json' da instância.
+  const { data } = await api.post<FotoEmpresa>('/profile/fotos', formData, {
+    headers: { 'Content-Type': undefined },
+  });
+  return data;
+}
+
+export async function removerFoto(id: string): Promise<void> {
+  await api.delete(`/profile/fotos/${id}`);
+}
+
+// Rota pública (sem token) — usável direto num <img src>.
+export function urlFoto(id: string): string {
+  return `${API_URL}/api/companies/fotos/${id}`;
 }
 
 /* ---------- Documentação de verificação ---------- */

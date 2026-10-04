@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
 import { DocumentosRepo } from '../db/repos/documentos.repo';
+import { FotosRepo } from '../db/repos/fotos.repo';
 import { CatalogoServico, Company, PlanoEmpresa } from '../models/types';
 
 const SEM_EMPRESA = {
@@ -78,8 +79,12 @@ function slugify(name: string): string {
 export class CompaniesController {
   static async list(_req: Request, res: Response): Promise<void> {
     const companies = await CompaniesRepo.list();
-    const verificados = await DocumentosRepo.listAprovadosPorEmpresas(companies.map((c) => c.id));
-    res.json(companies.map((c) => ({ ...c, documentosVerificados: verificados[c.id] ?? [] })));
+    const ids = companies.map((c) => c.id);
+    const [verificados, fotos] = await Promise.all([
+      DocumentosRepo.listAprovadosPorEmpresas(ids),
+      FotosRepo.listByCompanies(ids),
+    ]);
+    res.json(companies.map((c) => ({ ...c, documentosVerificados: verificados[c.id] ?? [], fotos: fotos[c.id] ?? [] })));
   }
 
   static async getById(req: Request, res: Response): Promise<void> {
@@ -88,8 +93,11 @@ export class CompaniesController {
       res.status(404).json({ error: 'Empresa não encontrada' });
       return;
     }
-    const verificados = await DocumentosRepo.listAprovadosPorEmpresas([c.id]);
-    res.json({ ...c, documentosVerificados: verificados[c.id] ?? [] });
+    const [verificados, fotos] = await Promise.all([
+      DocumentosRepo.listAprovadosPorEmpresas([c.id]),
+      FotosRepo.listByCompany(c.id),
+    ]);
+    res.json({ ...c, documentosVerificados: verificados[c.id] ?? [], fotos });
   }
 
   static async create(req: Request, res: Response): Promise<void> {
@@ -137,8 +145,11 @@ export class CompaniesController {
       res.status(404).json(SEM_EMPRESA);
       return;
     }
-    const documentos = await DocumentosRepo.listByCompany(empresa.id);
-    res.json({ ...paraPerfil(empresa), documentos });
+    const [documentos, fotos] = await Promise.all([
+      DocumentosRepo.listByCompany(empresa.id),
+      FotosRepo.listByCompany(empresa.id),
+    ]);
+    res.json({ ...paraPerfil(empresa), documentos, fotos });
   }
 
   static async updateProfile(req: Request, res: Response): Promise<void> {

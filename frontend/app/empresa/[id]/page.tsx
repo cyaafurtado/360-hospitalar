@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import { getCompanies, getMyProfile } from '../../../lib/services';
+import { getCompanies, getMyProfile, urlFoto } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { segmentLabel } from '../../../data/reference';
 import { Icon } from '../../../lib/icons';
@@ -122,6 +122,19 @@ export default function EmpresaPage() {
 
       <div className="detail-grid">
         <main className="detail-col">
+          {c.fotos && c.fotos.length > 0 && (
+            <section className="d-block">
+              <h2>Fotos</h2>
+              <div className="photo-grid">
+                {c.fotos.map((f) => (
+                  <a key={f.id} href={urlFoto(f.id)} target="_blank" rel="noreferrer" className="photo-cell">
+                    <img src={urlFoto(f.id)} alt={f.nome} className="photo-img" />
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="d-block">
             <h2>Sobre a empresa</h2>
             <p>{c.about}</p>

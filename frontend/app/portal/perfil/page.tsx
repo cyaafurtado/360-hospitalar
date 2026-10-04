@@ -12,12 +12,15 @@ import {
   abrirArquivoDocumento,
   enviarDocumentoParaAnalise,
   cancelarEnvioDocumento,
+  enviarFoto,
+  removerFoto,
+  urlFoto,
   mensagemDeErro,
 } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import { useAppStore } from '../../../lib/store';
 import { STATES, segmentLabel, stateName } from '../../../data/reference';
-import type { SupplierProfileData, DocumentoVerificacao, CatalogoServico, Plan } from '../../../data/types';
+import type { SupplierProfileData, DocumentoVerificacao, CatalogoServico, Plan, FotoEmpresa } from '../../../data/types';
 import { Icon } from '../../../lib/icons';
 import { Logo } from '../../../components/Logo';
 import { Stars } from '../../../components/Stars';
@@ -191,25 +194,40 @@ export default function PerfilPage() {
   // admin decide a partir daqui (ou a pessoa cancela o envio).
   const docBloqueado = (status: DocumentoVerificacao['status']) => status === 'em_analise' || status === 'aprovado';
 
-  // fotos da empresa
-  type Photo = { name: string; url: string };
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  // Fotos da empresa: igual aos documentos, cada ação salva direto na API —
+  // sem aprovação (não é documento de verificação), aparece pro público assim
+  // que sobe.
+  const [photos, setPhotos] = useState<FotoEmpresa[]>([]);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const [fotoErro, setFotoErro] = useState('');
 
   useEffect(() => {
-    if (initial?.fotos?.length) {
-      setPhotos(initial.fotos.map((name) => ({ name, url: '' })));
-    }
+    if (initial?.fotos) setPhotos(initial.fotos);
   }, [initial]);
 
-  const addPhotos = (files: FileList | null) => {
-    if (!files) return;
-    const entries = Array.from(files).map((f) => ({ name: f.name, url: URL.createObjectURL(f) }));
-    setPhotos((p) => [...p, ...entries]);
-    setForm((f) => f ? { ...f, fotos: [...(f.fotos ?? []), ...entries.map((e) => e.name)] } : f);
+  const addPhotos = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setFotoErro('');
+    setEnviandoFoto(true);
+    try {
+      for (const file of Array.from(files)) {
+        const foto = await enviarFoto(file);
+        setPhotos((p) => [...p, foto]);
+      }
+    } catch (e) {
+      setFotoErro(mensagemDeErro(e, 'Não foi possível enviar a foto.'));
+    } finally {
+      setEnviandoFoto(false);
+    }
   };
-  const removePhoto = (idx: number) => {
-    setPhotos((p) => p.filter((_, i) => i !== idx));
-    setForm((f) => f ? { ...f, fotos: (f.fotos ?? []).filter((_, i) => i !== idx) } : f);
+
+  const removePhoto = async (id: string) => {
+    setPhotos((p) => p.filter((x) => x.id !== id));
+    try {
+      await removerFoto(id);
+    } catch (e) {
+      setFotoErro(mensagemDeErro(e, 'Não foi possível remover a foto.'));
+    }
   };
 
   // ── Plano de pagamento ───────────────────────────────────────────
@@ -626,23 +644,33 @@ export default function PerfilPage() {
             </div>
           )}
 
-          {/* ── Fotos da empresa ── */}
+          {/* ── Fotos da empresa — aparecem direto no site, sem aprovação ── */}
           <section className="prof-card span-2">
             <div className="prof-doc-head">
-              <h3>Fotos da empresa</h3>
+              <div>
+                <h3>Fotos da empresa</h3>
+                <p className="prof-card-sub">Visíveis para todo mundo na página pública, assim que você envia.</p>
+              </div>
               {edit && (
-                <label className="prof-doc-add">
+                <label className={'prof-doc-add' + (enviandoFoto ? ' disabled' : '')}>
                   <input
                     type="file"
                     hidden
+                    disabled={enviandoFoto}
                     accept="image/jpeg,image/png,image/webp"
                     multiple
-                    onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+                    onChange={(e) => { void addPhotos(e.target.files); e.target.value = ''; }}
                   />
-                  <Icon name="check" size={13} stroke={3} /> Adicionar fotos
+                  <Icon name="check" size={13} stroke={3} /> {enviandoFoto ? 'Enviando…' : 'Adicionar fotos'}
                 </label>
               )}
             </div>
+
+            {fotoErro && (
+              <div className="login-error" style={{ marginBottom: 14 }}>
+                <Icon name="close" size={14} stroke={2.4} /> {fotoErro}
+              </div>
+            )}
 
             {photos.length === 0 && !edit && (
               <p className="doc-empty-hint">Nenhuma foto cadastrada. Edite o perfil para adicionar fotos da fachada.</p>
@@ -650,21 +678,14 @@ export default function PerfilPage() {
 
             {(photos.length > 0 || edit) && (
               <div className="photo-grid">
-                {photos.map((p, i) => (
-                  <div key={i} className="photo-cell">
-                    {p.url ? (
-                      <img src={p.url} alt={p.name} className="photo-img" />
-                    ) : (
-                      <div className="photo-placeholder">
-                        <Icon name="file" size={22} />
-                        <span>{p.name}</span>
-                      </div>
-                    )}
+                {photos.map((p) => (
+                  <div key={p.id} className="photo-cell">
+                    <img src={urlFoto(p.id)} alt={p.nome} className="photo-img" />
                     {edit && (
                       <button
                         type="button"
                         className="photo-remove"
-                        onClick={() => removePhoto(i)}
+                        onClick={() => removePhoto(p.id)}
                         title="Remover foto"
                       >
                         <Icon name="close" size={13} stroke={2.5} />
@@ -673,16 +694,17 @@ export default function PerfilPage() {
                   </div>
                 ))}
                 {edit && (
-                  <label className="photo-add-cell">
+                  <label className={'photo-add-cell' + (enviandoFoto ? ' disabled' : '')}>
                     <input
                       type="file"
                       hidden
+                      disabled={enviandoFoto}
                       accept="image/jpeg,image/png,image/webp"
                       multiple
-                      onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }}
+                      onChange={(e) => { void addPhotos(e.target.files); e.target.value = ''; }}
                     />
                     <span className="photo-add-ico">+</span>
-                    <span>Adicionar foto</span>
+                    <span>{enviandoFoto ? 'Enviando…' : 'Adicionar foto'}</span>
                   </label>
                 )}
               </div>

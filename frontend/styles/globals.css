@@ -1216,16 +1216,14 @@ em { font-style: italic; }
 @media (max-width: 860px) { .plano-grid { grid-template-columns: 1fr; } }
 
 .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 4px; }
-.photo-cell { position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); border: 1.5px solid var(--border); }
+.photo-cell { display: block; position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); border: 1.5px solid var(--border); }
 .photo-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .15s; }
 .photo-cell:hover .photo-img { opacity: .9; }
-.photo-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 100%; color: var(--muted); font-size: 11.5px; text-align: center; padding: 12px; }
-.photo-placeholder svg { opacity: .5; }
-.photo-placeholder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .photo-remove { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,.55); border: none; color: #fff; display: grid; place-items: center; cursor: pointer; transition: background .12s; }
 .photo-remove:hover { background: rgba(0,0,0,.8); }
 .photo-add-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; aspect-ratio: 4 / 3; border-radius: var(--radius); border: 2px dashed var(--border); cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 650; font-family: var(--font); transition: border-color .13s, color .13s, background .13s; }
 .photo-add-cell:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-tint); }
+.photo-add-cell.disabled { opacity: .6; cursor: default; pointer-events: none; }
 .photo-add-ico { font-size: 30px; font-weight: 300; line-height: 1; color: inherit; }
 
 /* ── Documentação para verificação ── */
@@ -1234,6 +1232,7 @@ em { font-style: italic; }
 .prof-doc-add { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font); font-size: 13px; font-weight: 650; color: var(--primary); background: var(--primary-tint); border: 1px solid color-mix(in oklch, var(--primary), white 70%); border-radius: var(--pill); padding: 6px 14px; cursor: pointer; transition: background .13s; white-space: nowrap; }
 .prof-doc-add:hover { background: color-mix(in oklch, var(--primary), white 80%); }
 .prof-doc-add svg { flex: none; }
+.prof-doc-add.disabled { opacity: .6; cursor: default; pointer-events: none; }
 .doc-table { display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 /* visualização: tipo | numero | validade | situação | anexos */
 .doc-row { display: grid; grid-template-columns: 1.7fr 1fr 95px 90px 150px 1.2fr; align-items: start; gap: 0; }

@@ -23,9 +23,11 @@ export type Company = {
   status?: CompanyStatus;
   catalogo?: CatalogoServico[];
   documentosVerificados?: CertificacaoVerificada[];
+  fotos?: FotoEmpresa[];
 };
 
 export type CertificacaoVerificada = { tipo: string; numero: string; validade: string };
+export type FotoEmpresa = { id: string; nome: string };
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
 export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada' | 'cancelada' | 'declinada';
@@ -138,7 +140,7 @@ export type SupplierProfileData = {
   status?: CompanyStatus;
   plan?: Plan;
   documentos?: DocumentoVerificacao[];
-  fotos?: string[];
+  fotos?: FotoEmpresa[];
   catalogo?: CatalogoServico[];
 };
 

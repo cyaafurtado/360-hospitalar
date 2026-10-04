@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { CompaniesController } from '../controllers/companies.controller';
 import { DocumentosController } from '../controllers/documentos.controller';
+import { FotosController } from '../controllers/fotos.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth } from '../middleware/auth';
-import { uploadDocumento } from '../middleware/upload';
+import { uploadDocumento, uploadFoto } from '../middleware/upload';
 
 // Perfil da empresa da conta logada.
 const router = Router();
@@ -22,5 +23,9 @@ router.get('/documentos/:id/arquivos/:arquivoId', asyncHandler(DocumentosControl
 router.delete('/documentos/:id/arquivos/:arquivoId', asyncHandler(DocumentosController.removeArquivo));
 router.post('/documentos/:id/enviar', asyncHandler(DocumentosController.enviarParaAnalise));
 router.post('/documentos/:id/cancelar', asyncHandler(DocumentosController.cancelarEnvio));
+
+// Fotos da empresa: sem aprovação — aparecem no site assim que sobem.
+router.post('/fotos', uploadFoto.single('foto'), asyncHandler(FotosController.upload));
+router.delete('/fotos/:id', asyncHandler(FotosController.remove));
 
 export default router;
