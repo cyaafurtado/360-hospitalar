@@ -22,7 +22,10 @@ export type Company = {
   atendeUfs?: string[];
   status?: CompanyStatus;
   catalogo?: CatalogoServico[];
+  documentosVerificados?: CertificacaoVerificada[];
 };
+
+export type CertificacaoVerificada = { tipo: string; numero: string; validade: string };
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
 export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada' | 'cancelada' | 'declinada';
@@ -70,13 +73,19 @@ export type CatalogoServico = {
 
 export type ArquivoDocumento = { id: string; nome: string };
 
+export type DocumentoStatus = 'rascunho' | 'em_analise' | 'aprovado' | 'rejeitado';
+
 export type DocumentoVerificacao = {
   id: string;
   tipo: string;
   numero: string;
   validade: string; // YYYY-MM-DD
+  status: DocumentoStatus;
+  motivoRejeicao: string;
   arquivos: ArquivoDocumento[];
 };
+
+export type AdminDocumento = DocumentoVerificacao & { companyId: string; empresaId: string; empresaNome: string };
 
 export type CredentialStatus = 'valida' | 'vigente' | 'vencida';
 

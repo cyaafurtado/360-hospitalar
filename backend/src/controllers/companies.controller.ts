@@ -77,7 +77,9 @@ function slugify(name: string): string {
 
 export class CompaniesController {
   static async list(_req: Request, res: Response): Promise<void> {
-    res.json(await CompaniesRepo.list());
+    const companies = await CompaniesRepo.list();
+    const verificados = await DocumentosRepo.listAprovadosPorEmpresas(companies.map((c) => c.id));
+    res.json(companies.map((c) => ({ ...c, documentosVerificados: verificados[c.id] ?? [] })));
   }
 
   static async getById(req: Request, res: Response): Promise<void> {
@@ -86,7 +88,8 @@ export class CompaniesController {
       res.status(404).json({ error: 'Empresa não encontrada' });
       return;
     }
-    res.json(c);
+    const verificados = await DocumentosRepo.listAprovadosPorEmpresas([c.id]);
+    res.json({ ...c, documentosVerificados: verificados[c.id] ?? [] });
   }
 
   static async create(req: Request, res: Response): Promise<void> {

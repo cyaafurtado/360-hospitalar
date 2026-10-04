@@ -27,6 +27,9 @@ export function AdminNav() {
           <Link href="/admin/contratos" className={'portal-tab' + (pathname === '/admin/contratos' ? ' on' : '')}>
             <Icon name="file" size={16} /> Contratos
           </Link>
+          <Link href="/admin/documentos" className={'portal-tab' + (pathname === '/admin/documentos' ? ' on' : '')}>
+            <Icon name="shield2" size={16} /> Documentos
+          </Link>
         </div>
         <div className="portal-subnav-actions">
           <span className="portal-role-badge">

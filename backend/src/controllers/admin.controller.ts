@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { CompaniesRepo } from '../db/repos/companies.repo';
 import { UsuariosRepo, RefreshTokensRepo } from '../db/repos/usuarios.repo';
 import { SolicitacoesRepo } from '../db/repos/solicitacoes.repo';
+import { DocumentosRepo } from '../db/repos/documentos.repo';
 import { PlanoEmpresa } from '../models/types';
 import { gerarSenhaTemporaria, hashSenha } from '../services/auth.service';
 
@@ -92,5 +93,41 @@ export class AdminController {
 
   static async listSolicitacoes(_req: Request, res: Response): Promise<void> {
     res.json(await SolicitacoesRepo.adminList());
+  }
+
+  /* ---------- Documentos para verificação ---------- */
+
+  static async listDocumentos(_req: Request, res: Response): Promise<void> {
+    res.json(await DocumentosRepo.listPendentes());
+  }
+
+  static async aprovarDocumento(req: Request, res: Response): Promise<void> {
+    const ok = await DocumentosRepo.aprovar(req.params.id);
+    if (!ok) {
+      res.status(404).json({ error: 'Documento não encontrado.' });
+      return;
+    }
+    res.json({ ok: true });
+  }
+
+  static async rejeitarDocumento(req: Request, res: Response): Promise<void> {
+    const motivo = String(req.body?.motivo ?? '').trim();
+    const ok = await DocumentosRepo.rejeitar(req.params.id, motivo);
+    if (!ok) {
+      res.status(404).json({ error: 'Documento não encontrado.' });
+      return;
+    }
+    res.json({ ok: true });
+  }
+
+  static async downloadDocumentoArquivo(req: Request, res: Response): Promise<void> {
+    const arquivo = await DocumentosRepo.getArquivo(req.params.arquivoId);
+    if (!arquivo) {
+      res.status(404).json({ error: 'Arquivo não encontrado.' });
+      return;
+    }
+    res.setHeader('Content-Type', arquivo.tipoMime);
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(arquivo.nome)}"`);
+    res.send(arquivo.conteudo);
   }
 }

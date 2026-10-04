@@ -10,6 +10,8 @@ import {
   enviarArquivoDocumento,
   removerArquivoDocumento,
   abrirArquivoDocumento,
+  enviarDocumentoParaAnalise,
+  cancelarEnvioDocumento,
   mensagemDeErro,
 } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
@@ -159,6 +161,35 @@ export default function PerfilPage() {
       setDocErro(mensagemDeErro(e, 'Não foi possível abrir o arquivo.'));
     }
   };
+
+  const [enviandoAnalise, setEnviandoAnalise] = useState<string | null>(null);
+
+  const enviarAnalise = async (docId: string) => {
+    setDocErro('');
+    setEnviandoAnalise(docId);
+    try {
+      await enviarDocumentoParaAnalise(docId);
+      setDocs((d) => d.map((x) => (x.id === docId ? { ...x, status: 'em_analise' } : x)));
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível enviar para verificação.'));
+    } finally {
+      setEnviandoAnalise(null);
+    }
+  };
+
+  const cancelarAnalise = async (docId: string) => {
+    setDocErro('');
+    try {
+      await cancelarEnvioDocumento(docId);
+      setDocs((d) => d.map((x) => (x.id === docId ? { ...x, status: 'rascunho' } : x)));
+    } catch (e) {
+      setDocErro(mensagemDeErro(e, 'Não foi possível cancelar o envio.'));
+    }
+  };
+
+  // Em análise ou já verificado: trava edição de campos e anexos — só o
+  // admin decide a partir daqui (ou a pessoa cancela o envio).
+  const docBloqueado = (status: DocumentoVerificacao['status']) => status === 'em_analise' || status === 'aprovado';
 
   // fotos da empresa
   type Photo = { name: string; url: string };
@@ -697,6 +728,29 @@ export default function PerfilPage() {
                   const st = docStatus(doc.validade);
                   const atts = getAtts(doc.id);
                   const enviando = enviandoArquivo === doc.id;
+                  const bloqueado = docBloqueado(doc.status);
+                  const enviandoParaAnalise = enviandoAnalise === doc.id;
+
+                  const verifBadge = (
+                    <>
+                      {doc.status === 'em_analise' && (
+                        <span className="doc-verif-badge em_analise">
+                          <Icon name="signal" size={11} stroke={2.4} /> Em análise
+                        </span>
+                      )}
+                      {doc.status === 'aprovado' && (
+                        <span className="doc-verif-badge aprovado">
+                          <Icon name="check" size={11} stroke={3} /> Verificado
+                        </span>
+                      )}
+                      {doc.status === 'rejeitado' && (
+                        <span className="doc-verif-badge rejeitado" title={doc.motivoRejeicao || undefined}>
+                          <Icon name="close" size={11} stroke={2.6} /> Rejeitado{doc.motivoRejeicao ? `: ${doc.motivoRejeicao}` : ''}
+                        </span>
+                      )}
+                    </>
+                  );
+
                   return (
                     <div key={doc.id} className={'doc-row' + (edit ? ' editing' : '')}>
                       {edit ? (
@@ -706,6 +760,7 @@ export default function PerfilPage() {
                             list={'doc-presets-' + doc.id}
                             placeholder="Ex: ANVISA, ISO 9001…"
                             value={doc.tipo}
+                            disabled={bloqueado}
                             onChange={(e) => setDoc(doc.id, 'tipo', e.target.value)}
                             onBlur={() => persistDoc(doc.id)}
                           />
@@ -713,40 +768,64 @@ export default function PerfilPage() {
                             {DOC_PRESETS.map((p) => <option key={p} value={p} />)}
                           </datalist>
                           <input className="doc-input" placeholder="Ex: 10.000/2023"
-                            value={doc.numero} onChange={(e) => setDoc(doc.id, 'numero', e.target.value)}
+                            value={doc.numero} disabled={bloqueado}
+                            onChange={(e) => setDoc(doc.id, 'numero', e.target.value)}
                             onBlur={() => persistDoc(doc.id)} />
-                          <input className="doc-input" type="date"
+                          <input className="doc-input" type="date" disabled={bloqueado}
                             value={doc.validade} onChange={(e) => { setDoc(doc.id, 'validade', e.target.value); persistDoc(doc.id); }} />
 
-                          {/* coluna Anexos — chips + botão + */}
+                          {/* coluna Anexos — chips, anexar e envio pra verificação */}
                           <div className="doc-file-list">
                             {atts.map((att) => (
                               <span key={att.id} className="doc-file-chip">
                                 <Icon name="file" size={12} />
                                 <span className="doc-file-name">{att.nome}</span>
-                                <button
-                                  type="button"
-                                  className="doc-file-remove"
-                                  onClick={() => removeDocFile(doc.id, att.id)}
-                                  title="Remover arquivo"
-                                >
-                                  <Icon name="close" size={11} stroke={2.5} />
-                                </button>
+                                {!bloqueado && (
+                                  <button
+                                    type="button"
+                                    className="doc-file-remove"
+                                    onClick={() => removeDocFile(doc.id, att.id)}
+                                    title="Remover arquivo"
+                                  >
+                                    <Icon name="close" size={11} stroke={2.5} />
+                                  </button>
+                                )}
                               </span>
                             ))}
-                            <label className={'doc-file-add' + (enviando ? ' disabled' : '')}>
-                              <input
-                                type="file"
-                                hidden
-                                disabled={enviando}
-                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                onChange={(e) => {
-                                  const f = e.target.files?.[0];
-                                  if (f) { void addDocFile(doc.id, f); e.target.value = ''; }
-                                }}
-                              />
-                              {enviando ? 'Enviando…' : '+ Anexar'}
-                            </label>
+                            {!bloqueado && (
+                              <label className={'doc-file-add' + (enviando ? ' disabled' : '')}>
+                                <input
+                                  type="file"
+                                  hidden
+                                  disabled={enviando}
+                                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f) { void addDocFile(doc.id, f); e.target.value = ''; }
+                                  }}
+                                />
+                                {enviando ? 'Enviando…' : '+ Anexar'}
+                              </label>
+                            )}
+
+                            {/* Envio pra verificação — ao lado do Anexar */}
+                            {(doc.status === 'rascunho' || doc.status === 'rejeitado') && (
+                              <button
+                                type="button"
+                                className="doc-verif-send"
+                                disabled={atts.length === 0 || enviandoParaAnalise}
+                                title={atts.length === 0 ? 'Anexe um arquivo antes de enviar' : 'Enviar para verificação da equipe 360H'}
+                                onClick={() => enviarAnalise(doc.id)}
+                              >
+                                <Icon name="shield2" size={12} /> {enviandoParaAnalise ? 'Enviando…' : 'Enviar para verificação'}
+                              </button>
+                            )}
+                            {doc.status === 'em_analise' && (
+                              <button type="button" className="doc-verif-cancel" onClick={() => cancelarAnalise(doc.id)}>
+                                Cancelar envio
+                              </button>
+                            )}
+                            {verifBadge}
                           </div>
 
                           <button type="button" className="doc-remove" onClick={() => removeDoc(doc.id)} title="Remover documento">
@@ -781,6 +860,7 @@ export default function PerfilPage() {
                                 <span className="doc-file-name">{att.nome}</span>
                               </button>
                             ))}
+                            {verifBadge}
                           </div>
                         </>
                       )}

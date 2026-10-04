@@ -18,4 +18,9 @@ router.delete('/usuarios/:id', asyncHandler(AdminController.deleteUsuario));
 
 router.get('/solicitacoes', asyncHandler(AdminController.listSolicitacoes));
 
+router.get('/documentos', asyncHandler(AdminController.listDocumentos));
+router.patch('/documentos/:id/aprovar', asyncHandler(AdminController.aprovarDocumento));
+router.patch('/documentos/:id/rejeitar', asyncHandler(AdminController.rejeitarDocumento));
+router.get('/documentos/arquivos/:arquivoId', asyncHandler(AdminController.downloadDocumentoArquivo));
+
 export default router;

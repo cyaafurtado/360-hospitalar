@@ -11,6 +11,12 @@ import { CompanyCard } from '../../../components/CompanyCard';
 import { Loading, LoadError } from '../../../components/AsyncState';
 import { useAppStore } from '../../../lib/store';
 
+const fmtDate = (iso: string) => {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
+
 export default function EmpresaPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
@@ -162,6 +168,31 @@ export default function EmpresaPage() {
                         )}
                       </div>
                     )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {c.documentosVerificados && c.documentosVerificados.length > 0 && (
+            <section className="d-block">
+              <h2>Certificações verificadas</h2>
+              <div className="svc-grid">
+                {c.documentosVerificados.map((d, i) => (
+                  <div key={i} className="svc-item">
+                    <span className="svc-dot">
+                      <Icon name="check" size={13} stroke={3} />
+                    </span>
+                    <div>
+                      <div className="cert-item-tipo">{d.tipo || 'Documento verificado'}</div>
+                      {(d.numero || d.validade) && (
+                        <div className="cert-item-meta muted">
+                          {d.numero && <>Nº {d.numero}</>}
+                          {d.numero && d.validade && ' · '}
+                          {d.validade && <>válido até {fmtDate(d.validade)}</>}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

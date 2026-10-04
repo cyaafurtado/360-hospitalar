@@ -626,6 +626,8 @@ em { font-style: italic; }
 .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .svc-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text); font-weight: 500; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
 .svc-dot { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in oklch, var(--accent), white 84%); color: var(--accent); display: grid; place-items: center; flex: none; }
+.cert-item-tipo { font-weight: 650; }
+.cert-item-meta { font-size: 12.5px; margin-top: 2px; }
 .svc-edit-list { display: flex; flex-direction: column; gap: 8px; }
 .svc-edit-row { display: flex; align-items: center; gap: 8px; }
 .svc-edit-row .prof-input { flex: 1; }
@@ -1289,6 +1291,16 @@ em { font-style: italic; }
 .doc-file-add { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 4px 10px; border: 1.5px dashed color-mix(in oklch, var(--primary), white 50%); border-radius: var(--pill); transition: background .12s, border-color .12s; white-space: nowrap; }
 .doc-file-add:hover { background: var(--primary-tint); border-color: var(--primary); }
 .doc-file-add.disabled { opacity: .6; cursor: default; pointer-events: none; }
+
+.doc-verif-send { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font); font-size: 12px; font-weight: 700; color: #fff; background: var(--primary); cursor: pointer; padding: 5px 11px; border: none; border-radius: var(--pill); transition: opacity .12s; white-space: nowrap; }
+.doc-verif-send:hover { opacity: .9; }
+.doc-verif-send:disabled { opacity: .5; cursor: default; }
+.doc-verif-cancel { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; padding: 4px 2px; }
+.doc-verif-cancel:hover { color: var(--text-strong); }
+.doc-verif-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 650; padding: 4px 9px; border-radius: var(--pill); }
+.doc-verif-badge.em_analise { color: oklch(0.60 0.14 60); background: oklch(0.96 0.045 80); }
+.doc-verif-badge.aprovado { color: oklch(0.52 0.15 155); background: oklch(0.95 0.045 155); }
+.doc-verif-badge.rejeitado { color: oklch(0.52 0.18 25); background: oklch(0.955 0.04 25); cursor: help; }
 .doc-attach-empty { font-size: 13.5px; color: var(--muted); }
 .doc-empty-hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 

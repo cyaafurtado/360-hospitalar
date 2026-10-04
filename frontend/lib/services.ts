@@ -13,6 +13,7 @@ import type {
   Plan,
   DocumentoVerificacao,
   ArquivoDocumento,
+  AdminDocumento,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -87,8 +88,12 @@ export async function removerDocumento(id: string): Promise<void> {
 export async function enviarArquivoDocumento(documentoId: string, file: File): Promise<ArquivoDocumento> {
   const formData = new FormData();
   formData.append('arquivo', file);
+  // O 'Content-Type: multipart/form-data' da instância do axios não tem o
+  // boundary que o multer precisa pra separar os campos — forçar esse valor
+  // aqui quebraria o upload. 'undefined' remove o header da instância e
+  // deixa o navegador gerar o Content-Type certo (com boundary) sozinho.
   const { data } = await api.post<ArquivoDocumento>(`/profile/documentos/${documentoId}/arquivos`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': undefined },
   });
   return data;
 }
@@ -103,6 +108,38 @@ export async function abrirArquivoDocumento(documentoId: string, arquivoId: stri
   const { data } = await api.get(`/profile/documentos/${documentoId}/arquivos/${arquivoId}`, {
     responseType: 'blob',
   });
+  const url = URL.createObjectURL(data as Blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+// Manda o documento (já com arquivo anexado) pra fila de revisão do admin.
+export async function enviarDocumentoParaAnalise(documentoId: string): Promise<void> {
+  await api.post(`/profile/documentos/${documentoId}/enviar`);
+}
+
+// Desiste do envio enquanto ainda está em análise — volta a ser editável.
+export async function cancelarEnvioDocumento(documentoId: string): Promise<void> {
+  await api.post(`/profile/documentos/${documentoId}/cancelar`);
+}
+
+/* ---------- Painel de administração: documentos ---------- */
+
+export async function adminListDocumentos(): Promise<AdminDocumento[]> {
+  const { data } = await api.get<AdminDocumento[]>('/admin/documentos');
+  return data;
+}
+
+export async function adminAprovarDocumento(id: string): Promise<void> {
+  await api.patch(`/admin/documentos/${id}/aprovar`);
+}
+
+export async function adminRejeitarDocumento(id: string, motivo: string): Promise<void> {
+  await api.patch(`/admin/documentos/${id}/rejeitar`, { motivo });
+}
+
+export async function adminAbrirArquivoDocumento(arquivoId: string): Promise<void> {
+  const { data } = await api.get(`/admin/documentos/arquivos/${arquivoId}`, { responseType: 'blob' });
   const url = URL.createObjectURL(data as Blob);
   window.open(url, '_blank');
   setTimeout(() => URL.revokeObjectURL(url), 60_000);

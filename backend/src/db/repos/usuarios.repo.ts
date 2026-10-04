@@ -145,6 +145,12 @@ export const UsuariosRepo = {
     const { rowCount } = await query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
     return !!rowCount;
   },
+
+  // Quem recebe o aviso de documento pendente de verificação.
+  async listEmailsAdmins(): Promise<string[]> {
+    const { rows } = await query("SELECT email FROM usuarios WHERE tipo = 'admin' AND ativo = TRUE");
+    return rows.map((r) => r.email);
+  },
 };
 
 export interface AdminUsuario {

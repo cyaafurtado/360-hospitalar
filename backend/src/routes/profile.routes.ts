@@ -20,5 +20,7 @@ router.delete('/documentos/:id', asyncHandler(DocumentosController.remove));
 router.post('/documentos/:id/arquivos', uploadDocumento.single('arquivo'), asyncHandler(DocumentosController.uploadArquivo));
 router.get('/documentos/:id/arquivos/:arquivoId', asyncHandler(DocumentosController.downloadArquivo));
 router.delete('/documentos/:id/arquivos/:arquivoId', asyncHandler(DocumentosController.removeArquivo));
+router.post('/documentos/:id/enviar', asyncHandler(DocumentosController.enviarParaAnalise));
+router.post('/documentos/:id/cancelar', asyncHandler(DocumentosController.cancelarEnvio));
 
 export default router;
