@@ -654,9 +654,6 @@ em { font-style: italic; }
 .detail-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 104px; }
 .side-card { background: var(--surface); border: var(--card-border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-card); }
 .side-card h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 14px; }
-.cert-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.cert { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-strong); background: var(--surface-2); border: 1px solid var(--border); padding: 7px 11px; border-radius: var(--radius-sm); }
-.cert svg { color: var(--accent); }
 .contact-row { display: flex; align-items: center; gap: 11px; font-size: 14.5px; color: var(--text); padding: 9px 0; border-bottom: 1px solid var(--border); }
 .contact-row:last-of-type { border-bottom: none; }
 .contact-row svg { color: var(--primary); flex: none; }

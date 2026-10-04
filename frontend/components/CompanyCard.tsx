@@ -9,16 +9,18 @@ import { VerifiedTag } from './VerifiedTag';
 
 // Enquanto a empresa não tem avaliação real, estrela vazia só passa a impressão
 // de produto abandonado. No lugar entram os dados que o comprador B2B de fato
-// usa para decidir: certificações auditadas, cobertura e tempo de mercado.
+// usa para decidir: certificações verificadas pela equipe 360H (nunca a
+// autodeclaração do cadastro — essa não aparece em lugar nenhum do site
+// até passar pela análise), cobertura e tempo de mercado.
 function Signals({ c, max = 3 }: { c: Company; max?: number }) {
-  const badges = c.badges ?? [];
-  if (badges.length === 0) return null;
-  const restantes = badges.length - max;
+  const verificados = c.documentosVerificados ?? [];
+  if (verificados.length === 0) return null;
+  const restantes = verificados.length - max;
   return (
     <div className="cc-signals">
-      {badges.slice(0, max).map((b) => (
-        <span key={b} className="cc-chip">
-          <Icon name="shield2" size={11} /> {b}
+      {verificados.slice(0, max).map((d) => (
+        <span key={d.tipo + d.numero} className="cc-chip">
+          <Icon name="shield2" size={11} /> {d.tipo}
         </span>
       ))}
       {restantes > 0 && <span className="cc-chip more">+{restantes}</span>}

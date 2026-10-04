@@ -220,16 +220,6 @@ export default function EmpresaPage() {
 
         <aside className="detail-side">
           <div className="side-card">
-            <h3>Certificações</h3>
-            <div className="cert-list">
-              {c.badges.map((b) => (
-                <span key={b} className="cert">
-                  <Icon name="shield2" size={13} /> {b}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="side-card">
             <h3>Contato</h3>
             {podeVerContato ? (
               <>
