@@ -823,6 +823,18 @@ export default function PerfilPage() {
               </div>
             )}
           </section>
+
+          {/* Repete Salvar/Cancelar no final — a página cresce a cada novo bloco
+              (fotos, documentos, catálogo…) e sem isso só dava pra salvar rolando
+              de volta ao topo. */}
+          {edit && (
+            <div className="prof-footer-actions">
+              <button className="btn-ghost" onClick={() => setEdit(false)}>Cancelar</button>
+              <button className="btn-primary" onClick={save}>
+                <Icon name="check" size={15} stroke={2.4} /> Salvar
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
