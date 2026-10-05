@@ -32,7 +32,12 @@ function ConfirmarEmailForm() {
         signIn(accessToken, usuario);
         setEstado('ok');
         setTimeout(() => {
-          router.replace(usuario.tipo === 'admin' ? '/admin' : usuario.tipo === 'contratante' ? '/painel' : '/portal');
+          // Instituição ainda não tem cadastro de verdade pra completar
+          // (Parte B) — manda pra home em vez de abrir o painel direto;
+          // o aviso de "finalize seu cadastro" fica lá dentro, no /painel.
+          if (usuario.tipo === 'admin') router.replace('/admin');
+          else if (usuario.tipo === 'contratante') router.replace('/');
+          else router.replace('/portal');
         }, 1200);
       } catch (err) {
         setEstado('erro');

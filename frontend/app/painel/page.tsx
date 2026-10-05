@@ -15,6 +15,7 @@ import { Loading, LoadError } from '../../components/AsyncState';
 export default function PainelPage() {
   const router = useRouter();
   const authEmail = useAppStore((s) => s.authEmail);
+  const usuario = useAppStore((s) => s.usuario);
   const hydrated = useAppStore((s) => s.hydrated);
   const [openId, setOpenId] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<'' | RequestStatus>('');
@@ -98,6 +99,23 @@ export default function PainelPage() {
     <div className="portal-screen">
       <PainelNav />
       <div className="portal-body">
+        {/* Cadastro de instituição ainda não tem onde ser salvo de verdade
+            (Parte B) — até existir, toda conta contratante cai aqui. */}
+        {usuario?.tipo === 'contratante' && (
+          <div className="sol-terminal-banner pending">
+            <div className="sol-banner-row">
+              <Icon name="signal" size={16} stroke={2} />
+              <span>
+                Falta finalizar o cadastro da sua instituição. Enquanto isso, você já pode buscar
+                fornecedores e enviar solicitações normalmente.
+              </span>
+            </div>
+            <button className="btn-primary sm" onClick={() => router.push('/cadastrar')}>
+              Finalizar cadastro
+            </button>
+          </div>
+        )}
+
         <header className="portal-head">
           <div>
             <h1>Minhas solicitações</h1>

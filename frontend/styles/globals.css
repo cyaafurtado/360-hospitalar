@@ -1352,7 +1352,8 @@ em { font-style: italic; }
 .sol-finalizado svg { flex: none; }
 .sol-finalizado strong { display: block; font-size: 14px; font-weight: 720; }
 .sol-finalizado span { font-size: 12.5px; opacity: .8; }
-.sol-terminal-banner { display: flex; align-items: flex-start; gap: 12px; border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+.sol-terminal-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+.sol-terminal-banner > .btn-primary.sm { margin-left: auto; flex: none; }
 .sol-terminal-banner.canceled { background: oklch(0.96 0.04 15); border: 1px solid oklch(0.88 0.06 15); color: oklch(0.45 0.18 15); }
 .sol-terminal-banner.warn { background: oklch(0.97 0.04 45); border: 1px solid oklch(0.9 0.07 45); color: oklch(0.48 0.14 45); }
 .sol-terminal-banner.pending { background: color-mix(in oklch, var(--primary), white 90%); border: 1px solid color-mix(in oklch, var(--primary), white 72%); color: var(--primary); }
