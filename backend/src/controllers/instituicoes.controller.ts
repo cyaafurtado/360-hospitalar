@@ -49,6 +49,7 @@ export class InstituicoesController {
         about: String(b.about ?? '').trim(),
         email: String(b.email ?? '').trim(),
         phone: String(b.phone ?? '').trim(),
+        emailFinanceiro: String(b.emailFinanceiro ?? '').trim(),
       });
       res.json(atualizada);
       return;
@@ -80,6 +81,7 @@ export class InstituicoesController {
       about: String(b.about ?? '').trim(),
       email: String(b.email ?? '').trim(),
       phone: String(b.phone ?? '').trim(),
+      emailFinanceiro: String(b.emailFinanceiro ?? '').trim(),
     });
 
     const emails = await UsuariosRepo.listEmailsAdmins();

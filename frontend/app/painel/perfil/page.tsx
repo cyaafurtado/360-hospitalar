@@ -54,6 +54,7 @@ export default function PainelPerfilPage() {
         about: form.about,
         email: form.email,
         phone: form.phone,
+        emailFinanceiro: form.emailFinanceiro,
       });
       setForm(atualizado);
       setEdit(false);
@@ -206,6 +207,20 @@ export default function PainelPerfilPage() {
                 <input className="prof-input" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
               ) : (
                 <span className="prof-value">{form.phone || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">E-mail para nota fiscal / financeiro</span>
+              {edit ? (
+                <input
+                  className="prof-input"
+                  type="email"
+                  value={form.emailFinanceiro}
+                  onChange={(e) => set('emailFinanceiro', e.target.value)}
+                  placeholder="financeiro@instituicao.com.br"
+                />
+              ) : (
+                <span className="prof-value">{form.emailFinanceiro || '—'}</span>
               )}
             </div>
             <div className="prof-row">

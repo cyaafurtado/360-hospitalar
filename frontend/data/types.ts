@@ -161,6 +161,7 @@ export type Instituicao = {
   about: string;
   email: string;
   phone: string;
+  emailFinanceiro: string;
   status: InstituicaoStatus;
   motivoRejeicao: string;
 };

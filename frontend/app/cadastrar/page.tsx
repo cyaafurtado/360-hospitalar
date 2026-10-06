@@ -192,6 +192,7 @@ export default function CadastrarPage() {
           tipo: form.tipoConta as InstituicaoInput['tipo'],
           name: form.name, cnpj: form.cnpj, cnes: form.cnes, endereco: '',
           uf: form.uf, city: form.city, about: form.about, email: form.email, phone: form.phone,
+          emailFinanceiro: '',
         });
       }
       setDone(true);

@@ -16,6 +16,7 @@ export interface Instituicao {
   about: string;
   email: string;
   phone: string;
+  emailFinanceiro: string;
   status: InstituicaoStatus;
   motivoRejeicao: string;
 }
@@ -31,6 +32,7 @@ export interface InstituicaoInput {
   about: string;
   email: string;
   phone: string;
+  emailFinanceiro: string;
 }
 
 // Campos que a própria instituição pode editar depois — CNPJ, CNES, tipo e
@@ -43,6 +45,7 @@ export interface InstituicaoEdicao {
   about: string;
   email: string;
   phone: string;
+  emailFinanceiro: string;
 }
 
 export interface InstituicaoParaAdmin extends Instituicao {
@@ -65,6 +68,7 @@ function rowToInstituicao(r: any): Instituicao {
     about: r.about,
     email: r.email,
     phone: r.phone,
+    emailFinanceiro: r.email_financeiro,
     status: r.status,
     motivoRejeicao: r.motivo_rejeicao,
   };
@@ -80,18 +84,18 @@ export const InstituicoesRepo = {
   async create(usuarioId: string, d: InstituicaoInput): Promise<Instituicao> {
     const id = novoId('inst');
     const { rows } = await query(
-      `INSERT INTO instituicoes (id, usuario_id, tipo, name, cnpj, cnes, endereco, uf, city, about, email, phone, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'em_analise') RETURNING *`,
-      [id, usuarioId, d.tipo, d.name, d.cnpj, d.cnes, d.endereco, d.uf, d.city, d.about, d.email, d.phone]
+      `INSERT INTO instituicoes (id, usuario_id, tipo, name, cnpj, cnes, endereco, uf, city, about, email, phone, email_financeiro, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'em_analise') RETURNING *`,
+      [id, usuarioId, d.tipo, d.name, d.cnpj, d.cnes, d.endereco, d.uf, d.city, d.about, d.email, d.phone, d.emailFinanceiro]
     );
     return rowToInstituicao(rows[0]);
   },
 
   async updateDadosBasicos(id: string, d: InstituicaoEdicao): Promise<Instituicao> {
     const { rows } = await query(
-      `UPDATE instituicoes SET name = $2, endereco = $3, uf = $4, city = $5, about = $6, email = $7, phone = $8
+      `UPDATE instituicoes SET name = $2, endereco = $3, uf = $4, city = $5, about = $6, email = $7, phone = $8, email_financeiro = $9
        WHERE id = $1 RETURNING *`,
-      [id, d.name, d.endereco, d.uf, d.city, d.about, d.email, d.phone]
+      [id, d.name, d.endereco, d.uf, d.city, d.about, d.email, d.phone, d.emailFinanceiro]
     );
     return rowToInstituicao(rows[0]);
   },
