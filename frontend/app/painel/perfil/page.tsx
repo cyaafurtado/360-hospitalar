@@ -5,7 +5,7 @@ import { useAppStore } from '../../../lib/store';
 import { useAsync } from '../../../lib/useAsync';
 import { getMinhaInstituicao, criarInstituicao, mensagemDeErro } from '../../../lib/services';
 import { STATES } from '../../../data/reference';
-import type { Instituicao, TipoInstituicao } from '../../../data/types';
+import type { Instituicao, TipoInstituicao, Responsavel } from '../../../data/types';
 import { Icon } from '../../../lib/icons';
 import { PainelNav } from '../../../components/PainelNav';
 import { Loading, LoadError } from '../../../components/AsyncState';
@@ -39,6 +39,9 @@ export default function PainelPerfilPage() {
   const set = <K extends keyof Instituicao>(k: K, v: Instituicao[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
+  const setResp = (qual: 'respCadastro' | 'respTecnico', campo: keyof Responsavel, v: string) =>
+    setForm((f) => (f ? { ...f, [qual]: { ...f[qual], [campo]: v } } : f));
+
   const save = async () => {
     if (!form) return;
     setErro('');
@@ -46,6 +49,9 @@ export default function PainelPerfilPage() {
       const atualizado = await criarInstituicao({
         tipo: form.tipo,
         name: form.name,
+        razaoSocial: form.razaoSocial,
+        nomeFantasia: form.nomeFantasia,
+        naturezaJuridica: form.naturezaJuridica,
         cnpj: form.cnpj,
         cnes: form.cnes,
         endereco: form.endereco,
@@ -55,6 +61,8 @@ export default function PainelPerfilPage() {
         email: form.email,
         phone: form.phone,
         emailFinanceiro: form.emailFinanceiro,
+        respCadastro: form.respCadastro,
+        respTecnico: form.respTecnico,
       });
       setForm(atualizado);
       setEdit(false);
@@ -149,6 +157,35 @@ export default function PainelPerfilPage() {
                 <input className="prof-input" value={form.name} onChange={(e) => set('name', e.target.value)} />
               ) : (
                 <span className="prof-value">{form.name}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Razão social</span>
+              {edit ? (
+                <input className="prof-input" value={form.razaoSocial} onChange={(e) => set('razaoSocial', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.razaoSocial || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Nome fantasia</span>
+              {edit ? (
+                <input className="prof-input" value={form.nomeFantasia} onChange={(e) => set('nomeFantasia', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.nomeFantasia || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Natureza jurídica</span>
+              {edit ? (
+                <input
+                  className="prof-input"
+                  value={form.naturezaJuridica}
+                  onChange={(e) => set('naturezaJuridica', e.target.value)}
+                  placeholder="Ex: Administração Pública, Associação Privada…"
+                />
+              ) : (
+                <span className="prof-value">{form.naturezaJuridica || '—'}</span>
               )}
             </div>
             {/* CNPJ e CNES são identificadores oficiais — não ficam abertos
@@ -249,6 +286,61 @@ export default function PainelPerfilPage() {
                 </div>
               ) : (
                 <span className="prof-value">{form.city} · {form.uf}</span>
+              )}
+            </div>
+          </section>
+
+          <section className="prof-card span-2">
+            <h3>Responsáveis</h3>
+            <div className="prof-subhead">Responsável pelo cadastro</div>
+            <div className="prof-row">
+              <span className="prof-label">Nome</span>
+              {edit ? (
+                <input className="prof-input" value={form.respCadastro.nome} onChange={(e) => setResp('respCadastro', 'nome', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respCadastro.nome || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">E-mail</span>
+              {edit ? (
+                <input className="prof-input" type="email" value={form.respCadastro.email} onChange={(e) => setResp('respCadastro', 'email', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respCadastro.email || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Telefone</span>
+              {edit ? (
+                <input className="prof-input" value={form.respCadastro.telefone} onChange={(e) => setResp('respCadastro', 'telefone', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respCadastro.telefone || '—'}</span>
+              )}
+            </div>
+
+            <div className="prof-subhead">Responsável técnico</div>
+            <div className="prof-row">
+              <span className="prof-label">Nome</span>
+              {edit ? (
+                <input className="prof-input" value={form.respTecnico.nome} onChange={(e) => setResp('respTecnico', 'nome', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respTecnico.nome || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">E-mail</span>
+              {edit ? (
+                <input className="prof-input" type="email" value={form.respTecnico.email} onChange={(e) => setResp('respTecnico', 'email', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respTecnico.email || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Telefone</span>
+              {edit ? (
+                <input className="prof-input" value={form.respTecnico.telefone} onChange={(e) => setResp('respTecnico', 'telefone', e.target.value)} />
+              ) : (
+                <span className="prof-value">{form.respTecnico.telefone || '—'}</span>
               )}
             </div>
           </section>

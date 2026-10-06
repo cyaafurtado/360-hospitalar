@@ -190,9 +190,12 @@ export default function CadastrarPage() {
           // Nesta etapa o tipo já foi escolhido (passo "Tipo de cadastro")
           // — '' só existe antes do primeiro passo.
           tipo: form.tipoConta as InstituicaoInput['tipo'],
-          name: form.name, cnpj: form.cnpj, cnes: form.cnes, endereco: '',
+          name: form.name, razaoSocial: '', nomeFantasia: '', naturezaJuridica: '',
+          cnpj: form.cnpj, cnes: form.cnes, endereco: '',
           uf: form.uf, city: form.city, about: form.about, email: form.email, phone: form.phone,
           emailFinanceiro: '',
+          respCadastro: { nome: '', email: '', telefone: '' },
+          respTecnico: { nome: '', email: '', telefone: '' },
         });
       }
       setDone(true);

@@ -149,10 +149,16 @@ export type SupplierProfileData = {
 export type TipoInstituicao = 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_pub';
 export type InstituicaoStatus = 'em_analise' | 'aprovado' | 'rejeitado';
 
+// Pessoa de contato — nem sempre é quem preencheu o cadastro.
+export type Responsavel = { nome: string; email: string; telefone: string };
+
 export type Instituicao = {
   id: string;
   tipo: TipoInstituicao;
   name: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  naturezaJuridica: string;
   cnpj: string;
   cnes: string;
   endereco: string;
@@ -162,6 +168,8 @@ export type Instituicao = {
   email: string;
   phone: string;
   emailFinanceiro: string;
+  respCadastro: Responsavel;
+  respTecnico: Responsavel;
   status: InstituicaoStatus;
   motivoRejeicao: string;
 };

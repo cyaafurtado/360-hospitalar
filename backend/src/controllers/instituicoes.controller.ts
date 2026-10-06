@@ -11,6 +11,15 @@ const SEM_INSTITUICAO = {
 const TIPOS = ['clinica', 'hosp_priv', 'hosp_pub', 'orgao_pub'];
 const TIPOS_COM_CNES = ['clinica', 'hosp_priv', 'hosp_pub'];
 
+function responsavel(v: unknown) {
+  const r = (v ?? {}) as Record<string, unknown>;
+  return {
+    nome: String(r.nome ?? '').trim(),
+    email: String(r.email ?? '').trim(),
+    telefone: String(r.telefone ?? '').trim(),
+  };
+}
+
 export class InstituicoesController {
   // Usado pelo painel pra saber se ainda falta mostrar o aviso de "finalize
   // seu cadastro" — existe a linha, cadastro está completo.
@@ -43,6 +52,9 @@ export class InstituicoesController {
     if (existente) {
       const atualizada = await InstituicoesRepo.updateDadosBasicos(existente.id, {
         name: String(b.name ?? existente.name).trim() || existente.name,
+        razaoSocial: String(b.razaoSocial ?? '').trim(),
+        nomeFantasia: String(b.nomeFantasia ?? '').trim(),
+        naturezaJuridica: String(b.naturezaJuridica ?? '').trim(),
         endereco: String(b.endereco ?? '').trim(),
         uf: String(b.uf ?? '').trim(),
         city: String(b.city ?? '').trim(),
@@ -50,6 +62,8 @@ export class InstituicoesController {
         email: String(b.email ?? '').trim(),
         phone: String(b.phone ?? '').trim(),
         emailFinanceiro: String(b.emailFinanceiro ?? '').trim(),
+        respCadastro: responsavel(b.respCadastro),
+        respTecnico: responsavel(b.respTecnico),
       });
       res.json(atualizada);
       return;
@@ -73,6 +87,9 @@ export class InstituicoesController {
     const inst = await InstituicoesRepo.create(req.user.sub, {
       tipo,
       name,
+      razaoSocial: String(b.razaoSocial ?? '').trim(),
+      nomeFantasia: String(b.nomeFantasia ?? '').trim(),
+      naturezaJuridica: String(b.naturezaJuridica ?? '').trim(),
       cnpj: String(b.cnpj ?? '').trim(),
       cnes: String(b.cnes ?? '').trim(),
       endereco: String(b.endereco ?? '').trim(),
@@ -82,6 +99,8 @@ export class InstituicoesController {
       email: String(b.email ?? '').trim(),
       phone: String(b.phone ?? '').trim(),
       emailFinanceiro: String(b.emailFinanceiro ?? '').trim(),
+      respCadastro: responsavel(b.respCadastro),
+      respTecnico: responsavel(b.respTecnico),
     });
 
     const emails = await UsuariosRepo.listEmailsAdmins();
