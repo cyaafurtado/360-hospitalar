@@ -143,22 +143,16 @@ export default function PainelPerfilPage() {
                 <span className="prof-value">{form.name}</span>
               )}
             </div>
+            {/* CNPJ e CNES são identificadores oficiais — não ficam abertos
+                pra edição casual, nem em modo de edição. */}
             <div className="prof-row">
               <span className="prof-label">CNPJ</span>
-              {edit ? (
-                <input className="prof-input" value={form.cnpj} onChange={(e) => set('cnpj', e.target.value)} />
-              ) : (
-                <span className="prof-value">{form.cnpj || '—'}</span>
-              )}
+              <span className="prof-value">{form.cnpj || '—'}</span>
             </div>
             {CNES_TIPOS.includes(form.tipo) && (
               <div className="prof-row">
                 <span className="prof-label">CNES</span>
-                {edit ? (
-                  <input className="prof-input" value={form.cnes} onChange={(e) => set('cnes', e.target.value)} />
-                ) : (
-                  <span className="prof-value">{form.cnes || '—'}</span>
-                )}
+                <span className="prof-value">{form.cnes || '—'}</span>
               </div>
             )}
             <div className="prof-row">
