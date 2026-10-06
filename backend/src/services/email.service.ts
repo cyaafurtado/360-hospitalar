@@ -132,3 +132,38 @@ export async function notificarAdminDocumento(destinatarios: string[], empresaNo
     console.error('[email] Falha ao notificar admin sobre documento pendente:', err);
   }
 }
+
+export async function notificarAdminInstituicao(destinatarios: string[], nomeInstituicao: string, tipo: string): Promise<void> {
+  if (destinatarios.length === 0) return;
+  const link = `${config.frontendUrl}/admin/instituicoes`;
+  const r = resend();
+
+  if (!r) {
+    console.warn(`[email] RESEND_API_KEY não configurada. Instituição "${nomeInstituicao}" (${tipo}) aguardando verificação de CNPJ/CNES em ${link}`);
+    return;
+  }
+
+  try {
+    await r.emails.send({
+      from: config.emailFrom,
+      to: destinatarios,
+      subject: `Novo cadastro de instituição para verificar — ${nomeInstituicao}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
+          <h2 style="color: #1e5fa8;">360 Hospitalar</h2>
+          <p><strong>${nomeInstituicao}</strong> finalizou o cadastro como instituição de saúde. Confira se o
+            CNPJ e o CNES informados realmente correspondem a essa instituição.</p>
+          <p style="text-align: center; margin: 32px 0;">
+            <a href="${link}"
+               style="background: #1e5fa8; color: #fff; padding: 12px 28px; border-radius: 8px;
+                      text-decoration: none; font-weight: bold; display: inline-block;">
+              Revisar no painel
+            </a>
+          </p>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error('[email] Falha ao notificar admin sobre instituição pendente:', err);
+  }
+}

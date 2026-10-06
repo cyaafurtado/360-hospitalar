@@ -147,6 +147,7 @@ export type SupplierProfileData = {
 /* ---------- Instituição de saúde (contratante) ---------- */
 
 export type TipoInstituicao = 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_pub';
+export type InstituicaoStatus = 'em_analise' | 'aprovado' | 'rejeitado';
 
 export type Instituicao = {
   id: string;
@@ -159,9 +160,15 @@ export type Instituicao = {
   about: string;
   email: string;
   phone: string;
+  status: InstituicaoStatus;
+  motivoRejeicao: string;
 };
 
-export type InstituicaoInput = Omit<Instituicao, 'id'>;
+// Campos que a própria instituição envia — status e motivoRejeicao são
+// sempre decididos pelo admin, nunca pela instituição.
+export type InstituicaoInput = Omit<Instituicao, 'id' | 'status' | 'motivoRejeicao'>;
+
+export type AdminInstituicao = Instituicao & { donoNome: string; donoEmail: string };
 
 /* ---------- Sessão (auth real) ---------- */
 

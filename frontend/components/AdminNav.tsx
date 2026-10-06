@@ -30,6 +30,9 @@ export function AdminNav() {
           <Link href="/admin/documentos" className={'portal-tab' + (pathname === '/admin/documentos' ? ' on' : '')}>
             <Icon name="shield2" size={16} /> Documentos
           </Link>
+          <Link href="/admin/instituicoes" className={'portal-tab' + (pathname === '/admin/instituicoes' ? ' on' : '')}>
+            <Icon name="pulse" size={16} /> Instituições
+          </Link>
         </div>
         <div className="portal-subnav-actions">
           <span className="portal-role-badge">

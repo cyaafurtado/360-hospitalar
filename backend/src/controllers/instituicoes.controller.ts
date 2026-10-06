@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { InstituicoesRepo } from '../db/repos/instituicoes.repo';
+import { UsuariosRepo } from '../db/repos/usuarios.repo';
+import { notificarAdminInstituicao } from '../services/email.service';
 
 const SEM_INSTITUICAO = {
   error: 'Cadastro da instituição ainda não foi finalizado.',
@@ -25,12 +27,32 @@ export class InstituicoesController {
     res.json(inst);
   }
 
+  // Primeira vez (fim do assistente de cadastro): cria e já manda CNPJ/CNES
+  // pra análise do admin — a conta funciona normalmente nesse meio tempo,
+  // isso é só um selo de confiança, nunca uma trava de uso.
+  // Depois da primeira vez, esta mesma rota passa a só editar os dados
+  // básicos — tipo, CNPJ, CNES e status nunca mudam por aqui de novo.
   static async create(req: Request, res: Response): Promise<void> {
     if (!req.user) {
       res.status(401).json({ error: 'Sessão expirada ou inválida. Entre novamente.' });
       return;
     }
     const b = req.body ?? {};
+
+    const existente = await InstituicoesRepo.getByUsuario(req.user.sub);
+    if (existente) {
+      const atualizada = await InstituicoesRepo.updateDadosBasicos(existente.id, {
+        name: String(b.name ?? existente.name).trim() || existente.name,
+        uf: String(b.uf ?? '').trim(),
+        city: String(b.city ?? '').trim(),
+        about: String(b.about ?? '').trim(),
+        email: String(b.email ?? '').trim(),
+        phone: String(b.phone ?? '').trim(),
+      });
+      res.json(atualizada);
+      return;
+    }
+
     const tipo = String(b.tipo ?? '');
     if (!TIPOS.includes(tipo)) {
       res.status(400).json({ error: 'Tipo de instituição inválido.' });
@@ -46,7 +68,7 @@ export class InstituicoesController {
       return;
     }
 
-    const inst = await InstituicoesRepo.upsert(req.user.sub, {
+    const inst = await InstituicoesRepo.create(req.user.sub, {
       tipo,
       name,
       cnpj: String(b.cnpj ?? '').trim(),
@@ -57,6 +79,10 @@ export class InstituicoesController {
       email: String(b.email ?? '').trim(),
       phone: String(b.phone ?? '').trim(),
     });
+
+    const emails = await UsuariosRepo.listEmailsAdmins();
+    await notificarAdminInstituicao(emails, inst.name, inst.tipo);
+
     res.status(201).json(inst);
   }
 }

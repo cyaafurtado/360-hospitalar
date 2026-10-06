@@ -17,6 +17,7 @@ import type {
   FotoEmpresa,
   Instituicao,
   InstituicaoInput,
+  AdminInstituicao,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -109,6 +110,21 @@ export async function getMinhaInstituicao(): Promise<Instituicao | null> {
 export async function criarInstituicao(input: InstituicaoInput): Promise<Instituicao> {
   const { data } = await api.post<Instituicao>('/profile/instituicao', input);
   return data;
+}
+
+/* ---------- Painel de administração: instituições ---------- */
+
+export async function adminListInstituicoes(): Promise<AdminInstituicao[]> {
+  const { data } = await api.get<AdminInstituicao[]>('/admin/instituicoes');
+  return data;
+}
+
+export async function adminAprovarInstituicao(id: string): Promise<void> {
+  await api.patch(`/admin/instituicoes/${id}/aprovar`);
+}
+
+export async function adminRejeitarInstituicao(id: string, motivo: string): Promise<void> {
+  await api.patch(`/admin/instituicoes/${id}/rejeitar`, { motivo });
 }
 
 /* ---------- Documentação de verificação ---------- */

@@ -3,6 +3,7 @@ import { CompaniesRepo } from '../db/repos/companies.repo';
 import { UsuariosRepo, RefreshTokensRepo } from '../db/repos/usuarios.repo';
 import { SolicitacoesRepo } from '../db/repos/solicitacoes.repo';
 import { DocumentosRepo } from '../db/repos/documentos.repo';
+import { InstituicoesRepo } from '../db/repos/instituicoes.repo';
 import { PlanoEmpresa } from '../models/types';
 import { gerarSenhaTemporaria, hashSenha } from '../services/auth.service';
 
@@ -129,5 +130,30 @@ export class AdminController {
     res.setHeader('Content-Type', arquivo.tipoMime);
     res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(arquivo.nome)}"`);
     res.send(arquivo.conteudo);
+  }
+
+  /* ---------- Instituições (verificação de CNPJ/CNES) ---------- */
+
+  static async listInstituicoes(_req: Request, res: Response): Promise<void> {
+    res.json(await InstituicoesRepo.listPendentes());
+  }
+
+  static async aprovarInstituicao(req: Request, res: Response): Promise<void> {
+    const ok = await InstituicoesRepo.aprovar(req.params.id);
+    if (!ok) {
+      res.status(404).json({ error: 'Instituição não encontrada.' });
+      return;
+    }
+    res.json({ ok: true });
+  }
+
+  static async rejeitarInstituicao(req: Request, res: Response): Promise<void> {
+    const motivo = String(req.body?.motivo ?? '').trim();
+    const ok = await InstituicoesRepo.rejeitar(req.params.id, motivo);
+    if (!ok) {
+      res.status(404).json({ error: 'Instituição não encontrada.' });
+      return;
+    }
+    res.json({ ok: true });
   }
 }

@@ -156,6 +156,17 @@ export default function PainelPerfilPage() {
               </div>
             )}
             <div className="prof-row">
+              <span className="prof-label">Verificação de CNPJ/CNES</span>
+              <span className={'doc-verif-badge ' + form.status}>
+                {form.status === 'em_analise' && (<><Icon name="signal" size={11} stroke={2.4} /> Em análise</>)}
+                {form.status === 'aprovado' && (<><Icon name="check" size={11} stroke={3} /> Verificado</>)}
+                {form.status === 'rejeitado' && (<><Icon name="close" size={11} stroke={2.6} /> Não confirmado</>)}
+              </span>
+              {form.status === 'rejeitado' && form.motivoRejeicao && (
+                <span className="doc-verif-reason">{form.motivoRejeicao}</span>
+              )}
+            </div>
+            <div className="prof-row">
               <span className="prof-label">Sobre</span>
               {edit ? (
                 <textarea className="prof-input" rows={3} value={form.about} onChange={(e) => set('about', e.target.value)} />
