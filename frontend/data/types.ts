@@ -155,6 +155,7 @@ export type Instituicao = {
   name: string;
   cnpj: string;
   cnes: string;
+  endereco: string;
   uf: string;
   city: string;
   about: string;

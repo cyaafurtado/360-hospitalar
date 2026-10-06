@@ -10,6 +10,7 @@ export interface Instituicao {
   name: string;
   cnpj: string;
   cnes: string;
+  endereco: string;
   uf: string;
   city: string;
   about: string;
@@ -24,6 +25,7 @@ export interface InstituicaoInput {
   name: string;
   cnpj: string;
   cnes: string;
+  endereco: string;
   uf: string;
   city: string;
   about: string;
@@ -35,6 +37,7 @@ export interface InstituicaoInput {
 // status nunca mudam por aqui: já passaram (ou estão passando) pela análise.
 export interface InstituicaoEdicao {
   name: string;
+  endereco: string;
   uf: string;
   city: string;
   about: string;
@@ -56,6 +59,7 @@ function rowToInstituicao(r: any): Instituicao {
     name: r.name,
     cnpj: r.cnpj,
     cnes: r.cnes,
+    endereco: r.endereco,
     uf: r.uf,
     city: r.city,
     about: r.about,
@@ -76,18 +80,18 @@ export const InstituicoesRepo = {
   async create(usuarioId: string, d: InstituicaoInput): Promise<Instituicao> {
     const id = novoId('inst');
     const { rows } = await query(
-      `INSERT INTO instituicoes (id, usuario_id, tipo, name, cnpj, cnes, uf, city, about, email, phone, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'em_analise') RETURNING *`,
-      [id, usuarioId, d.tipo, d.name, d.cnpj, d.cnes, d.uf, d.city, d.about, d.email, d.phone]
+      `INSERT INTO instituicoes (id, usuario_id, tipo, name, cnpj, cnes, endereco, uf, city, about, email, phone, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'em_analise') RETURNING *`,
+      [id, usuarioId, d.tipo, d.name, d.cnpj, d.cnes, d.endereco, d.uf, d.city, d.about, d.email, d.phone]
     );
     return rowToInstituicao(rows[0]);
   },
 
   async updateDadosBasicos(id: string, d: InstituicaoEdicao): Promise<Instituicao> {
     const { rows } = await query(
-      `UPDATE instituicoes SET name = $2, uf = $3, city = $4, about = $5, email = $6, phone = $7
+      `UPDATE instituicoes SET name = $2, endereco = $3, uf = $4, city = $5, about = $6, email = $7, phone = $8
        WHERE id = $1 RETURNING *`,
-      [id, d.name, d.uf, d.city, d.about, d.email, d.phone]
+      [id, d.name, d.endereco, d.uf, d.city, d.about, d.email, d.phone]
     );
     return rowToInstituicao(rows[0]);
   },

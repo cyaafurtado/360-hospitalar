@@ -43,6 +43,7 @@ export class InstituicoesController {
     if (existente) {
       const atualizada = await InstituicoesRepo.updateDadosBasicos(existente.id, {
         name: String(b.name ?? existente.name).trim() || existente.name,
+        endereco: String(b.endereco ?? '').trim(),
         uf: String(b.uf ?? '').trim(),
         city: String(b.city ?? '').trim(),
         about: String(b.about ?? '').trim(),
@@ -73,6 +74,7 @@ export class InstituicoesController {
       name,
       cnpj: String(b.cnpj ?? '').trim(),
       cnes: String(b.cnes ?? '').trim(),
+      endereco: String(b.endereco ?? '').trim(),
       uf: String(b.uf ?? '').trim(),
       city: String(b.city ?? '').trim(),
       about: String(b.about ?? '').trim(),

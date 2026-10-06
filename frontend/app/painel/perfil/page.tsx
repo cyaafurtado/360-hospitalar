@@ -48,6 +48,7 @@ export default function PainelPerfilPage() {
         name: form.name,
         cnpj: form.cnpj,
         cnes: form.cnes,
+        endereco: form.endereco,
         uf: form.uf,
         city: form.city,
         about: form.about,
@@ -199,6 +200,19 @@ export default function PainelPerfilPage() {
                 <input className="prof-input" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
               ) : (
                 <span className="prof-value">{form.phone || '—'}</span>
+              )}
+            </div>
+            <div className="prof-row">
+              <span className="prof-label">Endereço</span>
+              {edit ? (
+                <input
+                  className="prof-input"
+                  value={form.endereco}
+                  onChange={(e) => set('endereco', e.target.value)}
+                  placeholder="Rua, número, bairro"
+                />
+              ) : (
+                <span className="prof-value">{form.endereco || '—'}</span>
               )}
             </div>
             <div className="prof-row">
