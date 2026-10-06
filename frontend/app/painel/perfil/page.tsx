@@ -144,28 +144,35 @@ export default function PainelPerfilPage() {
               )}
             </div>
             {/* CNPJ e CNES são identificadores oficiais — não ficam abertos
-                pra edição casual, nem em modo de edição. */}
+                pra edição casual, nem em modo de edição. O selo de
+                verificação aparece junto de cada um. */}
             <div className="prof-row">
               <span className="prof-label">CNPJ</span>
-              <span className="prof-value">{form.cnpj || '—'}</span>
-            </div>
-            {CNES_TIPOS.includes(form.tipo) && (
-              <div className="prof-row">
-                <span className="prof-label">CNES</span>
-                <span className="prof-value">{form.cnes || '—'}</span>
-              </div>
-            )}
-            <div className="prof-row">
-              <span className="prof-label">Verificação de CNPJ/CNES</span>
-              <span className={'doc-verif-badge ' + form.status}>
-                {form.status === 'em_analise' && (<><Icon name="signal" size={11} stroke={2.4} /> Em análise</>)}
-                {form.status === 'aprovado' && (<><Icon name="check" size={11} stroke={3} /> Verificado</>)}
-                {form.status === 'rejeitado' && (<><Icon name="close" size={11} stroke={2.6} /> Não confirmado</>)}
+              <span className="prof-value" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                {form.cnpj || '—'}
+                <span className={'doc-verif-badge ' + form.status}>
+                  {form.status === 'em_analise' && (<><Icon name="signal" size={11} stroke={2.4} /> Em análise</>)}
+                  {form.status === 'aprovado' && (<><Icon name="check" size={11} stroke={3} /> Verificado</>)}
+                  {form.status === 'rejeitado' && (<><Icon name="close" size={11} stroke={2.6} /> Não confirmado</>)}
+                </span>
               </span>
               {form.status === 'rejeitado' && form.motivoRejeicao && (
                 <span className="doc-verif-reason">{form.motivoRejeicao}</span>
               )}
             </div>
+            {CNES_TIPOS.includes(form.tipo) && (
+              <div className="prof-row">
+                <span className="prof-label">CNES</span>
+                <span className="prof-value" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {form.cnes || '—'}
+                  <span className={'doc-verif-badge ' + form.status}>
+                    {form.status === 'em_analise' && (<><Icon name="signal" size={11} stroke={2.4} /> Em análise</>)}
+                    {form.status === 'aprovado' && (<><Icon name="check" size={11} stroke={3} /> Verificado</>)}
+                    {form.status === 'rejeitado' && (<><Icon name="close" size={11} stroke={2.6} /> Não confirmado</>)}
+                  </span>
+                </span>
+              </div>
+            )}
             <div className="prof-row">
               <span className="prof-label">Sobre</span>
               {edit ? (
