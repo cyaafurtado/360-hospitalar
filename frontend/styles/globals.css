@@ -1138,6 +1138,7 @@ em { font-style: italic; }
 /* ── Fotos da empresa ── */
 /* ── Catálogo de serviços ── */
 .prof-card-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.inst-map { width: 100%; height: 320px; border: 0; border-radius: var(--radius-sm); display: block; }
 .catalogo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
 .catalogo-card { position: relative; background: var(--surface-2); border: var(--card-border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow .15s; }
 .catalogo-card.destaque { border-color: var(--primary); background: color-mix(in oklch, var(--primary), white 94%); box-shadow: 0 0 0 1px var(--primary); }

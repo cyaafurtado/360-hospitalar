@@ -93,6 +93,12 @@ export default function PainelPerfilPage() {
     );
   }
 
+  // Precisa pelo menos de cidade e estado pra valer mostrar um mapa — só UF
+  // ou só o texto livre do endereço, sem cidade, dá um resultado inútil.
+  const enderecoParaMapa = form.city && form.uf
+    ? [form.endereco, form.city, form.uf].filter(Boolean).join(', ')
+    : '';
+
   return (
     <div className="portal-screen">
       <PainelNav />
@@ -230,6 +236,20 @@ export default function PainelPerfilPage() {
                 <span className="prof-value">{form.city} · {form.uf}</span>
               )}
             </div>
+          </section>
+
+          <section className="prof-card span-2">
+            <h3>Localização</h3>
+            {enderecoParaMapa ? (
+              <iframe
+                className="inst-map"
+                title="Mapa do endereço da instituição"
+                loading="lazy"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(enderecoParaMapa)}&output=embed`}
+              />
+            ) : (
+              <p className="doc-empty-hint">Preencha cidade e estado (e, se possível, o endereço) para ver o mapa aqui.</p>
+            )}
           </section>
         </div>
       </div>
