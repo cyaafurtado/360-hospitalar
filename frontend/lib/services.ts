@@ -15,6 +15,8 @@ import type {
   ArquivoDocumento,
   AdminDocumento,
   FotoEmpresa,
+  Instituicao,
+  InstituicaoInput,
 } from '../data/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -88,6 +90,25 @@ export async function removerFoto(id: string): Promise<void> {
 // Rota pública (sem token) — usável direto num <img src>.
 export function urlFoto(id: string): string {
   return `${API_URL}/api/companies/fotos/${id}`;
+}
+
+/* ---------- Instituição de saúde (contratante) ---------- */
+
+// null = conta contratante que ainda não finalizou o cadastro da instituição
+// (não é erro de carga — é só a lista de "falta terminar").
+export async function getMinhaInstituicao(): Promise<Instituicao | null> {
+  try {
+    const { data } = await api.get<Instituicao>('/profile/instituicao');
+    return data;
+  } catch (err) {
+    if (codigoDoErro(err) === 'SEM_INSTITUICAO') return null;
+    throw err;
+  }
+}
+
+export async function criarInstituicao(input: InstituicaoInput): Promise<Instituicao> {
+  const { data } = await api.post<Instituicao>('/profile/instituicao', input);
+  return data;
 }
 
 /* ---------- Documentação de verificação ---------- */

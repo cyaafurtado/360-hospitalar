@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { CompaniesController } from '../controllers/companies.controller';
 import { DocumentosController } from '../controllers/documentos.controller';
 import { FotosController } from '../controllers/fotos.controller';
+import { InstituicoesController } from '../controllers/instituicoes.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth } from '../middleware/auth';
 import { uploadDocumento, uploadFoto } from '../middleware/upload';
@@ -27,5 +28,9 @@ router.post('/documentos/:id/cancelar', asyncHandler(DocumentosController.cancel
 // Fotos da empresa: sem aprovação — aparecem no site assim que sobem.
 router.post('/fotos', uploadFoto.single('foto'), asyncHandler(FotosController.upload));
 router.delete('/fotos/:id', asyncHandler(FotosController.remove));
+
+// Cadastro da instituição de saúde (contratante): existir = cadastro finalizado.
+router.get('/instituicao', asyncHandler(InstituicoesController.getMine));
+router.post('/instituicao', asyncHandler(InstituicoesController.create));
 
 export default router;

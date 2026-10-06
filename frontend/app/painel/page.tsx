@@ -6,7 +6,7 @@ import { Icon } from '../../lib/icons';
 import { PainelNav } from '../../components/PainelNav';
 import { StatusPill, TypePill } from '../../components/Pills';
 import { segmentLabel, REQUEST_STATUS, REQUEST_TYPES } from '../../data/reference';
-import { getRequests } from '../../lib/services';
+import { getRequests, getMinhaInstituicao } from '../../lib/services';
 import { useAsync } from '../../lib/useAsync';
 import type { RequestStatus, RequestType, SolicitacaoRequest } from '../../data/types';
 import { gerarPdfSolicitacao } from '../../lib/pdf';
@@ -26,6 +26,15 @@ export default function PainelPage() {
   useEffect(() => {
     if (hydrated && !authEmail) router.replace('/entrar');
   }, [hydrated, authEmail, router]);
+
+  const souContratante = usuario?.tipo === 'contratante';
+  // undefined = ainda carregando, null = confirmado que falta cadastrar —
+  // nos dois casos o aviso aparece, some só quando a instituição é encontrada.
+  const { data: minhaInstituicao } = useAsync(
+    () => (souContratante ? getMinhaInstituicao() : Promise.resolve(null)),
+    [souContratante]
+  );
+  const cadastroPendente = souContratante && !minhaInstituicao;
 
   const { data, loading, error } = useAsync(() => getRequests('recebidas'), []);
   const [rowsState, setRowsState] = useState<SolicitacaoRequest[] | null>(null);
@@ -99,9 +108,7 @@ export default function PainelPage() {
     <div className="portal-screen">
       <PainelNav />
       <div className="portal-body">
-        {/* Cadastro de instituição ainda não tem onde ser salvo de verdade
-            (Parte B) — até existir, toda conta contratante cai aqui. */}
-        {usuario?.tipo === 'contratante' && (
+        {cadastroPendente && (
           <div className="sol-terminal-banner pending">
             <div className="sol-banner-row">
               <Icon name="signal" size={16} stroke={2} />

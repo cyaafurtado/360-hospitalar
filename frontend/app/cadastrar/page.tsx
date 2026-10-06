@@ -2,12 +2,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SEGMENTS, STATES } from '../../data/reference';
-import type { Plan } from '../../data/types';
+import type { Plan, InstituicaoInput } from '../../data/types';
 import { Icon } from '../../lib/icons';
 import { maskCNPJ, maskCNES, maskCard, maskExp } from '../../lib/masks';
 import { Field } from '../../components/Field';
 import { PreviewCard } from '../../components/PreviewCard';
-import { preCadastrarEmpresa, updateMyProfile, mensagemDeErro } from '../../lib/services';
+import { preCadastrarEmpresa, updateMyProfile, criarInstituicao, mensagemDeErro } from '../../lib/services';
 import { useAppStore } from '../../lib/store';
 import { consultarCnpj, cnpjValido, apenasDigitos, CnpjErro } from '../../lib/cnpj';
 
@@ -183,8 +183,17 @@ export default function CadastrarPage() {
           services: [], phone: form.phone, site: form.site, email: form.email,
           rating: 0, reviews: 0, verified: false, plan: form.plan,
         });
+      } else {
+        // Grava o cadastro da instituição — é o que faz o aviso de
+        // "finalize seu cadastro" sumir do painel da conta contratante.
+        await criarInstituicao({
+          // Nesta etapa o tipo já foi escolhido (passo "Tipo de cadastro")
+          // — '' só existe antes do primeiro passo.
+          tipo: form.tipoConta as InstituicaoInput['tipo'],
+          name: form.name, cnpj: form.cnpj, cnes: form.cnes,
+          uf: form.uf, city: form.city, about: form.about, email: form.email, phone: form.phone,
+        });
       }
-      // instituição: endpoint será adicionado na Parte B
       setDone(true);
       window.scrollTo({ top: 0 });
     } catch (e) {

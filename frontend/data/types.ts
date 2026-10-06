@@ -144,6 +144,25 @@ export type SupplierProfileData = {
   catalogo?: CatalogoServico[];
 };
 
+/* ---------- Instituição de saúde (contratante) ---------- */
+
+export type TipoInstituicao = 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_pub';
+
+export type Instituicao = {
+  id: string;
+  tipo: TipoInstituicao;
+  name: string;
+  cnpj: string;
+  cnes: string;
+  uf: string;
+  city: string;
+  about: string;
+  email: string;
+  phone: string;
+};
+
+export type InstituicaoInput = Omit<Instituicao, 'id'>;
+
 /* ---------- Sessão (auth real) ---------- */
 
 export type UsuarioTipo = 'fornecedor' | 'contratante' | 'admin';
