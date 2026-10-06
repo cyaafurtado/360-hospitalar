@@ -24,6 +24,9 @@ export function PainelNav() {
           <Link href="/buscar" className="portal-tab">
             <Icon name="search" size={16} /> Buscar fornecedores
           </Link>
+          <Link href="/painel/perfil" className={'portal-tab' + (pathname === '/painel/perfil' ? ' on' : '')}>
+            <Icon name="shield2" size={16} /> Meu perfil
+          </Link>
         </div>
         <div className="portal-subnav-actions">
           <span className="portal-role-badge tone-green">
