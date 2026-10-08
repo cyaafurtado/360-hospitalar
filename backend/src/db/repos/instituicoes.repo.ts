@@ -174,4 +174,16 @@ export const InstituicoesRepo = {
     );
     return rows.map((r) => ({ ...rowToInstituicao(r), donoNome: r.dono_nome, donoEmail: r.dono_email }));
   },
+
+  // Página de verificação do admin: uma instituição só, com quem é o dono da conta.
+  async getOneParaAdmin(id: string): Promise<InstituicaoParaAdmin | null> {
+    const { rows } = await query(
+      `SELECT i.*, u.nome AS dono_nome, u.email AS dono_email
+         FROM instituicoes i
+         JOIN usuarios u ON u.id = i.usuario_id
+        WHERE i.id = $1`,
+      [id]
+    );
+    return rows[0] ? { ...rowToInstituicao(rows[0]), donoNome: rows[0].dono_nome, donoEmail: rows[0].dono_email } : null;
+  },
 };

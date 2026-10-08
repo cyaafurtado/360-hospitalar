@@ -138,6 +138,15 @@ export class AdminController {
     res.json(await InstituicoesRepo.listPendentes());
   }
 
+  static async getInstituicao(req: Request, res: Response): Promise<void> {
+    const inst = await InstituicoesRepo.getOneParaAdmin(req.params.id);
+    if (!inst) {
+      res.status(404).json({ error: 'Instituição não encontrada.' });
+      return;
+    }
+    res.json(inst);
+  }
+
   static async aprovarInstituicao(req: Request, res: Response): Promise<void> {
     const ok = await InstituicoesRepo.aprovar(req.params.id);
     if (!ok) {

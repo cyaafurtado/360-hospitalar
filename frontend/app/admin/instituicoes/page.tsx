@@ -1,16 +1,11 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  adminListInstituicoes,
-  adminAprovarInstituicao,
-  adminRejeitarInstituicao,
-  mensagemDeErro,
-} from '../../../lib/services';
+import { useRouter } from 'next/navigation';
+import { adminListInstituicoes } from '../../../lib/services';
 import { useAsync } from '../../../lib/useAsync';
 import type { AdminInstituicao, InstituicaoStatus, TipoInstituicao } from '../../../data/types';
 import { Icon } from '../../../lib/icons';
 import { Loading, LoadError } from '../../../components/AsyncState';
-import { Modal } from '../../../components/Modal';
 
 const STATUS_LABEL: Record<InstituicaoStatus, string> = {
   em_analise: 'Em análise',
@@ -26,15 +21,12 @@ const TIPO_LABEL: Record<TipoInstituicao, string> = {
 };
 
 export default function AdminInstituicoesPage() {
+  const router = useRouter();
   const { data, loading, error } = useAsync(() => adminListInstituicoes(), []);
   const [rows, setRows] = useState<AdminInstituicao[] | null>(null);
   useEffect(() => { if (data) setRows(data); }, [data]);
 
   const [statusFiltro, setStatusFiltro] = useState<'' | InstituicaoStatus>('em_analise');
-  const [carregando, setCarregando] = useState<string | null>(null);
-  const [erroAcao, setErroAcao] = useState('');
-  const [alvoRejeitar, setAlvoRejeitar] = useState<AdminInstituicao | null>(null);
-  const [motivo, setMotivo] = useState('');
 
   const lista = rows ?? [];
 
@@ -48,37 +40,6 @@ export default function AdminInstituicoesPage() {
     () => (statusFiltro ? lista.filter((i) => i.status === statusFiltro) : lista),
     [lista, statusFiltro]
   );
-
-  const aprovar = async (inst: AdminInstituicao) => {
-    setErroAcao('');
-    setCarregando(inst.id);
-    try {
-      await adminAprovarInstituicao(inst.id);
-      setRows((prev) => (prev ? prev.map((x) => (x.id === inst.id ? { ...x, status: 'aprovado' } : x)) : prev));
-    } catch (e) {
-      setErroAcao(mensagemDeErro(e, 'Não foi possível aprovar a instituição.'));
-    } finally {
-      setCarregando(null);
-    }
-  };
-
-  const confirmarRejeicao = async () => {
-    if (!alvoRejeitar) return;
-    setErroAcao('');
-    setCarregando(alvoRejeitar.id);
-    try {
-      await adminRejeitarInstituicao(alvoRejeitar.id, motivo);
-      setRows((prev) =>
-        prev ? prev.map((x) => (x.id === alvoRejeitar.id ? { ...x, status: 'rejeitado', motivoRejeicao: motivo } : x)) : prev
-      );
-      setAlvoRejeitar(null);
-      setMotivo('');
-    } catch (e) {
-      setErroAcao(mensagemDeErro(e, 'Não foi possível rejeitar a instituição.'));
-    } finally {
-      setCarregando(null);
-    }
-  };
 
   return (
     <>
@@ -116,8 +77,6 @@ export default function AdminInstituicoesPage() {
         </div>
       </div>
 
-      {erroAcao && <div className="sol-terminal-banner warn">{erroAcao}</div>}
-
       {loading ? (
         <Loading label="Carregando instituições…" />
       ) : error ? (
@@ -138,7 +97,7 @@ export default function AdminInstituicoesPage() {
             </thead>
             <tbody>
               {filtrados.map((inst) => (
-                <tr key={inst.id}>
+                <tr key={inst.id} onClick={() => router.push(`/admin/instituicoes/${inst.id}`)}>
                   <td className="td-name">
                     <div className="cell-strong">{inst.name}</div>
                     <div className="cell-muted">{inst.city} · {inst.uf}</div>
@@ -156,16 +115,9 @@ export default function AdminInstituicoesPage() {
                     </span>
                   </td>
                   <td>
-                    {inst.status === 'em_analise' && (
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn-primary sm" disabled={carregando === inst.id} onClick={() => aprovar(inst)}>
-                          <Icon name="check" size={13} stroke={2.6} /> Aprovar
-                        </button>
-                        <button className="btn-ghost sm" disabled={carregando === inst.id} onClick={() => { setAlvoRejeitar(inst); setMotivo(''); }}>
-                          Rejeitar
-                        </button>
-                      </div>
-                    )}
+                    <button className="btn-ghost sm" onClick={(e) => { e.stopPropagation(); router.push(`/admin/instituicoes/${inst.id}`); }}>
+                      {inst.status === 'em_analise' ? 'Analisar' : 'Ver'} <Icon name="arrow" size={13} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -179,33 +131,6 @@ export default function AdminInstituicoesPage() {
             </div>
           )}
         </div>
-      )}
-
-      {alvoRejeitar && (
-        <Modal title="Marcar como não confirmada?" icon="close" tone="warn" onClose={() => setAlvoRejeitar(null)}>
-          <p className="sol-modal-desc">
-            A conta de <strong>{alvoRejeitar.name}</strong> continua funcionando normalmente — isto só marca que
-            o CNPJ/CNES informado não pôde ser confirmado.
-          </p>
-          <div className="sol-modal-field">
-            <label className="sol-modal-label">Motivo (aparece para a instituição)</label>
-            <textarea
-              className="sol-modal-textarea"
-              rows={3}
-              placeholder="Ex: CNES informado não corresponde a este CNPJ na base do Ministério da Saúde."
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value)}
-            />
-          </div>
-          <div className="sol-modal-actions">
-            <button className="btn-ghost" onClick={() => setAlvoRejeitar(null)} disabled={carregando === alvoRejeitar.id}>
-              Cancelar
-            </button>
-            <button className="btn-danger" onClick={confirmarRejeicao} disabled={carregando === alvoRejeitar.id}>
-              {carregando === alvoRejeitar.id ? 'Salvando…' : 'Marcar como não confirmada'}
-            </button>
-          </div>
-        </Modal>
       )}
     </>
   );

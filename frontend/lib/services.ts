@@ -119,6 +119,11 @@ export async function adminListInstituicoes(): Promise<AdminInstituicao[]> {
   return data;
 }
 
+export async function adminGetInstituicao(id: string): Promise<AdminInstituicao> {
+  const { data } = await api.get<AdminInstituicao>(`/admin/instituicoes/${id}`);
+  return data;
+}
+
 export async function adminAprovarInstituicao(id: string): Promise<void> {
   await api.patch(`/admin/instituicoes/${id}/aprovar`);
 }

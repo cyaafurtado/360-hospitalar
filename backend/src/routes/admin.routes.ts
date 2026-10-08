@@ -24,6 +24,7 @@ router.patch('/documentos/:id/rejeitar', asyncHandler(AdminController.rejeitarDo
 router.get('/documentos/arquivos/:arquivoId', asyncHandler(AdminController.downloadDocumentoArquivo));
 
 router.get('/instituicoes', asyncHandler(AdminController.listInstituicoes));
+router.get('/instituicoes/:id', asyncHandler(AdminController.getInstituicao));
 router.patch('/instituicoes/:id/aprovar', asyncHandler(AdminController.aprovarInstituicao));
 router.patch('/instituicoes/:id/rejeitar', asyncHandler(AdminController.rejeitarInstituicao));
 
