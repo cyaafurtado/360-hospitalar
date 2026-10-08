@@ -16,6 +16,7 @@ type TipoConta = '' | 'empresa' | 'clinica' | 'hosp_priv' | 'hosp_pub' | 'orgao_
 type RegisterForm = {
   tipoConta: TipoConta;
   name: string; cnpj: string; cnes: string; site: string; about: string;
+  founded: number | null;
   segment: string; uf: string; city: string; tagline: string; atendeUfs: string[];
   email: string; emailConfirm: string; phone: string; employees: string; badges: string[]; terms: boolean;
   conselho: string; conselhoNum: string; plan: Plan;
@@ -36,7 +37,7 @@ const CERT_OPTS = ['ANVISA', 'ISO 9001', 'ISO 13485', 'ISO 27001', 'LGPD', 'RDC 
 const CONSELHOS = ['CRM', 'COREN', 'CRF', 'CRO', 'CRBM', 'CRN', 'CRP', 'CREFITO', 'CRMV', 'CREA', 'Outro'];
 
 const INITIAL: RegisterForm = {
-  tipoConta: '', name: '', cnpj: '', cnes: '', site: '', about: '', segment: '', uf: '', city: '',
+  tipoConta: '', name: '', cnpj: '', cnes: '', site: '', about: '', founded: null, segment: '', uf: '', city: '',
   tagline: '', atendeUfs: [], email: '', emailConfirm: '', phone: '', employees: '', badges: [], terms: false,
   conselho: '', conselhoNum: '', plan: 'free',
 };
@@ -153,6 +154,8 @@ export default function CadastrarPage() {
         uf: f.uf || e.uf,
         city: f.city.trim() || e.cidade,
         phone: f.phone.trim() || e.telefone,
+        // "Desde {ano}" no perfil público vem só daqui — nunca inventado.
+        founded: f.founded || e.fundacao,
       }));
       setEmpresaEncontrada(e.razaoSocial || e.nome);
       // Situação cadastral irregular não bloqueia, mas a pessoa precisa saber:
@@ -216,7 +219,7 @@ export default function CadastrarPage() {
       setErroEnvio('');
       try {
         const empresa = await preCadastrarEmpresa({
-          name: form.name, segment: form.segment, city: form.city, uf: form.uf,
+          name: form.name, segment: form.segment, city: form.city, uf: form.uf, founded: form.founded,
         });
         setEmpresaId(empresa.id);
       } catch (e) {

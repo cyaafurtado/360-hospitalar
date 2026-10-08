@@ -13,7 +13,7 @@ function rowToCompany(r: any): Company {
     rating: Number(r.rating),
     reviews: Number(r.reviews),
     verified: r.verified,
-    founded: Number(r.founded),
+    founded: r.founded === null ? null : Number(r.founded),
     employees: r.employees,
     services: r.services ?? [],
     badges: r.badges ?? [],
@@ -53,7 +53,7 @@ export interface NovaEmpresa {
   tagline: string;
   city: string;
   uf: string;
-  founded: number;
+  founded: number | null;
   employees: string;
   services: string[];
   badges: string[];

@@ -11,7 +11,7 @@ export type Company = {
   rating: number;
   reviews: number;
   verified: boolean;
-  founded: number;
+  founded: number | null;
   employees: string;
   services: string[];
   badges: string[];

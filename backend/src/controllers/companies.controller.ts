@@ -125,7 +125,9 @@ export class CompaniesController {
       tagline: b.tagline ?? '',
       city: b.city ?? '',
       uf: b.uf ?? '',
-      founded: Number(b.founded) || new Date().getFullYear(),
+      // Nunca inventa o ano de fundação: só o que vier de verdade da consulta
+      // de CNPJ na Receita (ver lib/cnpj.ts no front). Sem isso, fica em branco.
+      founded: Number(b.founded) > 0 ? Number(b.founded) : null,
       employees: b.employees || '1–10',
       services: Array.isArray(b.services) ? b.services : [],
       badges: Array.isArray(b.badges) ? b.badges : [],

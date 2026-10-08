@@ -219,6 +219,7 @@ export type PreCadastroInput = {
   segment: string;
   city: string;
   uf: string;
+  founded?: number | null;
 };
 
 export async function preCadastrarEmpresa(input: PreCadastroInput): Promise<Company> {

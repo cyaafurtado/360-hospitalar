@@ -92,9 +92,11 @@ export default function EmpresaPage() {
             <span>
               <Icon name="users" size={15} /> {c.employees} func.
             </span>
-            <span>
-              <Icon name="cal" size={15} /> Desde {c.founded}
-            </span>
+            {c.founded && (
+              <span>
+                <Icon name="cal" size={15} /> Desde {c.founded}
+              </span>
+            )}
           </div>
         </div>
         <div className="dh-rate">
