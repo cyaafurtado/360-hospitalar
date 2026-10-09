@@ -379,29 +379,43 @@ um agente de melhoria contínua **não pode violar** nenhuma destas:
 Organizado por impacto/urgência, não por ordem de preferência estética — um orquestrador pode
 reordenar, mas a classificação abaixo reflete risco real encontrado no código.
 
+**Protocolo do laço automático:** cada rodada pega o primeiro item `[ ]` (ignora `[HUMANO]`),
+entrega, roda os builds, marca `[x]` com uma linha do que foi feito e faz commit+push. Quando não
+restar nenhum `[ ]` executável, a rotina agendada se desativa. Itens `[HUMANO]` esperam decisão
+do dono do produto — o laço nunca os resolve sozinho.
+
 ### P0 — Risco de produção / segurança
-- [ ] Remover o fallback hardcoded de `JWT_SECRET` em `env.ts`; falhar o boot em produção
-  (`NODE_ENV=production`) se a env var não estiver definida.
-- [ ] Resolver a duplicidade de migration `008_*` (dois arquivos com o mesmo prefixo numérico) —
-  decidir uma convenção que impeça recorrência (ex.: checar no CI que não há prefixo repetido).
-- [ ] Auditar `documentos.repo.ts`/`fotos.repo.ts`: confirmar que listagens (admin, perfil) nunca
-  arrastam a coluna `BYTEA` inteira quando só precisam de metadados.
+- [x] `JWT_SECRET`: sem a env num ambiente publicado (`NODE_ENV=production` ou Railway), `env.ts`
+  usa segredo aleatório por processo em vez do valor público do código — não derruba o site
+  (refresh tokens são opacos no banco, o front renova no 401) e loga o alerta. **Ainda vale
+  definir `JWT_SECRET` no Railway** para as sessões sobreviverem a restart sem refresh.
+- [x] Duplicidade `008_*`: os dois arquivos ficam (renomear faria o `migrate.ts` reaplicar
+  `008_limpa_base_demo.sql` e apagar dados). `backend/scripts/check-migrations.js` barra no CI
+  qualquer novo prefixo repetido ou nome fora do padrão `NNN_nome.sql`.
+- [x] Auditoria BYTEA: já estava correto — o binário vive em `documento_arquivos.conteudo` e
+  `fotos_fornecedor.conteudo`; todas as listagens projetam colunas sem o binário, e só os
+  endpoints de download (`buscarArquivo`, `buscarFoto`) leem `conteudo`.
 
 ### P1 — Confiabilidade / manutenibilidade
 - [ ] Introduzir testes automatizados mínimos: pelo menos os fluxos críticos de auth
   (registro/login/refresh/reset de senha), criação de solicitação, e aprovação/rejeição no admin.
-- [ ] Adicionar um pipeline de CI (lint + typecheck + build) para frontend e backend, mesmo que
-  simples, antes do próximo lote de mudanças automatizadas via agente.
+  Rodar contra o Postgres de serviço do CI (`.github/workflows/ci.yml`) e incluir no workflow.
+- [x] CI em `.github/workflows/ci.yml`: backend (check-migrations + `tsc` + migrations aplicadas
+  num Postgres 16 vazio) e frontend (`next build`, que faz o typecheck). Lint fica de fora até o
+  projeto ter config de ESLint — `next lint` hoje abriria o assistente interativo.
 - [ ] Atualizar `README.md`, `DEPLOY.md`, `COMO-CONTINUAR.md` para refletir o estado real (rotas,
   endpoints, estado "Parte A completa + partes da Parte B implementadas de forma simplificada").
-- [ ] Decidir explicitamente (com o dono do produto) se a Parte B multi-tenant/RBAC completa do
+- [ ] [HUMANO] Decidir explicitamente (com o dono do produto) se a Parte B multi-tenant/RBAC completa do
   `CLAUDE.md` ainda é a direção desejada, ou se o modelo atual de 3 tipos fixos deve ser
   formalizado como a arquitetura definitiva — isso muda totalmente o escopo de qualquer trabalho
   futuro de agentes nessa área.
 
 ### P2 — Escalabilidade
-- [ ] Avaliar mover armazenamento de documentos/fotos de `BYTEA` para object storage (S3-compatível
-  ou equivalente), mantendo só metadados no Postgres.
+- [ ] [HUMANO] Avaliar mover armazenamento de documentos/fotos de `BYTEA` para object storage
+  (S3-compatível ou equivalente), mantendo só metadados no Postgres — exige escolher provedor e
+  criar credenciais.
+- [ ] `Cache-Control` longo (`public, max-age=31536000, immutable`) em `GET /api/companies/fotos/:id`
+  — a foto é imutável por id, então o navegador e a borda da Vercel deixam de rebaixar o BYTEA.
 - [ ] Mover o cache de consulta de CNPJ para um armazenamento compartilhado (ou aceitar
   explicitamente que é só uma otimização por instância, documentando a decisão).
 

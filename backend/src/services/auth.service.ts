@@ -9,12 +9,12 @@ const ACCESS_TTL = '15m';
 export const REFRESH_TTL_DIAS = 30;
 const BCRYPT_COST = 12;
 
-// Em produção o segredo TEM que vir do ambiente. Não derrubamos a API por causa
-// disso (deixaria o site fora do ar), mas gritamos no log de deploy.
-if (config.nodeEnv === 'production' && config.jwtSecret === 'default_secret_change_in_production') {
+// Não derrubamos a API sem JWT_SECRET (deixaria o site fora do ar); env.ts usa um
+// segredo aleatório por processo e avisamos no log de deploy.
+if (config.implantado && config.jwtSecretAusente) {
   console.error(
-    '[auth] ATENÇÃO: JWT_SECRET não configurado — os tokens estão sendo assinados ' +
-      'com o segredo padrão. Defina JWT_SECRET nas variáveis do Railway.'
+    '[auth] ATENÇÃO: JWT_SECRET não configurado — usando segredo aleatório deste processo. ' +
+      'Sessões continuam funcionando via refresh, mas defina JWT_SECRET nas variáveis do Railway.'
   );
 }
 

@@ -1,12 +1,24 @@
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Railway injeta RAILWAY_ENVIRONMENT_NAME mesmo quando NODE_ENV não foi definido.
+const implantado = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT_NAME;
+const jwtSecretAusente = !process.env.JWT_SECRET;
+
 export const config = {
+  implantado,
+  jwtSecretAusente,
   // Railway injeta PORT automaticamente; API_PORT é fallback local
   port: parseInt(process.env.PORT || process.env.API_PORT || '3001'),
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL || '',
-  jwtSecret: process.env.JWT_SECRET || 'default_secret_change_in_production',
+  // Sem JWT_SECRET num ambiente publicado, um segredo aleatório por processo impede
+  // forjar tokens com um valor conhecido; um restart só força o refresh silencioso
+  // (refresh tokens são opacos e ficam no banco, não dependem deste segredo).
+  jwtSecret:
+    process.env.JWT_SECRET ||
+    (implantado ? crypto.randomBytes(48).toString('hex') : 'segredo_local_apenas_desenvolvimento'),
   // Janela em que um refresh token recém-rotacionado ainda é aceito — cobre duas
   // abas renovando juntas. 0 desliga a tolerância.
   rotacaoGracaMs: parseInt(process.env.AUTH_ROTACAO_GRACA_MS || '30000'),
