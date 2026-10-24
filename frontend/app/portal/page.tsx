@@ -11,6 +11,7 @@ import { PortalNav } from '../../components/PortalNav';
 import { StatusPill, TypePill } from '../../components/Pills';
 import { Loading, LoadError } from '../../components/AsyncState';
 import { gerarPdfSolicitacao } from '../../lib/pdf';
+import { gerarExcelSolicitacao } from '../../lib/excel';
 
 type Tab = 'recebidas' | 'enviadas';
 
@@ -265,7 +266,10 @@ export default function PortalPage() {
                                     disabled={pdfLoading === r.id}
                                   >
                                     <Icon name="file" size={14} />
-                                    {pdfLoading === r.id ? 'Gerando…' : 'Gerar PDF'}
+                                    {pdfLoading === r.id ? 'Gerando…' : 'Exportar PDF'}
+                                  </button>
+                                  <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(r)}>
+                                    <Icon name="list" size={14} /> Exportar Excel
                                   </button>
                                   <button
                                     className="btn-ghost sm"
@@ -388,6 +392,17 @@ export default function PortalPage() {
                                   onClick={() => router.push(`/portal/enviada/${r.id}`)}
                                 >
                                   <Icon name="signal" size={14} /> Acompanhar
+                                </button>
+                                <button
+                                  className="btn-ghost sm"
+                                  onClick={() => baixarPdf(r)}
+                                  disabled={pdfLoading === r.id}
+                                >
+                                  <Icon name="file" size={14} />
+                                  {pdfLoading === r.id ? 'Gerando…' : 'Exportar PDF'}
+                                </button>
+                                <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(r)}>
+                                  <Icon name="list" size={14} /> Exportar Excel
                                 </button>
                                 <button
                                   className="btn-ghost sm"

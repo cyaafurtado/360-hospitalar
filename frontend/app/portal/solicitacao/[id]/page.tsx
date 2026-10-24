@@ -10,6 +10,8 @@ import { Icon } from '../../../../lib/icons';
 import { PortalNav } from '../../../../components/PortalNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
 import { Loading, LoadError } from '../../../../components/AsyncState';
+import { gerarPdfSolicitacao } from '../../../../lib/pdf';
+import { gerarExcelSolicitacao } from '../../../../lib/excel';
 
 const STATUS_STEPS: { id: RequestStatus; label: string }[] = [
   { id: 'nova', label: 'Nova' },
@@ -53,6 +55,13 @@ export default function SolicitacaoPage() {
   const [contratoSaved, setContratoSaved] = useState(false);
   const [declinaModal, setDeclinaModal] = useState(false);
   const [declinaObs, setDeclinaObs] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const baixarPdf = async () => {
+    if (!req) return;
+    setPdfLoading(true);
+    try { await gerarPdfSolicitacao(req); } finally { setPdfLoading(false); }
+  };
 
   const setC = (k: keyof ContratoInfo, v: string | boolean) =>
     setContrato((prev) => ({ ...prev, [k]: v }));
@@ -141,9 +150,17 @@ export default function SolicitacaoPage() {
             <h1>{typeLabel(req.tipo)} de {req.organizacao}</h1>
             <p className="muted">Recebida em {req.quando} · {req.prestador}</p>
           </div>
-          <a className="btn-primary sm" href={'mailto:' + req.email}>
-            <Icon name="phone" size={14} /> Responder por e-mail
-          </a>
+          <div className="portal-head-actions">
+            <button className="btn-ghost sm" onClick={baixarPdf} disabled={pdfLoading}>
+              <Icon name="file" size={14} /> {pdfLoading ? 'Gerando…' : 'Exportar PDF'}
+            </button>
+            <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(req)}>
+              <Icon name="list" size={14} /> Exportar Excel
+            </button>
+            <a className="btn-primary sm" href={'mailto:' + req.email}>
+              <Icon name="phone" size={14} /> Responder por e-mail
+            </a>
+          </div>
         </header>
 
         {/* Banner para status terminais negativos */}

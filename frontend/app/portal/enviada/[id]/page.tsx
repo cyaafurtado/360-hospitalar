@@ -9,6 +9,8 @@ import type { RequestStatus, SolicitacaoRequest } from '../../../../data/types';
 import { Icon } from '../../../../lib/icons';
 import { PortalNav } from '../../../../components/PortalNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
+import { gerarPdfSolicitacao } from '../../../../lib/pdf';
+import { gerarExcelSolicitacao } from '../../../../lib/excel';
 
 const STATUS_STEPS: { id: RequestStatus; label: string; desc: string }[] = [
   { id: 'nova', label: 'Enviada', desc: 'Solicitação recebida pelo parceiro.' },
@@ -33,6 +35,7 @@ export default function EnviadaDetalhe() {
 
   const { data: sol, loading, error } = useAsync(() => getRequest(id), [id]);
   const [cancelando, setCancelando] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   if (loading) return (
     <div className="portal-screen">
@@ -65,6 +68,11 @@ export default function EnviadaDetalhe() {
   const currentStep = STATUS_ORDER[sol.status];
   const isTerminal = sol.status === 'cancelada' || sol.status === 'declinada' || sol.status === 'fechada';
 
+  const baixarPdf = async () => {
+    setPdfLoading(true);
+    try { await gerarPdfSolicitacao(sol); } finally { setPdfLoading(false); }
+  };
+
   const cancelar = () => {
     setCancelando(true);
     // TODO: implementar chamada de API para cancelar
@@ -92,11 +100,19 @@ export default function EnviadaDetalhe() {
             <h1>{typeLabel(sol.tipo)}</h1>
             <p className="muted">Enviada {sol.quando}</p>
           </div>
-          {sol.status === 'respondida' && (
-            <a className="btn-primary sm" href={'mailto:' + sol.email}>
-              <Icon name="mail" size={14} /> Responder proposta
-            </a>
-          )}
+          <div className="portal-head-actions">
+            <button className="btn-ghost sm" onClick={baixarPdf} disabled={pdfLoading}>
+              <Icon name="file" size={14} /> {pdfLoading ? 'Gerando…' : 'Exportar PDF'}
+            </button>
+            <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(sol)}>
+              <Icon name="list" size={14} /> Exportar Excel
+            </button>
+            {sol.status === 'respondida' && (
+              <a className="btn-primary sm" href={'mailto:' + sol.email}>
+                <Icon name="mail" size={14} /> Responder proposta
+              </a>
+            )}
+          </div>
         </header>
 
         {sol.status === 'cancelada' && (

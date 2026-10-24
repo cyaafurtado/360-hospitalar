@@ -9,6 +9,8 @@ import type { RequestStatus, SolicitacaoRequest } from '../../../../data/types';
 import { Icon, ICON_PATHS } from '../../../../lib/icons';
 import { PainelNav } from '../../../../components/PainelNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
+import { gerarPdfSolicitacao } from '../../../../lib/pdf';
+import { gerarExcelSolicitacao } from '../../../../lib/excel';
 
 const STATUS_STEPS: { id: RequestStatus; label: string; desc: string }[] = [
   { id: 'nova', label: 'Enviada', desc: 'Solicitação recebida pelo fornecedor.' },
@@ -82,6 +84,13 @@ export default function AcompanharSolicitacaoPage() {
   const [cancelarModal, setCancelarModal] = useState(false);
   const [cancelResultado, setCancelResultado] = useState<'positivo' | 'negativo' | null>(null);
   const [cancelMotivo, setCancelMotivo] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const baixarPdf = async () => {
+    if (!sol) return;
+    setPdfLoading(true);
+    try { await gerarPdfSolicitacao(sol); } finally { setPdfLoading(false); }
+  };
 
   if (loading) return (
     <div className="portal-screen">
@@ -170,11 +179,19 @@ export default function AcompanharSolicitacaoPage() {
             <h1>{typeLabel(sol.tipo)}</h1>
             <p className="muted">Enviada {sol.quando}</p>
           </div>
-          {sol.status === 'respondida' && (
-            <a className="btn-primary sm" href={'mailto:' + sol.email}>
-              <Icon name="mail" size={14} /> Responder proposta
-            </a>
-          )}
+          <div className="portal-head-actions">
+            <button className="btn-ghost sm" onClick={baixarPdf} disabled={pdfLoading}>
+              <Icon name="file" size={14} /> {pdfLoading ? 'Gerando…' : 'Exportar PDF'}
+            </button>
+            <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(sol)}>
+              <Icon name="list" size={14} /> Exportar Excel
+            </button>
+            {sol.status === 'respondida' && (
+              <a className="btn-primary sm" href={'mailto:' + sol.email}>
+                <Icon name="mail" size={14} /> Responder proposta
+              </a>
+            )}
+          </div>
         </header>
 
         {sol.status === 'cancelada' && (
