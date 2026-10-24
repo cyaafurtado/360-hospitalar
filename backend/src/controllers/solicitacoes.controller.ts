@@ -72,7 +72,7 @@ export class SolicitacoesController {
     }
     const b = req.body ?? {};
     if (!b.solicitante || !b.organizacao || !b.email || !b.detalhes) {
-      res.status(400).json({ error: 'Campos obrigatórios: solicitante, organizacao, email, detalhes' });
+      res.status(400).json({ error: 'Não foi possível identificar seus dados de cadastro. Complete seu perfil e tente novamente.' });
       return;
     }
     let prestadorNome = b.prestador ?? '';

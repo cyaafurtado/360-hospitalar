@@ -231,7 +231,7 @@ export type NewQuoteInput = {
   prestadorId: string;
   prestador: string;
   tipo: string;
-  nome: string;
+  solicitante: string;
   cargo: string;
   organizacao: string;
   email: string;

@@ -1,10 +1,9 @@
 'use client';
 import { useState, type FormEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCompanies, createQuote, getMyProfile, mensagemDeErro } from '../../../../lib/services';
+import { getCompanies, createQuote, getMyProfile, getMinhaInstituicao, mensagemDeErro } from '../../../../lib/services';
 import { useAsync } from '../../../../lib/useAsync';
-import { segmentLabel, STATES, typeLabel } from '../../../../data/reference';
-import { maskPhone } from '../../../../lib/masks';
+import { segmentLabel, typeLabel } from '../../../../data/reference';
 import { Icon } from '../../../../lib/icons';
 import { Logo } from '../../../../components/Logo';
 import { RatingLine } from '../../../../components/Stars';
@@ -31,31 +30,48 @@ export default function OrcamentoPage() {
 
   // Fornecedor com cadastro pendente não pode solicitar orçamento — mesma
   // trava de "cadastro completo" aplicada em /empresa/[id]. Instituição
-  // segue liberada só com login (ainda sem cadastro de instituição no backend).
+  // precisa do cadastro da instituição finalizado pelo mesmo motivo: é dali
+  // que vêm os dados do solicitante (ver meusDados abaixo).
   const souFornecedor = usuario?.tipo === 'fornecedor';
+  const souContratante = usuario?.tipo === 'contratante';
   const { data: meuPerfil, loading: carregandoPerfil } = useAsync(
     () => (souFornecedor ? getMyProfile() : Promise.resolve(null)),
     [souFornecedor]
   );
-  const cadastroPendente = souFornecedor && meuPerfil?.status !== 'completo';
+  const { data: minhaInstituicao, loading: carregandoInstituicao } = useAsync(
+    () => (souContratante ? getMinhaInstituicao() : Promise.resolve(null)),
+    [souContratante]
+  );
+  const cadastroPendente =
+    (souFornecedor && meuPerfil?.status !== 'completo') || (souContratante && !minhaInstituicao);
+
+  // Quem solicita já fez o cadastro na plataforma — não pede de novo nome,
+  // organização, e-mail, telefone, UF/cidade: usa o que já está na conta.
+  const meusDados = souContratante
+    ? {
+        nome: minhaInstituicao?.respCadastro?.nome || usuario?.nome || '',
+        organizacao: minhaInstituicao?.name || usuario?.organizacao || '',
+        email: minhaInstituicao?.respCadastro?.email || minhaInstituicao?.email || usuario?.email || '',
+        telefone: minhaInstituicao?.respCadastro?.telefone || minhaInstituicao?.phone || usuario?.telefone || '',
+        uf: minhaInstituicao?.uf || '',
+        cidade: minhaInstituicao?.city || '',
+      }
+    : {
+        nome: usuario?.nome || '',
+        organizacao: meuPerfil?.name || usuario?.organizacao || '',
+        email: meuPerfil?.email || usuario?.email || '',
+        telefone: meuPerfil?.phone || usuario?.telefone || '',
+        uf: meuPerfil?.uf || '',
+        cidade: meuPerfil?.city || '',
+      };
 
   const [tipo, setTipo] = useState('cotacao');
   const [prazo, setPrazo] = useState('Até 30 dias');
+  const [detalhes, setDetalhes] = useState('');
   const [done, setDone] = useState(false);
   const [proto, setProto] = useState('');
   const [sending, setSending] = useState(false);
   const [erroEnvio, setErroEnvio] = useState('');
-  const [f, setF] = useState({
-    nome: '',
-    organizacao: '',
-    cargo: '',
-    email: '',
-    telefone: '',
-    uf: '',
-    cidade: '',
-    detalhes: '',
-  });
-  const set = (k: keyof typeof f, v: string) => setF((s) => ({ ...s, [k]: v }));
 
   // Lista de serviços de interesse — pode marcar mais de um do catálogo do
   // fornecedor, mais um item livre pro que não estiver listado.
@@ -65,7 +81,11 @@ export default function OrcamentoPage() {
   const toggleServico = (s: string) =>
     setServicos((lista) => (lista.includes(s) ? lista.filter((x) => x !== s) : [...lista, s]));
 
-  if (loading || error || (authEmail && souFornecedor && carregandoPerfil)) {
+  if (
+    loading ||
+    error ||
+    (authEmail && ((souFornecedor && carregandoPerfil) || (souContratante && carregandoInstituicao)))
+  ) {
     return (
       <div className="screen register">
         {error ? <LoadError message={error} /> : <Loading />}
@@ -140,11 +160,12 @@ export default function OrcamentoPage() {
           </div>
           <h1>Finalize seu cadastro para continuar</h1>
           <p>
-            Para solicitar orçamento a <strong>{c.name}</strong>, sua empresa precisa ter o cadastro
-            completo na 360 Hospitalar. Falta pouco — termine o perfil da sua empresa e volte aqui.
+            Para solicitar orçamento a <strong>{c.name}</strong>, sua conta precisa ter o cadastro
+            completo na 360 Hospitalar — é de lá que vêm seus dados para a solicitação. Falta pouco —
+            termine o seu perfil e volte aqui.
           </p>
           <div className="success-actions">
-            <button className="btn-primary" onClick={() => router.push('/portal/perfil')}>
+            <button className="btn-primary" onClick={() => router.push(souFornecedor ? '/portal/perfil' : '/painel/perfil')}>
               Completar cadastro
             </button>
             <button className="btn-ghost" onClick={() => router.push(`/empresa/${c.id}`)}>
@@ -157,15 +178,10 @@ export default function OrcamentoPage() {
   }
 
   // defaults dependentes do fornecedor
-  const ufVal = f.uf || c.uf;
+  const ufVal = meusDados.uf || c.uf;
   const servicoVal = [...servicos, ...(outro && outroTexto.trim() ? [outroTexto.trim()] : [])].join(', ');
 
-  const valid =
-    f.nome.trim() &&
-    f.organizacao.trim() &&
-    /\S+@\S+\.\S+/.test(f.email) &&
-    f.telefone.replace(/\D/g, '').length >= 10 &&
-    f.detalhes.trim().length >= 8;
+  const valid = detalhes.trim().length >= 8;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -177,15 +193,15 @@ export default function OrcamentoPage() {
         prestadorId: c.id,
         prestador: c.name,
         tipo,
-        nome: f.nome,
-        cargo: f.cargo,
-        organizacao: f.organizacao,
-        email: f.email,
-        telefone: f.telefone,
+        solicitante: meusDados.nome,
+        cargo: '',
+        organizacao: meusDados.organizacao,
+        email: meusDados.email,
+        telefone: meusDados.telefone,
         uf: ufVal,
-        cidade: f.cidade,
+        cidade: meusDados.cidade,
         servico: servicoVal,
-        detalhes: f.detalhes,
+        detalhes,
       });
       setProto(r.id);
       setDone(true);
@@ -210,7 +226,7 @@ export default function OrcamentoPage() {
           <p>
             Seu pedido de <strong>{typeLabel(tipo)}</strong> foi encaminhado para{' '}
             <strong>{c.name}</strong> sob o protocolo <strong>{proto}</strong>. O fornecedor responde
-            diretamente em <strong>{f.email}</strong> — normalmente em até 2 dias úteis.
+            diretamente em <strong>{meusDados.email}</strong> — normalmente em até 2 dias úteis.
           </p>
           <div className="quote-recap">
             <div className="qr-row">
@@ -276,46 +292,35 @@ export default function OrcamentoPage() {
             </div>
 
             <h3 className="reg-section-title mt">
-              <Icon name="users" size={16} /> Seus dados
+              <Icon name="users" size={16} /> Solicitando como
             </h3>
-            <div className="reg-grid">
-              <div className="reg-row2">
-                <Field label="Nome completo" required>
-                  <input value={f.nome} onChange={(e) => set('nome', e.target.value)} placeholder="Seu nome" />
-                </Field>
-                <Field label="Cargo">
-                  <input value={f.cargo} onChange={(e) => set('cargo', e.target.value)} placeholder="Ex: Coordenador de Compras" />
-                </Field>
+            <div className="quote-recap" style={{ margin: '0 0 4px', maxWidth: 'none' }}>
+              <div className="qr-row">
+                <span>Nome</span>
+                <strong>{meusDados.nome || '—'}</strong>
               </div>
-              <Field label="Organização" required>
-                <input value={f.organizacao} onChange={(e) => set('organizacao', e.target.value)} placeholder="Hospital, clínica ou empresa" />
-              </Field>
-              <div className="reg-row2">
-                <Field label="E-mail" required>
-                  <input type="email" value={f.email} onChange={(e) => set('email', e.target.value)} placeholder="voce@organizacao.com.br" />
-                </Field>
-                <Field label="Telefone" required>
-                  <input value={f.telefone} onChange={(e) => set('telefone', maskPhone(e.target.value))} placeholder="(00) 00000-0000" inputMode="numeric" />
-                </Field>
+              <div className="qr-row">
+                <span>Organização</span>
+                <strong>{meusDados.organizacao || '—'}</strong>
               </div>
-              <div className="reg-row2">
-                <Field label="Estado">
-                  <div className="reg-select">
-                    <Icon name="pin" size={16} />
-                    <select value={ufVal} onChange={(e) => set('uf', e.target.value)}>
-                      {STATES.map((s) => (
-                        <option key={s.uf} value={s.uf}>
-                          {s.name} ({s.uf})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </Field>
-                <Field label="Cidade">
-                  <input value={f.cidade} onChange={(e) => set('cidade', e.target.value)} placeholder="Sua cidade" />
-                </Field>
+              <div className="qr-row">
+                <span>E-mail</span>
+                <strong>{meusDados.email || '—'}</strong>
+              </div>
+              <div className="qr-row">
+                <span>Telefone</span>
+                <strong>{meusDados.telefone || '—'}</strong>
               </div>
             </div>
+            <p className="reg-hint">
+              Dados do seu cadastro na 360 Hospitalar.{' '}
+              <a
+                className="login-link"
+                onClick={() => router.push(souFornecedor ? '/portal/perfil' : '/painel/perfil')}
+              >
+                Editar no meu perfil
+              </a>
+            </p>
 
             <h3 className="reg-section-title mt">
               <Icon name="list" size={16} /> Sobre o que você precisa
@@ -362,8 +367,8 @@ export default function OrcamentoPage() {
               >
                 <textarea
                   rows={5}
-                  value={f.detalhes}
-                  onChange={(e) => set('detalhes', e.target.value)}
+                  value={detalhes}
+                  onChange={(e) => setDetalhes(e.target.value)}
                   placeholder="Ex: Precisamos de apoio laboratorial 24h para uma nova unidade com volume estimado de 12 mil exames/mês…"
                 />
               </Field>
