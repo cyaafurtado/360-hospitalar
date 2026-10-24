@@ -11,7 +11,6 @@ import { PortalNav } from '../../../../components/PortalNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
 import { Loading, LoadError } from '../../../../components/AsyncState';
 import { gerarPdfSolicitacao } from '../../../../lib/pdf';
-import { gerarExcelSolicitacao } from '../../../../lib/excel';
 
 const STATUS_STEPS: { id: RequestStatus; label: string }[] = [
   { id: 'nova', label: 'Nova' },
@@ -185,9 +184,6 @@ export default function SolicitacaoPage() {
           <div className="portal-head-actions">
             <button className="btn-ghost sm" onClick={baixarPdf} disabled={pdfLoading}>
               <Icon name="file" size={14} /> {pdfLoading ? 'Gerando…' : 'Exportar PDF'}
-            </button>
-            <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(req)}>
-              <Icon name="list" size={14} /> Exportar Excel
             </button>
             <a className="btn-primary sm" href={'mailto:' + req.email}>
               <Icon name="phone" size={14} /> Responder por e-mail

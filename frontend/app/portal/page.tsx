@@ -11,7 +11,6 @@ import { PortalNav } from '../../components/PortalNav';
 import { StatusPill, TypePill } from '../../components/Pills';
 import { Loading, LoadError } from '../../components/AsyncState';
 import { gerarPdfSolicitacao } from '../../lib/pdf';
-import { gerarExcelSolicitacao } from '../../lib/excel';
 
 type Tab = 'recebidas' | 'enviadas';
 
@@ -268,9 +267,6 @@ export default function PortalPage() {
                                     <Icon name="file" size={14} />
                                     {pdfLoading === r.id ? 'Gerando…' : 'Exportar PDF'}
                                   </button>
-                                  <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(r)}>
-                                    <Icon name="list" size={14} /> Exportar Excel
-                                  </button>
                                   <button
                                     className="btn-ghost sm"
                                     onClick={() => marcarStatus(r.id, 'respondida')}
@@ -400,9 +396,6 @@ export default function PortalPage() {
                                 >
                                   <Icon name="file" size={14} />
                                   {pdfLoading === r.id ? 'Gerando…' : 'Exportar PDF'}
-                                </button>
-                                <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(r)}>
-                                  <Icon name="list" size={14} /> Exportar Excel
                                 </button>
                                 <button
                                   className="btn-ghost sm"

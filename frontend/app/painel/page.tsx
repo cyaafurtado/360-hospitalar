@@ -10,7 +10,6 @@ import { getRequests, getMinhaInstituicao } from '../../lib/services';
 import { useAsync } from '../../lib/useAsync';
 import type { RequestStatus, RequestType, SolicitacaoRequest } from '../../data/types';
 import { gerarPdfSolicitacao } from '../../lib/pdf';
-import { gerarExcelSolicitacao } from '../../lib/excel';
 import { Loading, LoadError } from '../../components/AsyncState';
 
 export default function PainelPage() {
@@ -245,12 +244,6 @@ export default function PainelPage() {
                             >
                               <Icon name="file" size={14} />
                               {pdfLoading === r.id ? 'Gerando…' : 'Exportar PDF'}
-                            </button>
-                            <button
-                              className="btn-ghost sm"
-                              onClick={(e) => { e.stopPropagation(); gerarExcelSolicitacao(r); }}
-                            >
-                              <Icon name="list" size={14} /> Exportar Excel
                             </button>
                             <button
                               className="btn-ghost sm"

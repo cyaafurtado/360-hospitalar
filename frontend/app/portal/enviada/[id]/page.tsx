@@ -10,7 +10,6 @@ import { Icon } from '../../../../lib/icons';
 import { PortalNav } from '../../../../components/PortalNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
 import { gerarPdfSolicitacao } from '../../../../lib/pdf';
-import { gerarExcelSolicitacao } from '../../../../lib/excel';
 
 const STATUS_STEPS: { id: RequestStatus; label: string; desc: string }[] = [
   { id: 'nova', label: 'Enviada', desc: 'Solicitação recebida pelo parceiro.' },
@@ -128,9 +127,6 @@ export default function EnviadaDetalhe() {
           <div className="portal-head-actions">
             <button className="btn-ghost sm" onClick={baixarPdf} disabled={pdfLoading}>
               <Icon name="file" size={14} /> {pdfLoading ? 'Gerando…' : 'Exportar PDF'}
-            </button>
-            <button className="btn-ghost sm" onClick={() => gerarExcelSolicitacao(sol)}>
-              <Icon name="list" size={14} /> Exportar Excel
             </button>
             {sol.status === 'respondida' && (
               <a className="btn-primary sm" href={'mailto:' + sol.email}>
