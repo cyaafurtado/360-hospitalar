@@ -50,6 +50,16 @@ export async function updateRequestContract(id: string, contrato: ContratoInfo):
   return data;
 }
 
+export async function solicitarCancelamento(id: string, motivo: string): Promise<SolicitacaoRequest> {
+  const { data } = await api.post<SolicitacaoRequest>(`/requests/${id}/cancelamento`, { motivo });
+  return data;
+}
+
+export async function responderCancelamento(id: string, aceitar: boolean): Promise<SolicitacaoRequest> {
+  const { data } = await api.post<SolicitacaoRequest>(`/requests/${id}/cancelamento/responder`, { aceitar });
+  return data;
+}
+
 // null = a conta existe mas ainda não cadastrou empresa (não é erro de carga).
 export async function getMyProfile(): Promise<SupplierProfileData | null> {
   try {

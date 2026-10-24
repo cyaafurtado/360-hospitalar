@@ -35,7 +35,7 @@ export interface Company {
 }
 
 export type RequestType = 'cotacao' | 'contato' | 'parceria';
-export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada';
+export type RequestStatus = 'nova' | 'andamento' | 'respondida' | 'fechada' | 'cancelada';
 
 export interface ContratoInfo {
   assinado: boolean;
@@ -44,6 +44,17 @@ export interface ContratoInfo {
   aprovadoEm?: string;
   inicio?: string;
   validade?: string;
+}
+
+// Quem pediu o cancelamento e se ele já valeu ou ainda espera a outra parte.
+export type CancelamentoStatus = 'pendente' | 'aceito' | 'recusado';
+export type CancelamentoSolicitante = 'fornecedor' | 'contratante';
+
+export interface CancelamentoInfo {
+  motivo: string;
+  solicitadoPor: CancelamentoSolicitante;
+  em: string;
+  status: CancelamentoStatus;
 }
 
 export interface SolicitacaoRequest {
@@ -63,6 +74,7 @@ export interface SolicitacaoRequest {
   servico?: string;
   prazo?: string;
   contrato?: ContratoInfo;
+  cancelamento?: CancelamentoInfo;
 }
 
 // Perfil editável do fornecedor logado (deriva de Company)

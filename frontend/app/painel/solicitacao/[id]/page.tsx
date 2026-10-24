@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '../../../../lib/store';
 import { typeLabel } from '../../../../data/reference';
-import { getRequest } from '../../../../lib/services';
+import { getRequest, solicitarCancelamento, responderCancelamento } from '../../../../lib/services';
 import { useAsync } from '../../../../lib/useAsync';
-import type { RequestStatus, SolicitacaoRequest } from '../../../../data/types';
+import type { RequestStatus, SolicitacaoRequest, CancelamentoInfo } from '../../../../data/types';
 import { Icon, ICON_PATHS } from '../../../../lib/icons';
 import { PainelNav } from '../../../../components/PainelNav';
 import { StatusPill, TypePill } from '../../../../components/Pills';
@@ -73,7 +73,12 @@ export default function AcompanharSolicitacaoPage() {
 
   const { data: solApi, loading, error } = useAsync(() => getRequest(id), [id]);
   const [localStatus, setLocalStatus] = useState<RequestStatus | null>(null);
-  const sol = { ...solApi, status: localStatus || solApi?.status } as SolicitacaoRequest | undefined;
+  const [cancelamentoOverride, setCancelamentoOverride] = useState<CancelamentoInfo | undefined>(undefined);
+  const sol = {
+    ...solApi,
+    status: localStatus || solApi?.status,
+    cancelamento: cancelamentoOverride ?? solApi?.cancelamento,
+  } as SolicitacaoRequest | undefined;
 
   const [cancelando, setCancelando] = useState(false);
   const [cancelado, setCancelado] = useState(false);
@@ -82,14 +87,28 @@ export default function AcompanharSolicitacaoPage() {
   const [avaliacao, setAvaliacao] = useState(0);
   const [encerrando, setEncerrando] = useState(false);
   const [cancelarModal, setCancelarModal] = useState(false);
-  const [cancelResultado, setCancelResultado] = useState<'positivo' | 'negativo' | null>(null);
   const [cancelMotivo, setCancelMotivo] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [respondendoCancel, setRespondendoCancel] = useState(false);
 
   const baixarPdf = async () => {
     if (!sol) return;
     setPdfLoading(true);
     try { await gerarPdfSolicitacao(sol); } finally { setPdfLoading(false); }
+  };
+
+  const responderPedidoCancelamento = async (aceitar: boolean) => {
+    if (!sol || respondendoCancel) return;
+    setRespondendoCancel(true);
+    try {
+      const updated = await responderCancelamento(sol.id, aceitar);
+      setLocalStatus(updated.status);
+      setCancelamentoOverride(updated.cancelamento);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRespondendoCancel(false);
+    }
   };
 
   if (loading) return (
@@ -126,19 +145,24 @@ export default function AcompanharSolicitacaoPage() {
   const fecharModalCancelar = () => {
     if (cancelando) return;
     setCancelarModal(false);
-    setCancelResultado(null);
     setCancelMotivo('');
   };
 
-  const confirmarCancelamento = () => {
-    if (cancelando || cancelResultado === null || !cancelMotivo.trim()) return;
+  const confirmarCancelamento = async () => {
+    if (!sol || cancelando || !cancelMotivo.trim()) return;
     setCancelando(true);
-    setTimeout(() => {
-      setLocalStatus('cancelada');
-      setCancelando(false);
-      setCancelado(true);
+    try {
+      const updated = await solicitarCancelamento(sol.id, cancelMotivo.trim());
+      setLocalStatus(updated.status);
+      setCancelamentoOverride(updated.cancelamento);
       setCancelarModal(false);
-    }, 600);
+      setCancelMotivo('');
+      setCancelado(updated.status === 'cancelada');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCancelando(false);
+    }
   };
 
   const fecharModalEncerrar = () => {
@@ -216,6 +240,47 @@ export default function AcompanharSolicitacaoPage() {
               <Icon name="check" size={16} stroke={2.4} />
               <span>Cotação <strong>encerrada</strong>.</span>
             </div>
+          </div>
+        )}
+
+        {/* Pedido de cancelamento pendente — quem pediu só acompanha; a
+            outra parte decide aceitar ou manter a cotação. */}
+        {sol.cancelamento?.status === 'pendente' && (
+          <div className="sol-terminal-banner pending">
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="signal" size={16} stroke={2} />
+                <span>
+                  {sol.cancelamento.solicitadoPor === 'contratante' ? (
+                    <>Você solicitou o cancelamento. Aguardando confirmação de <strong>{sol.prestador}</strong>.</>
+                  ) : (
+                    <><strong>{sol.prestador}</strong> pediu para cancelar esta cotação.</>
+                  )}
+                  <span className="sol-banner-when"> · {sol.cancelamento.em}</span>
+                </span>
+              </div>
+              <div className="sol-banner-obs">
+                <span className="sol-banner-obs-label">Motivo informado:</span> {sol.cancelamento.motivo}
+              </div>
+            </div>
+            {sol.cancelamento.solicitadoPor !== 'contratante' && (
+              <div className="sol-banner-actions">
+                <button
+                  className="btn-ghost sm"
+                  disabled={respondendoCancel}
+                  onClick={() => responderPedidoCancelamento(false)}
+                >
+                  Manter cotação
+                </button>
+                <button
+                  className="btn-primary sm"
+                  disabled={respondendoCancel}
+                  onClick={() => responderPedidoCancelamento(true)}
+                >
+                  {respondendoCancel ? 'Enviando…' : 'Aceitar cancelamento'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -311,18 +376,29 @@ export default function AcompanharSolicitacaoPage() {
                   >
                     <Icon name="check" size={13} stroke={2.6} /> Encerrar cotação
                   </button>
-                  <button
-                    className="sol-status-btn danger"
-                    onClick={() => setCancelarModal(true)}
-                    disabled={cancelando}
-                  >
-                    {cancelando ? 'Cancelando…' : 'Cancelar solicitação'}
-                  </button>
+                </>
+              )}
+              {/* Cancelamento: disponível mesmo com a cotação já fechada —
+                  só que aí precisa da confirmação do fornecedor. */}
+              {sol.status !== 'cancelada' && sol.status !== 'declinada' && (
+                <>
+                  <div className="sol-status-sep" />
+                  {sol.cancelamento?.status === 'pendente' ? (
+                    <p className="sol-status-desc">Pedido de cancelamento em análise.</p>
+                  ) : (
+                    <button
+                      className="sol-status-btn danger"
+                      onClick={() => setCancelarModal(true)}
+                      disabled={cancelando}
+                    >
+                      {cancelando ? 'Enviando…' : 'Cancelar solicitação'}
+                    </button>
+                  )}
                 </>
               )}
               {cancelado && (
                 <p className="sol-cancel-ok">
-                  <Icon name="check" size={13} stroke={2.5} /> Solicitação cancelada.
+                  <Icon name="check" size={13} stroke={2.5} /> Cancelamento efetivado.
                 </p>
               )}
             </div>
@@ -411,38 +487,21 @@ export default function AcompanharSolicitacaoPage() {
             </div>
             <h2 className="sol-modal-title">Cancelar solicitação</h2>
             <p className="sol-modal-desc">
-              Antes de cancelar, conte como ficou o atendimento com <strong>{sol.prestador}</strong> —
-              isso ajuda a manter o histórico da plataforma.
+              {sol.status === 'respondida' || sol.status === 'fechada' ? (
+                <>Como <strong>{sol.prestador}</strong> já respondeu, o cancelamento fica pendente até o
+                  fornecedor confirmar.</>
+              ) : (
+                <>O fornecedor ainda não respondeu, então o cancelamento é efetivado na hora.</>
+              )}
             </p>
             <div className="sol-modal-field">
-              <label className="sol-modal-label">O serviço foi concluído de forma positiva ou negativa?</label>
-              <div className="sol-status-btns">
-                <button
-                  type="button"
-                  className={'sol-status-btn' + (cancelResultado === 'positivo' ? ' active' : '')}
-                  onClick={() => setCancelResultado('positivo')}
-                >
-                  {cancelResultado === 'positivo' && <Icon name="check" size={13} stroke={3} />}
-                  Positivo — foi resolvido de outra forma
-                </button>
-                <button
-                  type="button"
-                  className={'sol-status-btn danger' + (cancelResultado === 'negativo' ? ' active' : '')}
-                  onClick={() => setCancelResultado('negativo')}
-                >
-                  {cancelResultado === 'negativo' && <Icon name="check" size={13} stroke={3} />}
-                  Negativo — não foi resolvido
-                </button>
-              </div>
-            </div>
-            <div className="sol-modal-field">
-              <label className="sol-modal-label">Motivo do encerramento</label>
+              <label className="sol-modal-label">Motivo do cancelamento</label>
               <textarea
                 className="sol-modal-textarea"
                 rows={3}
                 value={cancelMotivo}
                 onChange={(e) => setCancelMotivo(e.target.value)}
-                placeholder="Explique por que está encerrando esta solicitação na plataforma…"
+                placeholder="Explique por que está cancelando esta solicitação…"
               />
             </div>
             <div className="sol-modal-actions">
@@ -452,9 +511,9 @@ export default function AcompanharSolicitacaoPage() {
               <button
                 className="btn-danger"
                 onClick={confirmarCancelamento}
-                disabled={cancelando || cancelResultado === null || !cancelMotivo.trim()}
+                disabled={cancelando || !cancelMotivo.trim()}
               >
-                {cancelando ? 'Cancelando…' : 'Confirmar cancelamento'}
+                {cancelando ? 'Enviando…' : 'Confirmar cancelamento'}
               </button>
             </div>
           </div>

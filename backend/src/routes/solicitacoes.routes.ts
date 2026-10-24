@@ -13,5 +13,7 @@ router.post('/', asyncHandler(SolicitacoesController.create));
 router.get('/:id', asyncHandler(SolicitacoesController.getById));
 router.patch('/:id/status', asyncHandler(SolicitacoesController.updateStatus));
 router.patch('/:id/contract', asyncHandler(SolicitacoesController.updateContract));
+router.post('/:id/cancelamento', asyncHandler(SolicitacoesController.solicitarCancelamento));
+router.post('/:id/cancelamento/responder', asyncHandler(SolicitacoesController.responderCancelamento));
 
 export default router;

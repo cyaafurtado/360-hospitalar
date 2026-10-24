@@ -41,6 +41,19 @@ export type ContratoInfo = {
   validade?: string;    // fim da vigência (prazo de validade)
 };
 
+// Pedido de cancelamento: enquanto o fornecedor não respondeu, cancela na
+// hora ('aceito'); depois de respondida/fechada, fica 'pendente' até a
+// outra parte aceitar ou recusar.
+export type CancelamentoStatus = 'pendente' | 'aceito' | 'recusado';
+export type CancelamentoSolicitante = 'fornecedor' | 'contratante';
+
+export type CancelamentoInfo = {
+  motivo: string;
+  solicitadoPor: CancelamentoSolicitante;
+  em: string;
+  status: CancelamentoStatus;
+};
+
 export type SolicitacaoRequest = {
   id: string;
   solicitante: string;
@@ -58,6 +71,7 @@ export type SolicitacaoRequest = {
   servico?: string;
   prazo?: string;
   contrato?: ContratoInfo;
+  cancelamento?: CancelamentoInfo;
   declinaObs?: string;
   declinadoEm?: string;
 };

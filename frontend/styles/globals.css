@@ -1366,6 +1366,7 @@ em { font-style: italic; }
 .sol-banner-when { font-size: 12.5px; font-weight: 400; opacity: 0.75; }
 .sol-banner-obs { font-size: 13px; background: color-mix(in oklch, var(--primary), white 82%); border-radius: var(--radius-sm); padding: 8px 12px; line-height: 1.5; color: color-mix(in oklch, var(--primary), black 20%); }
 .sol-banner-obs-label { font-weight: 700; }
+.sol-banner-actions { display: flex; gap: 8px; flex: none; }
 
 .sol-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; z-index: 200; padding: 20px; backdrop-filter: blur(2px); }
 .sol-modal { background: var(--surface); border-radius: var(--radius-lg); padding: 32px; max-width: 460px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,.22); display: flex; flex-direction: column; gap: 16px; }

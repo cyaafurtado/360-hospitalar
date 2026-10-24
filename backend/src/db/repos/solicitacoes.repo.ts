@@ -1,5 +1,5 @@
 import { query } from '../connection';
-import { SolicitacaoRequest, RequestStatus, ContratoInfo } from '../../models/types';
+import { SolicitacaoRequest, RequestStatus, ContratoInfo, CancelamentoInfo } from '../../models/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function rowToReq(r: any): SolicitacaoRequest {
@@ -20,6 +20,7 @@ function rowToReq(r: any): SolicitacaoRequest {
     ...(r.servico ? { servico: r.servico } : {}),
     ...(r.prazo ? { prazo: r.prazo } : {}),
     ...(r.contrato ? { contrato: r.contrato as ContratoInfo } : {}),
+    ...(r.cancelamento ? { cancelamento: r.cancelamento as CancelamentoInfo } : {}),
   };
 }
 
@@ -106,6 +107,19 @@ export const SolicitacoesRepo = {
     const { rows } = await query(
       'UPDATE solicitacoes SET contrato = $2::jsonb WHERE id = $1 RETURNING *',
       [id, JSON.stringify(contrato)]
+    );
+    return rows[0] ? rowToReq(rows[0]) : null;
+  },
+
+  // `efetivar` também marca status = 'cancelada' (pedido imediato ou pedido
+  // pendente que a outra parte aceitou); sem isso, só grava o registro do
+  // pedido/resposta e o status original continua valendo.
+  async setCancelamento(id: string, cancelamento: CancelamentoInfo, efetivar: boolean): Promise<SolicitacaoRequest | null> {
+    const { rows } = await query(
+      efetivar
+        ? "UPDATE solicitacoes SET status = 'cancelada', cancelamento = $2::jsonb WHERE id = $1 RETURNING *"
+        : 'UPDATE solicitacoes SET cancelamento = $2::jsonb WHERE id = $1 RETURNING *',
+      [id, JSON.stringify(cancelamento)]
     );
     return rows[0] ? rowToReq(rows[0]) : null;
   },

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getRequests, updateRequestStatus, updateRequestContract } from '../../../../lib/services';
+import { getRequests, updateRequestStatus, updateRequestContract, solicitarCancelamento, responderCancelamento } from '../../../../lib/services';
 import { useAsync } from '../../../../lib/useAsync';
 import { useAppStore } from '../../../../lib/store';
 import { typeLabel } from '../../../../data/reference';
@@ -56,11 +56,43 @@ export default function SolicitacaoPage() {
   const [declinaModal, setDeclinaModal] = useState(false);
   const [declinaObs, setDeclinaObs] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [cancelModal, setCancelModal] = useState(false);
+  const [cancelMotivo, setCancelMotivo] = useState('');
+  const [cancelando, setCancelando] = useState(false);
+  const [respondendoCancel, setRespondendoCancel] = useState(false);
 
   const baixarPdf = async () => {
     if (!req) return;
     setPdfLoading(true);
     try { await gerarPdfSolicitacao(req); } finally { setPdfLoading(false); }
+  };
+
+  const confirmarCancelamento = async () => {
+    if (!req || cancelando || !cancelMotivo.trim()) return;
+    setCancelando(true);
+    try {
+      const updated = await solicitarCancelamento(req.id, cancelMotivo.trim());
+      setReq(updated);
+      setCancelModal(false);
+      setCancelMotivo('');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCancelando(false);
+    }
+  };
+
+  const responderPedidoCancelamento = async (aceitar: boolean) => {
+    if (!req || respondendoCancel) return;
+    setRespondendoCancel(true);
+    try {
+      const updated = await responderCancelamento(req.id, aceitar);
+      setReq(updated);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRespondendoCancel(false);
+    }
   };
 
   const setC = (k: keyof ContratoInfo, v: string | boolean) =>
@@ -189,6 +221,47 @@ export default function SolicitacaoPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Pedido de cancelamento pendente — quem pediu só acompanha; a
+            outra parte decide aceitar ou manter a solicitação. */}
+        {req.cancelamento?.status === 'pendente' && (
+          <div className="sol-terminal-banner pending">
+            <div className="sol-banner-main">
+              <div className="sol-banner-row">
+                <Icon name="signal" size={16} stroke={2} />
+                <span>
+                  {req.cancelamento.solicitadoPor === 'fornecedor' ? (
+                    <>Você solicitou o cancelamento. Aguardando confirmação de <strong>{req.organizacao}</strong>.</>
+                  ) : (
+                    <><strong>{req.organizacao}</strong> pediu para cancelar esta solicitação.</>
+                  )}
+                  <span className="sol-banner-when"> · {req.cancelamento.em}</span>
+                </span>
+              </div>
+              <div className="sol-banner-obs">
+                <span className="sol-banner-obs-label">Motivo informado:</span> {req.cancelamento.motivo}
+              </div>
+            </div>
+            {req.cancelamento.solicitadoPor !== 'fornecedor' && (
+              <div className="sol-banner-actions">
+                <button
+                  className="btn-ghost sm"
+                  disabled={respondendoCancel}
+                  onClick={() => responderPedidoCancelamento(false)}
+                >
+                  Manter solicitação
+                </button>
+                <button
+                  className="btn-primary sm"
+                  disabled={respondendoCancel}
+                  onClick={() => responderPedidoCancelamento(true)}
+                >
+                  {respondendoCancel ? 'Enviando…' : 'Aceitar cancelamento'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -386,17 +459,32 @@ export default function SolicitacaoPage() {
                     {req.status === 'declinada' && <Icon name="check" size={13} stroke={3} />}
                     Declinar
                   </button>
-                  <button
-                    className={'sol-status-btn danger' + (req.status === 'cancelada' ? ' active' : '')}
-                    onClick={() => changeStatus('cancelada')}
-                    disabled={changingStatus || req.status === 'cancelada'}
-                  >
-                    {req.status === 'cancelada' && <Icon name="check" size={13} stroke={3} />}
-                    Cancelar
-                  </button>
                 </div>
               )}
             </div>
+
+            {/* Cancelamento: disponível mesmo com a solicitação fechada —
+                só que aí precisa da confirmação do solicitante. */}
+            {req.status !== 'cancelada' && req.status !== 'declinada' && (
+              <div className="sol-card">
+                <h3 className="sol-card-title">
+                  <Icon name="close" size={16} stroke={2.2} /> Cancelamento
+                </h3>
+                {req.cancelamento?.status === 'pendente' ? (
+                  <p className="sol-cancel-ok" style={{ color: 'var(--muted)' }}>
+                    Pedido de cancelamento em análise.
+                  </p>
+                ) : (
+                  <button
+                    className="sol-status-btn danger"
+                    onClick={() => setCancelModal(true)}
+                    disabled={cancelando}
+                  >
+                    {cancelando ? 'Enviando…' : 'Cancelar solicitação'}
+                  </button>
+                )}
+              </div>
+            )}
           </aside>
         </div>
       </div>
@@ -429,6 +517,48 @@ export default function SolicitacaoPage() {
               </button>
               <button className="btn-danger" onClick={confirmarDeclinar} disabled={changingStatus}>
                 {changingStatus ? 'Declinando…' : 'Confirmar declínio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de pedido de cancelamento */}
+      {cancelModal && (
+        <div className="sol-modal-overlay" onClick={() => !cancelando && setCancelModal(false)}>
+          <div className="sol-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sol-modal-icon warn">
+              <Icon name="close" size={24} stroke={2.4} />
+            </div>
+            <h2 className="sol-modal-title">Cancelar solicitação</h2>
+            <p className="sol-modal-desc">
+              {req.status === 'respondida' || req.status === 'fechada' ? (
+                <>Como você já respondeu esta solicitação, o cancelamento fica pendente até{' '}
+                  <strong>{req.organizacao}</strong> confirmar.</>
+              ) : (
+                <>A solicitação ainda não teve retorno, então o cancelamento é efetivado na hora.</>
+              )}
+            </p>
+            <div className="sol-modal-field">
+              <label className="sol-modal-label">Motivo do cancelamento</label>
+              <textarea
+                className="sol-modal-textarea"
+                rows={3}
+                value={cancelMotivo}
+                onChange={(e) => setCancelMotivo(e.target.value)}
+                placeholder="Explique por que está cancelando esta solicitação…"
+              />
+            </div>
+            <div className="sol-modal-actions">
+              <button className="btn-ghost" onClick={() => setCancelModal(false)} disabled={cancelando}>
+                Voltar
+              </button>
+              <button
+                className="btn-danger"
+                onClick={confirmarCancelamento}
+                disabled={cancelando || !cancelMotivo.trim()}
+              >
+                {cancelando ? 'Enviando…' : 'Confirmar cancelamento'}
               </button>
             </div>
           </div>
