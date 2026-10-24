@@ -181,6 +181,14 @@ export default function OrcamentoPage() {
   const ufVal = meusDados.uf || c.uf;
   const servicoVal = [...servicos, ...(outro && outroTexto.trim() ? [outroTexto.trim()] : [])].join(', ');
 
+  // Opções pra marcar o que se quer: a lista simples ("Serviços e soluções")
+  // mais o catálogo da empresa ("Meu catálogo de serviços", com preço/prazo)
+  // — a mesma combinação que já aparece na página pública do fornecedor.
+  const catalogoPorNome = new Map((c.catalogo ?? []).map((s) => [s.nome, s]));
+  const servicoOptions = Array.from(
+    new Set([...(c.services ?? []), ...(c.catalogo ?? []).map((s) => s.nome)])
+  ).filter(Boolean);
+
   const valid = detalhes.trim().length >= 8;
 
   const submit = async (e: FormEvent) => {
@@ -326,18 +334,26 @@ export default function OrcamentoPage() {
               <Icon name="list" size={16} /> Sobre o que você precisa
             </h3>
             <div className="reg-grid">
-              <Field label="Serviços de interesse" hint="Selecione um ou mais serviços deste fornecedor.">
+              <Field
+                label="Serviços de interesse"
+                hint="Selecione um ou mais serviços deste fornecedor. Passe o mouse para ver preço e prazo, quando informados."
+              >
                 <div className="qprazo">
-                  {c.services.map((s) => (
-                    <button
-                      type="button"
-                      key={s}
-                      className={'reg-pick' + (servicos.includes(s) ? ' on' : '')}
-                      onClick={() => toggleServico(s)}
-                    >
-                      {servicos.includes(s) && <Icon name="check" size={12} stroke={3} />} {s}
-                    </button>
-                  ))}
+                  {servicoOptions.map((s) => {
+                    const info = catalogoPorNome.get(s);
+                    const detalhe = info ? [info.preco, info.prazo].filter(Boolean).join(' · ') : '';
+                    return (
+                      <button
+                        type="button"
+                        key={s}
+                        className={'reg-pick' + (servicos.includes(s) ? ' on' : '')}
+                        onClick={() => toggleServico(s)}
+                        title={detalhe || undefined}
+                      >
+                        {servicos.includes(s) && <Icon name="check" size={12} stroke={3} />} {s}
+                      </button>
+                    );
+                  })}
                   <button type="button" className={'reg-pick' + (outro ? ' on' : '')} onClick={() => setOutro((v) => !v)}>
                     {outro && <Icon name="check" size={12} stroke={3} />} Outro / não listado
                   </button>
