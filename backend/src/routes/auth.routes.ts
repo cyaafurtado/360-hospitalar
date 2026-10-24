@@ -24,5 +24,6 @@ router.post('/reset-password', authLimiter, asyncHandler(AuthController.resetPas
 router.post('/refresh', asyncHandler(AuthController.refresh));
 router.post('/logout', asyncHandler(AuthController.logout));
 router.get('/me', requireAuth, asyncHandler(AuthController.me));
+router.post('/change-password', authLimiter, requireAuth, asyncHandler(AuthController.changePassword));
 
 export default router;

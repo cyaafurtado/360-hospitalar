@@ -38,6 +38,18 @@ export const UsuariosRepo = {
     return rows[0] ? rowToUsuario(rows[0]) : null;
   },
 
+  // Troca de senha (já logado) precisa confirmar a senha atual primeiro.
+  async findByIdComHash(id: string): Promise<UsuarioComHash | null> {
+    const { rows } = await query('SELECT * FROM usuarios WHERE id = $1 AND ativo = TRUE', [id]);
+    if (!rows[0]) return null;
+    return {
+      ...rowToUsuario(rows[0]),
+      senhaHash: rows[0].senha_hash,
+      ativo: rows[0].ativo,
+      emailVerificado: rows[0].email_verificado,
+    };
+  },
+
   async create(u: {
     id: string;
     nome: string;

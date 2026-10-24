@@ -311,6 +311,13 @@ export async function redefinirSenha(token: string, novaSenha: string): Promise<
   await api.post('/auth/reset-password', { token, novaSenha });
 }
 
+// Diferente de esqueciSenha/redefinirSenha (por e-mail, pra quem esqueceu):
+// aqui a conta já está logada e confirma a senha atual. O backend derruba
+// todas as sessões depois — inclusive esta —, então quem chama faz logout.
+export async function alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
+  await api.post('/auth/change-password', { senhaAtual, novaSenha });
+}
+
 export async function getUsuarioLogado(): Promise<Usuario> {
   const { data } = await api.get<{ usuario: Usuario }>('/auth/me');
   return data.usuario;

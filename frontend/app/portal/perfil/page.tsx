@@ -27,6 +27,7 @@ import { Stars } from '../../../components/Stars';
 import { VerifiedTag } from '../../../components/VerifiedTag';
 import { PortalNav } from '../../../components/PortalNav';
 import { Loading, LoadError } from '../../../components/AsyncState';
+import { SegurancaSenha } from '../../../components/SegurancaSenha';
 
 type EditableKey = 'name' | 'tagline' | 'about' | 'site' | 'employees' | 'email' | 'phone';
 
@@ -1027,6 +1028,8 @@ export default function PerfilPage() {
               </div>
             )}
           </section>
+
+          <SegurancaSenha />
 
           {/* Repete Salvar/Cancelar no final — a página cresce a cada novo bloco
               (fotos, documentos, catálogo…) e sem isso só dava pra salvar rolando

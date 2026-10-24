@@ -294,6 +294,48 @@ export class AuthController {
     res.json({ ok: true });
   }
 
+  // Troca de senha com a conta já logada (diferente de forgot/reset, que é
+  // por e-mail pra quem esqueceu). Confirma a senha atual antes de trocar.
+  static async changePassword(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      res.status(401).json({ error: 'Sessão expirada ou inválida. Entre novamente.' });
+      return;
+    }
+    const senhaAtual = String(req.body?.senhaAtual ?? '');
+    const novaSenha = String(req.body?.novaSenha ?? '');
+
+    if (!senhaAtual || !novaSenha) {
+      res.status(400).json({ error: 'Informe a senha atual e a nova senha.' });
+      return;
+    }
+    if (novaSenha.length < 8) {
+      res.status(400).json({ error: 'A nova senha precisa ter pelo menos 8 caracteres.' });
+      return;
+    }
+    if (novaSenha === senhaAtual) {
+      res.status(400).json({ error: 'A nova senha precisa ser diferente da atual.' });
+      return;
+    }
+
+    const usuario = await UsuariosRepo.findByIdComHash(req.user.sub);
+    if (!usuario) {
+      res.status(401).json({ error: 'Conta indisponível.' });
+      return;
+    }
+    if (!(await conferirSenha(senhaAtual, usuario.senhaHash))) {
+      res.status(401).json({ error: 'Senha atual incorreta.' });
+      return;
+    }
+
+    await UsuariosRepo.setSenhaHash(usuario.id, await hashSenha(novaSenha));
+
+    // Senha trocada: toda sessão aberta (inclusive esta) deixa de valer —
+    // mesma régua do reset por e-mail. A pessoa entra de novo com a senha nova.
+    await RefreshTokensRepo.revogarTodosDoUsuario(usuario.id, 'seguranca');
+    res.clearCookie(COOKIE, cookieOpts());
+    res.json({ ok: true });
+  }
+
   static async me(req: Request, res: Response): Promise<void> {
     if (!req.user) {
       res.status(401).json({ error: 'Sessão expirada ou inválida. Entre novamente.' });

@@ -9,6 +9,7 @@ import type { Instituicao, TipoInstituicao, Responsavel } from '../../../data/ty
 import { Icon } from '../../../lib/icons';
 import { PainelNav } from '../../../components/PainelNav';
 import { Loading, LoadError } from '../../../components/AsyncState';
+import { SegurancaSenha } from '../../../components/SegurancaSenha';
 
 const TIPO_LABEL: Record<TipoInstituicao, string> = {
   clinica: 'Clínica',
@@ -358,6 +359,8 @@ export default function PainelPerfilPage() {
               <p className="doc-empty-hint">Preencha cidade e estado (e, se possível, o endereço) para ver o mapa aqui.</p>
             )}
           </section>
+
+          <SegurancaSenha />
         </div>
       </div>
     </div>
